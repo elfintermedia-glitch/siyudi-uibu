@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, GraduationCap, CheckCircle2, AlertTriangle, FileText, Upload, 
+  User, GraduationCap, CheckCircle2, CheckCircle, AlertTriangle, FileText, Upload, 
   Trash2, Send, HelpCircle, Check, MapPin, Sparkles, BookOpen, Clock, FileWarning, X
 } from 'lucide-react';
 import { StudentAcademic, YudisiumRegistration, WisudaRegistration, DocumentUpload, RegistrationStatus } from '../types';
@@ -1006,14 +1006,16 @@ export default function StudentPanel({
                 </div>
               )
             ) : yudisium?.status !== 'disetujui' && (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-5">
+              <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-5 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-600" />
+                
                 <div>
                   <h3 id="yudisium-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                     <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
-                    Formulir Pendaftaran Yudisium Pelulusan
+                    Langkah 2: Kelayakan Keuangan & Verifikasi Yudisium
                   </h3>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
-                    Silakan unggah seluruh berkas verifikasi persyaratan Yudisium pendukung untuk ditinjau oleh Biro Akademik.
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    Ajuan kelayakan akademik Langkah 1 Anda telah disahkan. Akun Anda telah terdaftar otomatis dalam antrean verifikasi yudisium untuk disetujui ikut yudisium oleh bagian keuangan.
                   </p>
                 </div>
 
@@ -1023,7 +1025,7 @@ export default function StudentPanel({
                     <div className="flex gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="font-bold text-xs text-rose-950">Alasan Rejection & Catatan Perbaikan:</h4>
+                        <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Keuangan:</h4>
                         <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
                           {yudisium.rejectionReason}
                         </p>
@@ -1032,54 +1034,53 @@ export default function StudentPanel({
                   </div>
                 )}
 
-                <form onSubmit={handleYudisiumSubmit} className="space-y-5">
-                  {/* Informational block - no documents needed */}
-                  <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-center">
-                    <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-indigo-950">Informasi Berkas Yudisium</p>
-                      <p className="text-[11px] text-indigo-900 font-medium leading-relaxed mt-0.5">
-                        Dokumen kelengkapan persyaratan fisik tidak perlu diunggah secara mandiri. Silakan langsung datang ke bagian keuangan untuk mendapatkan persetujuan mengikuti yudisium dengan membawa bukti pembayaran yudisium.
-                      </p>
-                    </div>
+                {/* Informational block - no documents needed */}
+                <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-center">
+                  <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-indigo-950">Informasi Berkas Yudisium</p>
+                    <p className="text-[11px] text-indigo-900 font-medium leading-relaxed mt-0.5">
+                      Dokumen kelengkapan persyaratan fisik tidak perlu diunggah secara mandiri. Silakan langsung datang ke bagian keuangan untuk mendapatkan persetujuan mengikuti yudisium dengan membawa bukti pembayaran yudisium.
+                    </p>
                   </div>
+                </div>
 
-                  {/* Submission Action */}
-                  <div className="flex justify-end pt-5 border-t border-slate-100">
-                    {(yudisium?.status === 'diajukan' || yudisium?.status === 'diproses') ? (
-                      <div className="text-right space-y-1">
-                        <p className="text-xs font-semibold text-slate-500">Pendaftaran Yudisium Sudah Diajukan</p>
-                        <p className="text-[11px] text-slate-400">Menunggu antrean verifikasi dan persetujuan akhir oleh Biro Akademik.</p>
-                      </div>
-                    ) : (
-                      <button
-                        id="submit-yudisium-btn"
-                        type="submit"
-                        disabled={submittingYudisium}
-                        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-slate-350 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow shadow-indigo-100 transition-all flex items-center gap-2 cursor-pointer"
-                      >
-                        {submittingYudisium ? 'Mengirim Pengajuan...' : 'Kirim Pendaftaran Yudisium'}
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </form>
+                {/* Submission Action (Read-only status info) */}
+                <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                  <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
+                  {(yudisium?.status === 'diajukan' || yudisium?.status === 'diproses' || !yudisium) ? (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                      Status: Menunggu Verifikasi Keuangan
+                    </span>
+                  ) : yudisium?.status === 'ditolak' ? (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                      Status: Ditangguhkan Keuangan
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Status: Yudisium Disetujui
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* STAGE B: WISUDA REGISTER FORM (UNLOCKED IF YUDISIUM APPROVED) */}
+            {/* STAGE B: WISUDA STATUS CARD (UNLOCKED IF YUDISIUM APPROVED) */}
             {yudisium?.status === 'disetujui' && (
-              <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-5 relative overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-4 relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-indigo-600" />
                 
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 id="wisuda-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                        <GraduationCap className="w-5 h-5 text-teal-600" />
-                       Formulir Pendaftaran Wisuda Sarjana
+                       Langkah 3: Pendaftaran Wisuda (Terdaftar Otomatis)
                     </h3>
                     <p className="text-[11px] text-gray-500 mt-1">
-                      Selamat, Yudisium Anda disetujui! Silakan isi data pendukung toga dan nama orang tua untuk berkas wisuda.
+                      Selamat, Yudisium Anda disetujui! Akun Anda telah terdaftar otomatis dalam antrean verifikasi wisuda oleh bagian keuangan.
                     </p>
                   </div>
                   <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-1">
@@ -1087,125 +1088,49 @@ export default function StudentPanel({
                   </span>
                 </div>
 
-                <form onSubmit={handleWisudaSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Toga selection */}
-                    <div className="flex flex-col gap-1 md:col-span-2">
-                      <label className="text-xs font-bold text-slate-700">Dimensi / Ukuran Baju Toga <span className="text-rose-500">*</span></label>
-                      <p className="text-[11px] text-slate-400 mb-2">Pilih ukuran toga yang paling sesuai berdasarkan tinggi dan lingkar dada Anda.</p>
-                      
-                      <div className="grid grid-cols-5 gap-2.5">
-                        {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-                          <label 
-                            key={size}
-                            className={`p-3 border rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                              ukuranToga === size 
-                                ? 'border-teal-500 bg-teal-50/40 text-teal-700 font-bold' 
-                                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
-                            }`}
-                          >
-                            <input
-                              id={`toga-radio-${size}`}
-                              type="radio"
-                              name="togaSize"
-                              value={size}
-                              checked={ukuranToga === size}
-                              onChange={() => setUkuranToga(size as any)}
-                              className="sr-only"
-                              disabled={wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui'}
-                            />
-                            <span className="text-xs">{size}</span>
-                            <span className="text-[9px] text-slate-400 mt-0.5 font-normal">
-                              {size === 'S' && 'H: <160 cm'}
-                              {size === 'M' && 'H: 160-165'}
-                              {size === 'L' && 'H: 165-170'}
-                              {size === 'XL' && 'H: 170-175'}
-                              {size === 'XXL' && 'H: >175'}
-                            </span>
-                          </label>
-                        ))}
+                {wisuda?.rejectionReason && (
+                  <div className="p-4 bg-rose-50 border border-rose-150 rounded-xl">
+                    <div className="flex gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Wisuda:</h4>
+                        <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
+                          {wisuda.rejectionReason}
+                        </p>
                       </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-600">Nama Ayah Kandung <span className="text-rose-500">*</span></label>
-                      <input
-                        id="nama-ayah-input"
-                        type="text"
-                        value={namaAyah}
-                        onChange={(e) => setNamaAyah(e.target.value)}
-                        placeholder="Masukkan nama ayah kandung"
-                        className="p-2.5 text-xs font-semibold border border-slate-200 focus:border-teal-500 focus:outline-none rounded-lg bg-slate-50/50"
-                        disabled={wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui'}
-                      />
-                      {errors.namaAyah && <span className="text-[10px] text-rose-600 mt-1">{errors.namaAyah}</span>}
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-600">Nama Ibu Kandung <span className="text-rose-500">*</span></label>
-                      <input
-                        id="nama-ibu-input"
-                        type="text"
-                        value={namaIbu}
-                        onChange={(e) => setNamaIbu(e.target.value)}
-                        placeholder="Masukkan nama ibu kandung"
-                        className="p-2.5 text-xs font-semibold border border-slate-200 focus:border-teal-500 focus:outline-none rounded-lg bg-slate-50/50"
-                        disabled={wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui'}
-                      />
-                      {errors.namaIbu && <span className="text-[10px] text-rose-600 mt-1">{errors.namaIbu}</span>}
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-slate-600">No. HP Orang Tua / Wali Aktif <span className="text-rose-500">*</span></label>
-                      <input
-                        id="tlp-ortu-input"
-                        type="text"
-                        value={noHpOrtu}
-                        onChange={(e) => setNoHpOrtu(e.target.value)}
-                        placeholder="Contoh: 0812XXXXXXXX"
-                        className="p-2.5 text-xs font-semibold border border-slate-200 focus:border-teal-500 focus:outline-none rounded-lg bg-slate-50/50"
-                        disabled={wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui'}
-                      />
-                      {errors.noHpOrtu && <span className="text-[10px] text-rose-600 mt-1">{errors.noHpOrtu}</span>}
-                    </div>
-
-                    <div className="flex flex-col gap-1 md:col-span-2">
-                      <label className="text-xs font-semibold text-slate-600">Alamat Pengiriman Undangan & Ijazah <span className="text-rose-500">*</span></label>
-                      <div className="relative">
-                        <textarea
-                          id="alamat-wisuda-textarea"
-                          value={alamatPengiriman}
-                          onChange={(e) => setAlamatPengiriman(e.target.value)}
-                          rows={2}
-                          placeholder="Tuliskan nama jalan, nomor rumah, RT/RW, kecamatan, kabupaten, dan kode pos tujuan..."
-                          className="p-2.5 pl-9 text-xs font-semibold border border-slate-200 focus:border-teal-500 focus:outline-none rounded-lg bg-slate-50/50 w-full resize-y"
-                          disabled={wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui'}
-                        />
-                        <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                      </div>
-                      {errors.alamatPengiriman && <span className="text-[10px] text-rose-600 mt-1">{errors.alamatPengiriman}</span>}
                     </div>
                   </div>
+                )}
 
-                  <div className="flex justify-end pt-5 border-t border-slate-100">
-                    {wisuda?.status === 'diajukan' || wisuda?.status === 'disetujui' ? (
-                      <div className="text-right space-y-1">
-                        <p className="text-xs font-semibold text-slate-500">Berkas Wisuda Berhasil Dikirim</p>
-                        <p className="text-[11px] text-slate-400">Verifikasi wisuda akan dicatatkan pada Buku Wisudawan Universitas.</p>
-                      </div>
-                    ) : (
-                      <button
-                        id="submit-wisuda-btn"
-                        type="submit"
-                        disabled={submittingWisuda}
-                        className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 disabled:bg-slate-300 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer"
-                      >
-                        {submittingWisuda ? 'Mengirim Data...' : 'Kirim Pendaftaran Wisuda'}
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                <div className="p-4 bg-teal-50/30 border border-teal-100 rounded-xl flex gap-3 items-center">
+                  <FileText className="w-5 h-5 text-teal-600 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-teal-950">Informasi Berkas Wisuda</p>
+                    <p className="text-[11px] text-teal-900 font-medium leading-relaxed mt-0.5">
+                      Segala pengisian data pendukung seperti ukuran baju toga, data wisudawan, orang tua, dan alamat pengiriman ijazah/undangan kini dikelola dan diverifikasi langsung secara administratif untuk mempermudah pendaftaran wisuda Anda. Anda tidak perlu mengirim/mengisi formulir manual apa pun.
+                    </p>
                   </div>
-                </form>
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                  <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
+                  {(wisuda?.status === 'diajukan' || wisuda?.status === 'diproses' || !wisuda) ? (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                      Status: Menunggu Verifikasi Wisuda Keuangan
+                    </span>
+                  ) : wisuda?.status === 'ditolak' ? (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                      Status: Ditangguhkan Keuangan
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Status: Wisuda Disetujui (Lolos)
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 

@@ -344,17 +344,19 @@ export default function FinancePanel({
                       filteredYudisiums.map((app) => {
                         const studentInfo = state.students.find(s => s.nim === app.nim);
                         const isExpanded = !!expandedYudisium[app.nim];
-                        const totalDocs = app.documents.length;
-                        const uploadedDocsCount = app.documents.filter(d => d.fileName).length;
-                        const approvedDocsCount = app.documents.filter(d => d.status === 'disetujui').length;
-                        const rejectedDocsCount = app.documents.filter(d => d.status === 'ditolak').length;
+                        const docsList = app.documents || [];
+                        const totalDocs = docsList.length;
+                        const uploadedDocsCount = docsList.filter(d => d.fileName).length;
+                        const approvedDocsCount = docsList.filter(d => d.status === 'disetujui').length;
+                        const rejectedDocsCount = docsList.filter(d => d.status === 'ditolak').length;
                         const allDocsApproved = approvedDocsCount === totalDocs;
 
-                        const sppDoc = app.documents.find(d => d.id === 'bebas_spp');
+                        const sppDoc = docsList.find(d => d.id === 'bebas_spp');
                         const sppStatus = sppDoc ? sppDoc.status : 'belum_unggah';
 
                         let docSummaryStatus = 'Pending';
-                        if (approvedDocsCount === totalDocs) docSummaryStatus = 'Semua Acc';
+                        if (totalDocs === 0) docSummaryStatus = 'Antrean Keuangan';
+                        else if (approvedDocsCount === totalDocs) docSummaryStatus = 'Semua Acc';
                         else if (rejectedDocsCount > 0) docSummaryStatus = `${rejectedDocsCount} Ditolak`;
                         else if (uploadedDocsCount < totalDocs) docSummaryStatus = `${totalDocs - uploadedDocsCount} Belum Unggah`;
 
@@ -467,83 +469,90 @@ export default function FinancePanel({
 
                                       {/* Documents check blocks */}
                                       <div className="space-y-3">
-                                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pemeriksaan Dokumen Persyaratan ({app.documents.length})</h4>
+                                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider font-sans">Pemeriksaan Dokumen Persyaratan ({(app.documents || []).length})</h4>
                                         
-                                        <div className="space-y-2.5">
-                                          {app.documents.map((doc) => {
-                                            const noteKey = `${app.nim}_${doc.id}`;
-                                            const isBebasSpp = doc.id === 'bebas_spp';
-                                            return (
-                                              <div key={doc.id} className={`p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                                                isBebasSpp ? 'bg-amber-50/20 border-amber-250/70 shadow-sm' : 'bg-white border-slate-200/80'
-                                              }`}>
-                                                <div className="flex-1 min-w-0">
-                                                  <div className="flex items-center gap-2">
-                                                    <p className="text-xs font-bold text-slate-700">{doc.name} {isBebasSpp && <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-1 rounded">Berkas Utama Keuangan</span>}</p>
-                                                    <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
-                                                      doc.status === 'disetujui' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : doc.status === 'ditolak' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-slate-50 text-slate-500 border border-slate-150'
-                                                    }`}>
-                                                      {doc.status === 'disetujui' ? 'DISETUJUI' : doc.status === 'ditolak' ? 'DITOLAK' : 'BELUM DIPERIKSA'}
-                                                    </span>
-                                                  </div>
-                                                  
-                                                  {doc.fileName ? (
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2">
-                                                      <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                          if (doc.fileData) {
-                                                            openFilePreview(doc.fileData, doc.fileName);
-                                                          }
-                                                        }}
-                                                        className="inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-750 hover:text-indigo-900 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border border-indigo-200/60 shadow-sm"
-                                                      >
-                                                        👁️ Preview / 📥 Unduh File
-                                                      </button>
-                                                      <div className="text-[10px] text-slate-400 font-medium truncate max-w-xs sm:max-w-md">
-                                                        Nama file: <span className="font-mono text-slate-600 font-semibold">{doc.fileName}</span> <span className="text-slate-400 font-mono">({doc.fileSize})</span>
-                                                      </div>
+                                        {(app.documents || []).length === 0 ? (
+                                          <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl text-center">
+                                            <p className="text-xs font-bold text-slate-600">Pendaftaran Yudisium Tanpa Berkas Digital Mandiri</p>
+                                            <p className="text-[11px] text-slate-400 mt-0.5">Persyaratan dokumen berkas digital dinonaktifkan. Silakan langsung validasi kelayakan pembayaran / yudisium di bawah ini.</p>
+                                          </div>
+                                        ) : (
+                                          <div className="space-y-2.5">
+                                            {app.documents.map((doc) => {
+                                              const noteKey = `${app.nim}_${doc.id}`;
+                                              const isBebasSpp = doc.id === 'bebas_spp';
+                                              return (
+                                                <div key={doc.id} className={`p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                                                  isBebasSpp ? 'bg-amber-50/20 border-amber-250/70 shadow-sm' : 'bg-white border-slate-200/80'
+                                                }`}>
+                                                  <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                      <p className="text-xs font-bold text-slate-700">{doc.name} {isBebasSpp && <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-1 rounded">Berkas Utama Keuangan</span>}</p>
+                                                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
+                                                        doc.status === 'disetujui' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : doc.status === 'ditolak' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-slate-50 text-slate-500 border border-slate-150'
+                                                      }`}>
+                                                        {doc.status === 'disetujui' ? 'DISETUJUI' : doc.status === 'ditolak' ? 'DITOLAK' : 'BELUM DIPERIKSA'}
+                                                      </span>
                                                     </div>
-                                                  ) : (
-                                                    <p className="text-[10px] text-rose-600 font-semibold italic mt-1">Penting: Mahasiswa belum mengunggah file!</p>
-                                                  )}
+                                                    
+                                                    {doc.fileName ? (
+                                                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2">
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => {
+                                                            if (doc.fileData) {
+                                                              openFilePreview(doc.fileData, doc.fileName);
+                                                            }
+                                                          }}
+                                                          className="inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-750 hover:text-indigo-900 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border border-indigo-200/60 shadow-sm"
+                                                        >
+                                                          👁️ Preview / 📥 Unduh File
+                                                        </button>
+                                                        <div className="text-[10px] text-slate-400 font-medium truncate max-w-xs sm:max-w-md">
+                                                          Nama file: <span className="font-mono text-slate-600 font-semibold">{doc.fileName}</span> <span className="text-slate-400 font-mono">({doc.fileSize})</span>
+                                                        </div>
+                                                      </div>
+                                                    ) : (
+                                                      <p className="text-[10px] text-rose-600 font-semibold italic mt-1">Penting: Mahasiswa belum mengunggah file!</p>
+                                                    )}
 
-                                                  {doc.notes && (
-                                                    <p className="text-[10px] text-rose-700 bg-rose-50/50 p-1.5 rounded mt-1.5 max-w-md"><strong>Catatan Koreksi:</strong> {doc.notes}</p>
-                                                  )}
-                                                </div>
+                                                    {doc.notes && (
+                                                      <p className="text-[10px] text-rose-700 bg-rose-50/50 p-1.5 rounded mt-1.5 max-w-md"><strong>Catatan Koreksi:</strong> {doc.notes}</p>
+                                                    )}
+                                                  </div>
 
-                                                {/* Evaluation forms */}
-                                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                                  <input
-                                                    id={`doc-audit-note-finance-${app.nim}-${doc.id}`}
-                                                    type="text"
-                                                    placeholder="Catatan koreksi (jika ditolak)..."
-                                                    value={docNotes[noteKey] || ''}
-                                                    onChange={(e) => setDocNotes(prev => ({ ...prev, [noteKey]: e.target.value }))}
-                                                    className="p-1 px-2 text-[11px] border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded bg-slate-50 w-full sm:w-48 font-medium"
-                                                  />
-                                                  <div className="flex gap-1 shrink-0">
-                                                    <button
-                                                      onClick={() => handleAuditDocument(app.nim, doc.id, 'disetujui')}
-                                                      className="p-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold border border-emerald-100 transition-colors cursor-pointer flex items-center gap-1.5"
-                                                      title="Setujui dokumen ini"
-                                                    >
-                                                      <Check className="w-3.5 h-3.5" /> Setuju
-                                                    </button>
-                                                    <button
-                                                      onClick={() => handleAuditDocument(app.nim, doc.id, 'ditolak')}
-                                                      className="p-1.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold border border-rose-100 transition-colors cursor-pointer flex items-center gap-1.5"
-                                                      title="Tolak dokumen ini"
-                                                    >
-                                                      <X className="w-3.5 h-3.5" /> Tolak
-                                                    </button>
+                                                  {/* Evaluation forms */}
+                                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                                    <input
+                                                      id={`doc-audit-note-finance-${app.nim}-${doc.id}`}
+                                                      type="text"
+                                                      placeholder="Catatan koreksi (jika ditolak)..."
+                                                      value={docNotes[noteKey] || ''}
+                                                      onChange={(e) => setDocNotes(prev => ({ ...prev, [noteKey]: e.target.value }))}
+                                                      className="p-1 px-2 text-[11px] border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded bg-slate-50 w-full sm:w-48 font-medium"
+                                                    />
+                                                    <div className="flex gap-1 shrink-0">
+                                                      <button
+                                                        onClick={() => handleAuditDocument(app.nim, doc.id, 'disetujui')}
+                                                        className="p-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold border border-emerald-100 transition-colors cursor-pointer flex items-center gap-1.5"
+                                                        title="Setujui dokumen ini"
+                                                      >
+                                                        <Check className="w-3.5 h-3.5" /> Setuju
+                                                      </button>
+                                                      <button
+                                                        onClick={() => handleAuditDocument(app.nim, doc.id, 'ditolak')}
+                                                        className="p-1.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold border border-rose-100 transition-colors cursor-pointer flex items-center gap-1.5"
+                                                        title="Tolak dokumen ini"
+                                                      >
+                                                        <X className="w-3.5 h-3.5" /> Tolak
+                                                      </button>
+                                                    </div>
                                                   </div>
                                                 </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
                                       </div>
 
                                       {/* Final Decisions block */}
@@ -749,15 +758,14 @@ export default function FinancePanel({
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Mahasiswa Wisudawan</th>
                       <th className="p-3">Program Studi</th>
-                      <th className="p-3 text-center">Ukuran Toga</th>
-                      <th className="p-3">Orang Tua / Wali</th>
+                      <th className="p-3 text-center">Yudisium</th>
                       <th className="p-3 text-center">Status Verifikasi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-150 text-xs text-slate-700">
                     {filteredWisudas.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                        <td colSpan={5} className="p-8 text-center text-slate-400">
                           <GraduationCap className="w-10 h-10 mx-auto text-slate-300 stroke-1" />
                           <p className="text-xs font-bold mt-2.5 uppercase tracking-wide">Data Tidak Ditemukan</p>
                           <p className="text-[11px] text-slate-400 mt-0.5">Tidak ada wisudawan yang cocok dengan kriteria filter.</p>
@@ -802,18 +810,13 @@ export default function FinancePanel({
                               </td>
                               <td className="p-3">
                                 <div className="font-bold text-slate-805">{studentInfo?.nama || 'Unregistered'}</div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">NIM. {app.nim}</div>
+                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">NIM. {app.nim} • 📞 {studentInfo?.noHp || '-'}</div>
                               </td>
                               <td className="p-3 text-slate-600 font-medium">{studentInfo?.programStudi || '-'}</td>
                               <td className="p-3 text-center">
-                                <span className="inline-block bg-slate-100 border border-slate-200 text-slate-700 font-extrabold px-3 py-1 rounded text-xs select-none">
-                                  {app.ukuranToga}
+                                <span className="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-md text-[10px] select-none">
+                                  ACC Yudisium
                                 </span>
-                              </td>
-                              <td className="p-3">
-                                <div className="text-slate-700 font-semibold text-[11px]">Ayah: {app.namaAyah}</div>
-                                <div className="text-slate-700 font-semibold text-[11px]">Ibu: {app.namaIbu}</div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">📞 {app.noHpOrtu}</div>
                               </td>
                               <td className="p-3 text-center">{statusBadge}</td>
                             </tr>
@@ -821,43 +824,30 @@ export default function FinancePanel({
                             {/* Expanded sub-section */}
                             {isExpanded && (
                               <tr className="bg-indigo-50/10">
-                                <td colSpan={6} className="p-4 border-t border-b border-indigo-100">
+                                <td colSpan={5} className="p-4 border-t border-b border-indigo-100">
                                   <div className="bg-white rounded-xl border border-indigo-100/85 shadow-md p-4 space-y-4">
                                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                                       <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wide flex items-center gap-1.5">
-                                        📋 Rincian Pendaftaran Wisuda & Atribut Logistik
+                                        📋 Rincian Registrasi Kelulusan Wisuda Otomatis
                                       </h4>
-                                      <span className="text-[10px] text-slate-400 font-medium">Tanggal Pengajuan: <strong className="font-mono">{app.registeredAt}</strong></span>
+                                      <span className="text-[10px] text-slate-400 font-medium">Auto-Registered: <strong className="font-mono">{app.registeredAt}</strong></span>
                                     </div>
 
                                     {/* Grid data */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/60 space-y-1.5">
-                                        <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-2">📦 Informasi Pengiriman & Logistik Toga</p>
-                                        <div className="text-[11px] text-slate-605">
-                                          <span className="font-extrabold text-slate-500">Ukuran Toga Wisuda:</span> <span className="font-mono bg-slate-150 text-slate-700 px-1.5 py-0.5 rounded font-bold text-xs">{app.ukuranToga}</span>
-                                        </div>
-                                        <div className="text-[11px] text-slate-605">
-                                          <span className="font-extrabold text-slate-500">Alamat Pengiriman Atribut:</span>
-                                          <p className="font-medium text-slate-800 bg-white p-2 border border-slate-200 rounded mt-1 shadow-inner leading-relaxed">
-                                            {app.alamatPengiriman}
-                                          </p>
-                                        </div>
+                                      <div className="p-4 rounded-xl bg-teal-50/20 border border-teal-100/70 space-y-2">
+                                        <p className="text-[11px] font-bold text-teal-900 uppercase tracking-wider">🎓 Antrean Kelulusan Wisuda</p>
+                                        <p className="text-xs text-teal-950 font-medium leading-relaxed">
+                                          Mahasiswa ini telah sukses menyelesaikan verifikasi kelayakan akademik & keuangan Yudisium (Langkah 1 & 2). Sistem pendaftaran secara otomatis memasukkan mahasiswa ini ke antrean kelulusan wisuda universitas.
+                                        </p>
                                       </div>
 
-                                      <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/60 space-y-1.5">
-                                        <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-2">👨‍👩‍👦 Kontak & Data Keluarga Wali</p>
-                                        <div className="text-[11px] text-slate-605">
-                                          <span className="font-extrabold text-slate-500">Nama Lengkap Ayah:</span> <span className="font-semibold text-slate-800">{app.namaAyah}</span>
-                                        </div>
-                                        <div className="text-[11px] text-slate-605">
-                                          <span className="font-extrabold text-slate-500">Nama Lengkap Ibu:</span> <span className="font-semibold text-slate-800">{app.namaIbu}</span>
-                                        </div>
-                                        <div className="text-[11px] text-slate-605">
-                                          <span className="font-extrabold text-slate-500">No. HP Orang Tua:</span> <span className="font-mono text-slate-800 font-bold">{app.noHpOrtu}</span>
-                                        </div>
-                                        <div className="text-[11px] text-slate-650 pt-1.5 border-t border-slate-200">
-                                          📧 <span className="font-semibold">{studentInfo?.email || '-'}</span> • 📞 <span className="font-semibold">{studentInfo?.noHp || '-'}</span>
+                                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-205 space-y-2">
+                                        <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">📞 Informasi Kontak Mahasiswa</p>
+                                        <div className="text-xs text-slate-700 leading-relaxed font-semibold space-y-1">
+                                          <div><span className="font-bold text-slate-500">Email:</span> {studentInfo?.email || '-'}</div>
+                                          <div><span className="font-bold text-slate-500">Nomor Telepon:</span> {studentInfo?.noHp || '-'}</div>
+                                          <div><span className="font-bold text-slate-500">NIK:</span> {studentInfo?.nik || '-'}</div>
                                         </div>
                                       </div>
                                     </div>

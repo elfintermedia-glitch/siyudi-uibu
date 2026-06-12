@@ -157,6 +157,34 @@ export default function App() {
         }
       });
 
+      // Maintain and auto-populate yudisiumApps for students with academicApproved === true
+      updatedStudentsList.forEach(s => {
+        if (s.academicApproved) {
+          if (!cleanedYudisiumApps[s.nim] || cleanedYudisiumApps[s.nim].status === 'belum_daftar') {
+            const autoYudisium: YudisiumRegistration = {
+              nim: s.nim,
+              judulSkripsi: '-',
+              pembimbing1: '-',
+              pembimbing2: '-',
+              tanggalLulus: '-',
+              registeredAt: new Date().toISOString().split('T')[0],
+              status: 'diajukan',
+              documents: []
+            };
+            cleanedYudisiumApps[s.nim] = autoYudisium;
+
+            // Sync with backend
+            fetch('/api/yudisium', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(autoYudisium)
+            }).catch(err => {
+              console.error('Auto API sync of yudisium failed:', err);
+            });
+          }
+        }
+      });
+
       const nextState = {
         ...prev,
         students: updatedStudentsList,
@@ -261,12 +289,45 @@ export default function App() {
   };
 
   const handleUpdateYudisiumApp = (nim: string, updatedRecord: YudisiumRegistration) => {
+    let extraStateUpdate = {};
+    if (updatedRecord.status === 'disetujui') {
+      const existingWisuda = state.wisudaApps[nim];
+      if (!existingWisuda || existingWisuda.status === 'belum_daftar') {
+        const autoWisuda: WisudaRegistration = {
+          nim,
+          ukuranToga: 'L',
+          namaAyah: '-',
+          namaIbu: '-',
+          noHpOrtu: '-',
+          alamatPengiriman: '-',
+          registeredAt: new Date().toISOString().split('T')[0],
+          status: 'diajukan'
+        };
+        extraStateUpdate = {
+          wisudaApps: {
+            ...state.wisudaApps,
+            [nim]: autoWisuda
+          }
+        };
+
+        // Sync with backend (the backend will already handle this, but sync client-side state for responsiveness)
+        fetch('/api/wisuda', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(autoWisuda)
+        }).catch(err => {
+          console.error('Auto API sync of wisuda failed:', err);
+        });
+      }
+    }
+
     setState(prev => ({
       ...prev,
       yudisiumApps: {
         ...prev.yudisiumApps,
         [nim]: updatedRecord
-      }
+      },
+      ...extraStateUpdate
     }));
 
     fetch('/api/yudisium', {

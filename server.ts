@@ -74,6 +74,23 @@ const memoryDb = {
       } else {
         memoryStore.students.push(cleanStudent);
       }
+
+      if (s.academicApproved) {
+        const yIdx = memoryStore.yudisiumRegistrations.findIndex(x => x.nim === s.nim);
+        if (yIdx === -1) {
+          memoryStore.yudisiumRegistrations.push({
+            nim: s.nim,
+            judulSkripsi: '-',
+            pembimbing1: '-',
+            pembimbing2: '-',
+            tanggalLulus: '-',
+            registeredAt: new Date().toISOString().split('T')[0],
+            status: 'diajukan',
+            rejectionReason: null,
+            documents: []
+          });
+        }
+      }
     }
   },
 
@@ -94,6 +111,23 @@ const memoryDb = {
       memoryStore.yudisiumRegistrations[idx] = cleanYudisium;
     } else {
       memoryStore.yudisiumRegistrations.push(cleanYudisium);
+    }
+
+    if (y.status === 'disetujui') {
+      const wIdx = memoryStore.wisudaRegistrations.findIndex(x => x.nim === y.nim);
+      if (wIdx === -1) {
+        memoryStore.wisudaRegistrations.push({
+          nim: y.nim,
+          ukuranToga: 'L',
+          namaAyah: '-',
+          namaIbu: '-',
+          noHpOrtu: '-',
+          alamatPengiriman: '-',
+          registeredAt: new Date().toISOString().split('T')[0],
+          status: 'diajukan',
+          rejectionReason: null
+        });
+      }
     }
   },
 
@@ -833,6 +867,28 @@ async function startServer() {
             });
         }
 
+        // Ensure any student with academicApproved has a yudisium entry in Cloud SQL
+        for (const std of incomingStudents) {
+          if (std.academicApproved) {
+            const existing = await db
+              .select()
+              .from(yudisiumRegistrations)
+              .where(eq(yudisiumRegistrations.nim, std.nim));
+            if (existing.length === 0) {
+              await db.insert(yudisiumRegistrations).values({
+                nim: std.nim,
+                judulSkripsi: '-',
+                pembimbing1: '-',
+                pembimbing2: '-',
+                tanggalLulus: '-',
+                registeredAt: new Date().toISOString().split('T')[0],
+                status: 'diajukan',
+                documents: []
+              });
+            }
+          }
+        }
+
         // Delete students and cascade associations for any student not included in the payload
         const incomingNims = incomingStudents.map((s: any) => s.nim);
         if (incomingNims.length > 0) {
@@ -885,6 +941,25 @@ async function startServer() {
               documents: y.documents || null,
             },
           });
+
+        if (y.status === 'disetujui') {
+          const existing = await db
+            .select()
+            .from(wisudaRegistrations)
+            .where(eq(wisudaRegistrations.nim, y.nim));
+          if (existing.length === 0) {
+            await db.insert(wisudaRegistrations).values({
+              nim: y.nim,
+              ukuranToga: 'L',
+              namaAyah: '-',
+              namaIbu: '-',
+              noHpOrtu: '-',
+              alamatPengiriman: '-',
+              registeredAt: new Date().toISOString().split('T')[0],
+              status: 'diajukan',
+            });
+          }
+        }
       } else {
         memoryDb.upsertYudisium(y);
       }
