@@ -16,8 +16,8 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     dataVerified: true,
     academicApproved: false,
     password: 'kebudiutamaan',
-    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_budi.pdf', fileSize: '145 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'pending' },
-    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_budi.pdf', fileSize: '390 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'pending' }
+    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_budi.pdf', fileSize: '145 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'pending' },
+    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_budi.pdf', fileSize: '390 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'pending' }
   },
   {
     nim: '120140085',
@@ -34,8 +34,8 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     dataVerified: true,
     academicApproved: true,
     password: 'kebudiutamaan',
-    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_siti_rahma.pdf', fileSize: '180 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
-    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_siti.pdf', fileSize: '450 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
+    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_siti_rahma.pdf', fileSize: '180 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' },
+    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_siti.pdf', fileSize: '450 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' }
   },
   {
     nim: '120140112',
@@ -52,8 +52,8 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     dataVerified: true,
     academicApproved: true,
     password: 'kebudiutamaan',
-    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_michael.pdf', fileSize: '192 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
-    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_michael.pdf', fileSize: '410 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
+    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_michael.pdf', fileSize: '192 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' },
+    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_michael.pdf', fileSize: '410 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' }
   },
   {
     nim: '120140224',
@@ -86,8 +86,8 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     dataVerified: true,
     academicApproved: true,
     password: 'kebudiutamaan',
-    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_diana.pdf', fileSize: '175 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
-    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_diana.pdf', fileSize: '430 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
+    ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_diana.pdf', fileSize: '175 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' },
+    ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_diana.pdf', fileSize: '430 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjUKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L1R5cGUvUGFnZXMvS2lkc1szIDAgUl0vQ291bnQgMT4+ZW5kb2JqMyAwIG9iajw8L1R5cGUvUGFnZS9QYXJlbnQgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERl0+Pj4+ZW5kb2JqeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE5IDAwMDAwIG4gCjAwMDAwMDAwNjkgMDAwMDAgbiAKMDAwMDAwMDEyMiAwMDAwIG4gCnRyYWlsZXI8PC9TaXplIDQvUm9vdCAxIDAgUj4+JXN0YXJ0eHJlZgoxNzMKJSVFT0Y=', status: 'disetujui' }
   }
 ];
 
