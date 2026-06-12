@@ -1116,14 +1116,16 @@ export default function AdminPanel({
                       filteredYudisiums.map((app) => {
                         const studentInfo = state.students.find(s => s.nim === app.nim);
                         const isExpanded = !!expandedYudisium[app.nim];
-                        const totalDocs = app.documents.length;
-                        const uploadedDocsCount = app.documents.filter(d => d.fileName).length;
-                        const approvedDocsCount = app.documents.filter(d => d.status === 'disetujui').length;
-                        const rejectedDocsCount = app.documents.filter(d => d.status === 'ditolak').length;
+                        const docsList = app.documents || [];
+                        const totalDocs = docsList.length;
+                        const uploadedDocsCount = docsList.filter(d => d.fileName).length;
+                        const approvedDocsCount = docsList.filter(d => d.status === 'disetujui').length;
+                        const rejectedDocsCount = docsList.filter(d => d.status === 'ditolak').length;
                         const allDocsApproved = approvedDocsCount === totalDocs;
 
                         let docSummaryStatus = 'Pending';
-                        if (approvedDocsCount === totalDocs) docSummaryStatus = 'Semua Acc';
+                        if (totalDocs === 0) docSummaryStatus = 'Tanpa Dokumen';
+                        else if (approvedDocsCount === totalDocs) docSummaryStatus = 'Semua Acc';
                         else if (rejectedDocsCount > 0) docSummaryStatus = `${rejectedDocsCount} Ditolak`;
                         else if (uploadedDocsCount < totalDocs) docSummaryStatus = `${totalDocs - uploadedDocsCount} Belum Unggah`;
 
@@ -1262,10 +1264,16 @@ export default function AdminPanel({
 
                                     {/* Documents check blocks */}
                                     <div className="space-y-3">
-                                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pemeriksaan Dokumen Persyaratan ({app.documents.length})</h4>
+                                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pemeriksaan Dokumen Persyaratan ({(app.documents || []).length})</h4>
                                       
-                                      <div className="space-y-2.5">
-                                        {app.documents.map((doc) => {
+                                      {(app.documents || []).length === 0 ? (
+                                        <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl text-center">
+                                          <p className="text-xs font-bold text-slate-600">Pendaftaran Yudisium Tanpa Dokumen Kelengkapan</p>
+                                          <p className="text-[11px] text-slate-400 mt-0.5">Persyaratan berkas digital dinonaktifkan. Silakan langsung verifikasi kelayakan akademik di bawah ini.</p>
+                                        </div>
+                                      ) : (
+                                        <div className="space-y-2.5">
+                                          {app.documents.map((doc) => {
                                           const noteKey = `${app.nim}_${doc.id}`;
                                           return (
                                             <div key={doc.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1339,6 +1347,7 @@ export default function AdminPanel({
                                           );
                                         })}
                                       </div>
+                                      )}
                                     </div>
 
                                     {/* Final Decisions block */}

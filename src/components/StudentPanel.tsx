@@ -294,16 +294,7 @@ export default function StudentPanel({
   };
 
   const validateYudisium = () => {
-    const newErrors: Record<string, string> = {};
-    
-    // Check if files are all uploaded
-    const missingDocs = uploadedDocs.filter(d => !d.fileName);
-    if (missingDocs.length > 0) {
-      newErrors.documents = `Harap unggah seluruh dokumen persyaratan (${missingDocs.length} belum diunggah).`;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
   const handleYudisiumSubmit = (e: React.FormEvent) => {
@@ -317,9 +308,9 @@ export default function StudentPanel({
         pembimbing1: pembimbing1 || '-',
         pembimbing2: pembimbing2 || '-',
         tanggalLulus: tanggalLulus || '-',
-      }, uploadedDocs);
+      }, []);
       setSubmittingYudisium(false);
-      setSuccessMsg("Pendaftaran Yudisium Anda berhasil diajukan! Admin akademik akan segera memeriksa berkas Anda.");
+      setSuccessMsg("Pendaftaran Yudisium Anda berhasil diajukan! Admin akademik akan segera memproses pengajuan Anda.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 1000);
   };
@@ -1030,7 +1021,7 @@ export default function StudentPanel({
                 {yudisium?.status === 'ditolak' && yudisium.rejectionReason && (
                   <div className="p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-lg">
                     <div className="flex gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
                       <div>
                         <h4 className="font-bold text-xs text-rose-950">Alasan Rejection & Catatan Perbaikan:</h4>
                         <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
@@ -1042,111 +1033,14 @@ export default function StudentPanel({
                 )}
 
                 <form onSubmit={handleYudisiumSubmit} className="space-y-5">
-                  {/* Attachment Document Upload blocks */}
-                  <div className="border-t border-slate-150 pt-5 space-y-4">
+                  {/* Informational block - no documents needed */}
+                  <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-center">
+                    <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
                     <div>
-                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Unggah Dokumen Kelengkapan Persyaratan</h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Semua dokumen harus berukuran maksimum 5MB dengan format PDF atau JPG/JPEG</p>
-                    </div>
-
-                    {errors.documents && (
-                      <p className="p-3 bg-rose-50 border border-rose-100 text-rose-800 text-[11px] font-semibold rounded-lg flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                        {errors.documents}
+                      <p className="text-xs font-bold text-indigo-950">Informasi Berkas Yudisium</p>
+                      <p className="text-[11px] text-indigo-900 font-medium leading-relaxed mt-0.5">
+                        Dokumen kelengkapan persyaratan fisik tidak perlu diunggah secara mandiri. Silakan langsung datang ke bagian keuangan untuk mendapatkan persetujuan mengikuti yudisium dengan membawa bukti pembayaran yudisium.
                       </p>
-                    )}
-
-                    <div className="space-y-3">
-                      {uploadedDocs.map((doc, idx) => {
-                        const fileExists = !!doc.fileName;
-                        return (
-                          <div 
-                            key={doc.id} 
-                            className={`p-3 rounded-xl border transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-                              doc.status === 'disetujui' 
-                                ? 'bg-emerald-50/30 border-emerald-100/70' 
-                                : doc.status === 'ditolak'
-                                  ? 'bg-rose-50/40 border-rose-200'
-                                  : fileExists 
-                                    ? 'bg-indigo-50/30 border-indigo-100'
-                                    : 'bg-slate-50/30 border-slate-100 hover:bg-slate-50/60'
-                            }`}
-                          >
-                            <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
-                                <FileText className="w-4 h-4 text-slate-500" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-slate-700 leading-tight">{doc.name}</p>
-                                {fileExists ? (
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-mono truncate max-w-[200px]">
-                                      {doc.fileName}
-                                    </span>
-                                    <span className="text-[10px] text-slate-400 font-mono">({doc.fileSize})</span>
-                                    {doc.status === 'disetujui' && (
-                                      <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                                        Disetujui
-                                      </span>
-                                    )}
-                                    {doc.status === 'ditolak' && (
-                                      <span className="inline-flex items-center text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-150">
-                                        Perlu Koreksi
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-[10px] text-slate-400 mt-1 block">Berkas syarat belum diunggah</span>
-                                )}
-                                
-                                {doc.notes && (
-                                  <div className="mt-1.5 px-2 py-1 bg-white/80 border border-slate-200 rounded text-[10px] text-rose-800">
-                                    <strong>Catatan:</strong> {doc.notes}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                              {(!fileExists || doc.status === 'ditolak' || (yudisium?.status !== 'diajukan' && yudisium?.status !== 'diproses')) ? (
-                                <div className="relative">
-                                  <label 
-                                    id={`upload-label-${doc.id}`}
-                                    className="px-3 py-1.5 bg-white hover:bg-slate-50 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 border border-slate-200 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-colors"
-                                  >
-                                    <Upload className="w-3 h-3" />
-                                    {fileExists ? 'Unggah Ulang' : 'Pilih File'}
-                                    <input
-                                      id={`file-input-${doc.id}`}
-                                      type="file"
-                                      accept=".pdf,.jpg,.jpeg"
-                                      onChange={(e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                          handleFileUpload(doc.id, e.target.files[0]);
-                                        }
-                                      }}
-                                      className="hidden"
-                                    />
-                                  </label>
-                                </div>
-                              ) : null}
-
-                              {fileExists && (yudisium?.status !== 'diajukan' && yudisium?.status !== 'diproses' && doc.status !== 'disetujui') && (
-                                <button
-                                  id={`remove-file-btn-${doc.id}`}
-                                  type="button"
-                                  onClick={() => handleRemoveFile(doc.id)}
-                                  className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg border border-slate-100 hover:border-rose-100 transition-colors cursor-pointer"
-                                  title="Hapus berkas"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
                     </div>
                   </div>
 
@@ -1154,8 +1048,8 @@ export default function StudentPanel({
                   <div className="flex justify-end pt-5 border-t border-slate-100">
                     {(yudisium?.status === 'diajukan' || yudisium?.status === 'diproses') ? (
                       <div className="text-right space-y-1">
-                        <p className="text-xs font-semibold text-slate-500">Berkas Yudisium Sudah Terkirim</p>
-                        <p className="text-[11px] text-slate-400">Menunggu antrean pengecekan dokumen oleh sekretariat fakultas.</p>
+                        <p className="text-xs font-semibold text-slate-500">Pendaftaran Yudisium Sudah Diajukan</p>
+                        <p className="text-[11px] text-slate-400">Menunggu antrean verifikasi dan persetujuan akhir oleh Biro Akademik.</p>
                       </div>
                     ) : (
                       <button
@@ -1164,7 +1058,7 @@ export default function StudentPanel({
                         disabled={submittingYudisium}
                         className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-slate-350 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow shadow-indigo-100 transition-all flex items-center gap-2 cursor-pointer"
                       >
-                        {submittingYudisium ? 'Mengirim Berkas...' : 'Kirim Pendaftaran Yudisium'}
+                        {submittingYudisium ? 'Mengirim Pengajuan...' : 'Kirim Pendaftaran Yudisium'}
                         <Send className="w-3.5 h-3.5" />
                       </button>
                     )}
