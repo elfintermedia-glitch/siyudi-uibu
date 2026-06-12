@@ -579,13 +579,14 @@ export default function AdminPanel({
                       <th className="p-3 text-center">Status KTP</th>
                       <th className="p-3 text-center">Status Ijazah</th>
                       <th className="p-3 text-center">Status Kelayakan</th>
+                      <th className="p-3 text-left">Catatan Penolakan</th>
                       <th className="p-3 text-right">Aksi Kelayakan</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-150 text-xs">
                     {filteredVerified.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-400">
+                        <td colSpan={8} className="p-8 text-center text-slate-400">
                           <FileCheck className="w-10 h-10 mx-auto text-slate-300 stroke-1" />
                           <p className="text-xs font-bold mt-2.5 uppercase tracking-wide">Data Tidak Ditemukan</p>
                           <p className="text-[11px] text-slate-400 mt-0.5">Tidak ada mahasiswa yang cocok dengan kriteria filter.</p>
@@ -687,6 +688,16 @@ export default function AdminPanel({
                                   </span>
                                 )}
                               </td>
+                              <td className="p-3 text-left">
+                                {stu.academicRejected ? (
+                                  <div className="max-w-[180px] p-2 bg-rose-50 border border-rose-150 text-rose-900 rounded-lg text-[11px] font-semibold flex items-start gap-1.5 leading-tight shadow-sm">
+                                    <span className="text-rose-550 shrink-0">⚠️</span>
+                                    <span className="break-words">{stu.academicRejectionReason || 'Ditolak/Revisi'}</span>
+                                  </div>
+                                ) : (
+                                  <span className="font-mono text-slate-400 text-[10px]">-</span>
+                                )}
+                              </td>
                               <td className="p-3 text-right">
                                 <div className="inline-flex items-center gap-1.5">
                                   {stu.academicApproved ? (
@@ -733,8 +744,8 @@ export default function AdminPanel({
                             {/* Expandable Document Audit Desk */}
                             {isExpanded && (
                               <tr className="bg-slate-50/50">
-                                <td colSpan={7} className="p-4 border-b border-slate-200">
-                                  <div className="space-y-4 max-w-4xl mx-auto pl-8">
+                                <td colSpan={8} className="p-4 border-b border-slate-200">
+                                  <div className="space-y-4 max-w-4xl mx-auto pl-8 font-sans">
                                     
                                     {/* Warnings if files are not approved but client clicks Sahkan */}
                                     {!canApprove && !stu.academicApproved && (
