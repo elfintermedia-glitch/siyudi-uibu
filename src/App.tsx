@@ -49,6 +49,13 @@ export default function App() {
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   
+  // Admin password change states
+  const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
+  const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
+  const [adminPasswordSuccess, setAdminPasswordSuccess] = useState<string | null>(null);
+  
   // Tab within the login container
   const [loginTab, setLoginTab] = useState<'student' | 'admin'>('student');
   const [showBusinessPresentation, setShowBusinessPresentation] = useState(false);
@@ -566,13 +573,28 @@ export default function App() {
                   )}
                 </p>
               </div>
-              <button
-                id="admin-logout-top"
-                onClick={handleLogout}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-slate-700/80 cursor-pointer"
-              >
-                Keluar Panel {currentAdmin.role === 'superadmin' ? 'Superadmin' : currentAdmin.role === 'keuangan' ? 'Keuangan' : 'Akademik'}
-              </button>
+              <div className="flex flex-wrap items-center gap-2 self-start md:self-center">
+                <button
+                  id="admin-change-password-btn"
+                  onClick={() => {
+                    setNewAdminPassword('');
+                    setConfirmAdminPassword('');
+                    setAdminPasswordError(null);
+                    setAdminPasswordSuccess(null);
+                    setIsChangingAdminPassword(true);
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm border border-indigo-500 cursor-pointer flex items-center gap-1.5 transition-colors"
+                >
+                  🔒 Ubah Password Staff
+                </button>
+                <button
+                  id="admin-logout-top"
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-slate-700/80 cursor-pointer"
+                >
+                  Keluar Panel {currentAdmin.role === 'superadmin' ? 'Superadmin' : currentAdmin.role === 'keuangan' ? 'Keuangan' : 'Akademik'}
+                </button>
+              </div>
             </div>
 
             {currentAdmin.role === 'superadmin' && (
@@ -599,6 +621,120 @@ export default function App() {
                 onUpdateYudisium={handleUpdateYudisiumApp}
                 onUpdateWisuda={handleUpdateWisudaApp}
               />
+            )}
+
+            {/* ADMIN PASSWORD CHANGE MODAL */}
+            {isChangingAdminPassword && (
+              <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
+                <div className="bg-white rounded-2xl shadow-xl border border-slate-150 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
+                    <div className="flex items-center gap-2 text-indigo-950">
+                      <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg">
+                        <span className="text-sm font-bold">🔑</span>
+                      </span>
+                      <h3 className="font-bold text-sm uppercase tracking-wider">Ubah Password Staff</h3>
+                    </div>
+                    <button 
+                      onClick={() => setIsChangingAdminPassword(false)}
+                      className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newAdminPassword) {
+                      setAdminPasswordError("Password baru wajib diisi!");
+                      return;
+                    }
+                    if (newAdminPassword !== confirmAdminPassword) {
+                      setAdminPasswordError("Konfirmasi password tidak cocok!");
+                      return;
+                    }
+                    setAdminPasswordError(null);
+                    
+                    // Update admin profile logic
+                    const updatedAdmin = { ...currentAdmin, password: newAdminPassword };
+                    const updatedUsersList = (state.adminUsers || []).map(u => u.username === currentAdmin.username ? updatedAdmin : u);
+                    
+                    handleUpdateAdminUsers(updatedUsersList);
+                    setCurrentAdmin(updatedAdmin);
+                    
+                    setAdminPasswordSuccess("Password staff sukses diubah!");
+                    setTimeout(() => {
+                      setIsChangingAdminPassword(false);
+                      setAdminPasswordSuccess(null);
+                    }, 1500);
+                  }} className="p-5 space-y-4">
+                    
+                    {adminPasswordSuccess ? (
+                      <div className="p-4 bg-emerald-50 border border-emerald-150 text-emerald-800 text-xs font-bold rounded-xl text-center space-y-2 py-8">
+                        <div className="text-2xl">✓</div>
+                        <p>{adminPasswordSuccess}</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="space-y-1 text-left">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Username Staff</label>
+                          <input 
+                            type="text"
+                            disabled
+                            value={currentAdmin.username}
+                            className="w-full p-2.5 text-xs font-bold border border-slate-200 bg-slate-100 text-slate-500 rounded-lg focus:outline-none cursor-not-allowed font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
+                          <input 
+                            type="password"
+                            required
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="Masukkan password baru"
+                            className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          />
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
+                          <input 
+                            type="password"
+                            required
+                            value={confirmAdminPassword}
+                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                            placeholder="Ulangi password baru"
+                            className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          />
+                        </div>
+
+                        {adminPasswordError && (
+                          <div className="p-3 bg-rose-50 border border-rose-100 text-rose-800 text-[11px] font-semibold rounded-lg text-left">
+                            ⚠️ {adminPasswordError}
+                          </div>
+                        )}
+
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => setIsChangingAdminPassword(false)}
+                            className="px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-xs font-bold rounded-lg border border-slate-200 cursor-pointer"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer"
+                          >
+                            Simpan Password
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </form>
+                </div>
+              </div>
             )}
           </motion.div>
         )}

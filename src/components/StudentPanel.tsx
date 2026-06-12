@@ -43,6 +43,12 @@ export default function StudentPanel({
   const [ktpDoc, setKtpDoc] = useState<DocumentUpload | undefined>(student.ktpDoc);
   const [ijazahSmaDoc, setIjazahSmaDoc] = useState<DocumentUpload | undefined>(student.ijazahSmaDoc);
 
+  // Password change states
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
   useEffect(() => {
     setEditNik(student.nik || '');
     setEditNama(student.nama || '');
@@ -474,6 +480,18 @@ export default function StudentPanel({
                 Ubah Data Akademik
               </button>
             )}
+            <button 
+              id="change-password-student-btn"
+              onClick={() => {
+                setNewPassword('');
+                setConfirmPassword('');
+                setPasswordError(null);
+                setIsChangingPassword(true);
+              }} 
+              className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-xs font-semibold text-indigo-700 rounded-lg border border-indigo-250 transition-colors cursor-pointer flex items-center gap-1"
+            >
+              🔒 Ubah Password
+            </button>
             <button 
               id="logout-btn"
               onClick={onLogout} 
@@ -1302,6 +1320,93 @@ export default function StudentPanel({
         </div>
       )}
         </>
+      )}
+
+      {/* PASSWORD CHANGE MODAL */}
+      {isChangingPassword && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-150 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
+              <div className="flex items-center gap-2 text-indigo-950">
+                <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg">
+                  <span className="text-sm font-bold">🔑</span>
+                </span>
+                <h3 className="font-bold text-sm uppercase tracking-wider">Ubah Password Akun</h3>
+              </div>
+              <button 
+                onClick={() => setIsChangingPassword(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newPassword) {
+                setPasswordError("Password baru wajib diisi!");
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                setPasswordError("Konfirmasi password tidak cocok!");
+                return;
+              }
+              setPasswordError(null);
+              onUpdateStudentProfile({
+                ...student,
+                password: newPassword
+              });
+              setSuccessMsg("Password akun Anda berhasil diubah!");
+              setIsChangingPassword(false);
+            }} className="p-5 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
+                <input 
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Masukkan password baru Anda"
+                  className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
+                <input 
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Ulangi password baru Anda"
+                  className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                />
+              </div>
+
+              {passwordError && (
+                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-800 text-[11px] font-semibold rounded-lg">
+                  ⚠️ {passwordError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsChangingPassword(false)}
+                  className="px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-xs font-bold rounded-lg border border-slate-200 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer"
+                >
+                  Simpan Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
