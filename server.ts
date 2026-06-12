@@ -205,14 +205,46 @@ async function startServer() {
       }
 
       logs.push(`[SUKSES] Seluruh sistem berhasil dimuat ulang ke build terbaru!`);
-      logs.push(`[SISTEM] Memulai ulang proses Node.js / PM2 dalam 2 detik...`);
+      logs.push(`[SISTEM] Memulai proses reload/restart layanan secara otomatis...`);
 
       res.json({ success: true, logs });
 
-      // Exit process gracefully to let PM2 or aaPanel supervisor auto-restart it
+      // Trigger automatic restart/hot-reload
       setTimeout(() => {
-        console.log('Deploy success. Exiting process for auto-restart...');
-        process.exit(0);
+        console.log('Deploy success. Initiating service restart...');
+        
+        const isPM2 = typeof process.env.pm_id !== 'undefined';
+        
+        if (isPM2) {
+          console.log(`Aplikasi berjalan di bawah PM2 (ID: ${process.env.pm_id}). Meminta PM2 restart...`);
+          // Try executing pm2 restart
+          exec(`pm2 restart ${process.env.pm_id}`, (err) => {
+            if (err) {
+              console.warn('Gagal menjalankan perintah "pm2" langsung. Mencoba "npx pm2"...', err);
+              exec(`npx pm2 restart ${process.env.pm_id}`, (npxErr) => {
+                if (npxErr) {
+                  console.error('Gagal menjalankan npx pm2 restart. Memaksa exit dengan kode 1 agar PM2/Supervisor mendeteksi crash dan memulai ulang...', npxErr);
+                  process.exit(1); // Exit with non-zero code to force PM2 to restart as a crash recovery
+                }
+              });
+            }
+          });
+        } else {
+          // Detached spawn fallback: spawn mandiri secara background dan exit
+          try {
+            const { spawn } = require('child_process');
+            console.log('Menyalahgunakan detached spawn untuk memicu reload mandiri...');
+            const child = spawn(process.argv[0], process.argv.slice(1), {
+              detached: true,
+              stdio: 'ignore'
+            });
+            child.unref();
+            process.exit(0);
+          } catch (spawnErr) {
+            console.error('Gagal melakukan spawn detached, memaksa exit langsung...', spawnErr);
+            process.exit(0);
+          }
+        }
       }, 2000);
 
     } catch (err: any) {
