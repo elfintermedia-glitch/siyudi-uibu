@@ -1,53 +1,53 @@
-import { pgTable, text, boolean, jsonb, serial } from 'drizzle-orm/pg-core';
+import { mysqlTable, text, boolean, json, varchar } from 'drizzle-orm/mysql-core';
 
-export const students = pgTable('students', {
-  nim: text('nim').primaryKey(),
-  nik: text('nik').notNull(),
-  nama: text('nama').notNull(),
-  tempatLahir: text('tempat_lahir').notNull(),
-  tanggalLahir: text('tanggal_lahir').notNull(),
-  fakultas: text('fakultas').notNull(),
-  programStudi: text('program_studi').notNull(),
-  statusKelulusan: text('status_kelulusan').$type<'Lulus' | 'Belum Lulus'>().notNull(),
+export const students = mysqlTable('students', {
+  nim: varchar('nim', { length: 50 }).primaryKey(),
+  nik: varchar('nik', { length: 50 }).notNull(),
+  nama: varchar('nama', { length: 255 }).notNull(),
+  tempatLahir: varchar('tempat_lahir', { length: 255 }).notNull(),
+  tanggalLahir: varchar('tanggal_lahir', { length: 50 }).notNull(),
+  fakultas: varchar('fakultas', { length: 255 }).notNull(),
+  programStudi: varchar('program_studi', { length: 255 }).notNull(),
+  statusKelulusan: varchar('status_kelulusan', { length: 55 }).$type<'Lulus' | 'Belum Lulus'>().notNull(),
   keterangan: text('keterangan'),
-  email: text('email'),
-  noHp: text('no_hp'),
+  email: varchar('email', { length: 255 }),
+  noHp: varchar('no_hp', { length: 50 }),
   dataVerified: boolean('data_verified').default(false),
   academicApproved: boolean('academic_approved').default(false),
   academicRejected: boolean('academic_rejected').default(false),
   academicRejectionReason: text('academic_rejection_reason'),
-  ktpDoc: jsonb('ktp_doc'), // Holds DocumentUpload object
-  ijazahSmaDoc: jsonb('ijazah_sma_doc'), // Holds DocumentUpload object
+  ktpDoc: json('ktp_doc'), // Holds DocumentUpload object
+  ijazahSmaDoc: json('ijazah_sma_doc'), // Holds DocumentUpload object
 });
 
-export const yudisiumRegistrations = pgTable('yudisium_registrations', {
-  nim: text('nim').primaryKey().references(() => students.nim, { onDelete: 'cascade' }),
+export const yudisiumRegistrations = mysqlTable('yudisium_registrations', {
+  nim: varchar('nim', { length: 50 }).primaryKey().references(() => students.nim, { onDelete: 'cascade' }),
   judulSkripsi: text('judul_skripsi').notNull(),
-  pembimbing1: text('pembimbing1').notNull(),
-  pembimbing2: text('pembimbing2').notNull(),
-  tanggalLulus: text('tanggal_lulus').notNull(),
-  registeredAt: text('registered_at').notNull(),
-  status: text('status').$type<'belum_daftar' | 'diajukan' | 'diproses' | 'disetujui' | 'ditolak'>().notNull(),
+  pembimbing1: varchar('pembimbing1', { length: 255 }).notNull(),
+  pembimbing2: varchar('pembimbing2', { length: 255 }).notNull(),
+  tanggalLulus: varchar('tanggal_lulus', { length: 50 }).notNull(),
+  registeredAt: varchar('registered_at', { length: 100 }).notNull(),
+  status: varchar('status', { length: 50 }).$type<'belum_daftar' | 'diajukan' | 'diproses' | 'disetujui' | 'ditolak'>().notNull(),
   rejectionReason: text('rejection_reason'),
-  documents: jsonb('documents'), // Holds DocumentUpload[]
+  documents: json('documents'), // Holds DocumentUpload[]
 });
 
-export const wisudaRegistrations = pgTable('wisuda_registrations', {
-  nim: text('nim').primaryKey().references(() => students.nim, { onDelete: 'cascade' }),
-  ukuranToga: text('ukuran_toga').$type<'S' | 'M' | 'L' | 'XL' | 'XXL'>().notNull(),
-  namaAyah: text('nama_ayah').notNull(),
-  namaIbu: text('nama_ibu').notNull(),
-  noHpOrtu: text('no_hp_ortu').notNull(),
+export const wisudaRegistrations = mysqlTable('wisuda_registrations', {
+  nim: varchar('nim', { length: 50 }).primaryKey().references(() => students.nim, { onDelete: 'cascade' }),
+  ukuranToga: varchar('ukuran_toga', { length: 10 }).$type<'S' | 'M' | 'L' | 'XL' | 'XXL'>().notNull(),
+  namaAyah: varchar('nama_ayah', { length: 255 }).notNull(),
+  namaIbu: varchar('nama_ibu', { length: 255 }).notNull(),
+  noHpOrtu: varchar('no_hp_ortu', { length: 50 }).notNull(),
   alamatPengiriman: text('alamat_pengiriman').notNull(),
-  registeredAt: text('registered_at').notNull(),
-  status: text('status').$type<'belum_daftar' | 'diajukan' | 'diproses' | 'disetujui' | 'ditolak'>().notNull(),
+  registeredAt: varchar('registered_at', { length: 100 }).notNull(),
+  status: varchar('status', { length: 50 }).$type<'belum_daftar' | 'diajukan' | 'diproses' | 'disetujui' | 'ditolak'>().notNull(),
   rejectionReason: text('rejection_reason'),
 });
 
-export const adminUsers = pgTable('admin_users', {
-  id: text('id').primaryKey(),
-  nama: text('nama').notNull(),
-  username: text('username').notNull().unique(),
-  password: text('password').notNull(),
-  role: text('role').$type<'superadmin' | 'akademik' | 'keuangan'>().notNull(),
+export const adminUsers = mysqlTable('admin_users', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  nama: varchar('nama', { length: 255 }).notNull(),
+  username: varchar('username', { length: 255 }).notNull().unique(),
+  password: varchar('password', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).$type<'superadmin' | 'akademik' | 'keuangan'>().notNull(),
 });

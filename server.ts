@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { notInArray } from 'drizzle-orm';
-import { db } from './src/db/index.ts';
+import { db, pool } from './src/db/index.ts';
 import { students, yudisiumRegistrations, wisudaRegistrations, adminUsers } from './src/db/schema.ts';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './src/utils/dummyData.ts';
 import { exec } from 'child_process';
@@ -10,8 +10,89 @@ import { promisify } from 'util';
 
 const execPromise = promisify(exec);
 
+async function initializeTables() {
+  try {
+    console.log('Verifying or creating MySQL database tables...');
+    // 1. students Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS \`students\` (
+        \`nim\` VARCHAR(50) NOT NULL,
+        \`nik\` VARCHAR(50) NOT NULL,
+        \`nama\` VARCHAR(255) NOT NULL,
+        \`tempat_lahir\` VARCHAR(255) NOT NULL,
+        \`tanggal_lahir\` VARCHAR(50) NOT NULL,
+        \`fakultas\` VARCHAR(255) NOT NULL,
+        \`program_studi\` VARCHAR(255) NOT NULL,
+        \`status_kelulusan\` VARCHAR(55) NOT NULL,
+        \`keterangan\` TEXT NULL,
+        \`email\` VARCHAR(255) NULL,
+        \`no_hp\` VARCHAR(50) NULL,
+        \`data_verified\` BOOLEAN DEFAULT FALSE,
+        \`academic_approved\` BOOLEAN DEFAULT FALSE,
+        \`academic_rejected\` BOOLEAN DEFAULT FALSE,
+        \`academic_rejection_reason\` TEXT NULL,
+        \`ktp_doc\` JSON NULL,
+        \`ijazah_sma_doc\` JSON NULL,
+        PRIMARY KEY (\`nim\`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    // 2. admin_users Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS \`admin_users\` (
+        \`id\` VARCHAR(255) NOT NULL,
+        \`nama\` VARCHAR(255) NOT NULL,
+        \`username\` VARCHAR(255) NOT NULL,
+        \`password\` VARCHAR(255) NOT NULL,
+        \`role\` VARCHAR(50) NOT NULL,
+        PRIMARY KEY (\`id\`),
+        UNIQUE KEY \`admin_users_username_unique\` (\`username\`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    // 3. yudisium_registrations Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS \`yudisium_registrations\` (
+        \`nim\` VARCHAR(50) NOT NULL,
+        \`judul_skripsi\` TEXT NOT NULL,
+        \`pembimbing1\` VARCHAR(255) NOT NULL,
+        \`pembimbing2\` VARCHAR(255) NOT NULL,
+        \`tanggal_lulus\` VARCHAR(50) NOT NULL,
+        \`registered_at\` VARCHAR(100) NOT NULL,
+        \`status\` VARCHAR(50) NOT NULL,
+        \`rejection_reason\` TEXT NULL,
+        \`documents\` JSON NULL,
+        PRIMARY KEY (\`nim\`),
+        CONSTRAINT \`fk_yudisium_student\` FOREIGN KEY (\`nim\`) REFERENCES \`students\` (\`nim\`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    // 4. wisuda_registrations Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS \`wisuda_registrations\` (
+        \`nim\` VARCHAR(50) NOT NULL,
+        \`ukuran_toga\` VARCHAR(10) NOT NULL,
+        \`nama_ayah\` VARCHAR(255) NOT NULL,
+        \`nama_ibu\` VARCHAR(255) NOT NULL,
+        \`no_hp_ortu\` VARCHAR(50) NOT NULL,
+        \`alamat_pengiriman\` TEXT NOT NULL,
+        \`registered_at\` VARCHAR(100) NOT NULL,
+        \`status\` VARCHAR(50) NOT NULL,
+        \`rejection_reason\` TEXT NULL,
+        PRIMARY KEY (\`nim\`),
+        CONSTRAINT \`fk_wisuda_student\` FOREIGN KEY (\`nim\`) REFERENCES \`students\` (\`nim\`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    console.log('Database tables verified/created successfully!');
+  } catch (err: any) {
+    console.error('Failed to initialize database tables:', err.message);
+  }
+}
+
 async function seedDatabaseIfEmpty() {
   try {
+    await initializeTables();
     const existingAdmins = await db.select().from(adminUsers);
     if (existingAdmins.length === 0) {
       console.log('Database is empty. Seeding initial data...');
@@ -532,8 +613,7 @@ async function startServer() {
             ktpDoc: std.ktpDoc || null,
             ijazahSmaDoc: std.ijazahSmaDoc || null,
           })
-          .onConflictDoUpdate({
-            target: students.nim,
+          .onDuplicateKeyUpdate({
             set: {
               nik: std.nik,
               nama: std.nama,
@@ -591,8 +671,7 @@ async function startServer() {
           rejectionReason: y.rejectionReason || null,
           documents: y.documents || null,
         })
-        .onConflictDoUpdate({
-          target: yudisiumRegistrations.nim,
+        .onDuplicateKeyUpdate({
           set: {
             judulSkripsi: y.judulSkripsi,
             pembimbing1: y.pembimbing1,
@@ -633,8 +712,7 @@ async function startServer() {
           status: w.status,
           rejectionReason: w.rejectionReason || null,
         })
-        .onConflictDoUpdate({
-          target: wisudaRegistrations.nim,
+        .onDuplicateKeyUpdate({
           set: {
             ukuranToga: w.ukuranToga,
             namaAyah: w.namaAyah,
@@ -683,8 +761,7 @@ async function startServer() {
           ktpDoc: std.ktpDoc || null,
           ijazahSmaDoc: std.ijazahSmaDoc || null,
         })
-        .onConflictDoUpdate({
-          target: students.nim,
+        .onDuplicateKeyUpdate({
           set: {
             nik: std.nik,
             nama: std.nama,
@@ -729,8 +806,7 @@ async function startServer() {
           password: adm.password,
           role: adm.role,
         })
-        .onConflictDoUpdate({
-          target: adminUsers.username,
+        .onDuplicateKeyUpdate({
           set: {
             nama: adm.nama,
             password: adm.password,
