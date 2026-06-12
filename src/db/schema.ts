@@ -12,6 +12,7 @@ export const students = mysqlTable('students', {
   keterangan: text('keterangan'),
   email: varchar('email', { length: 255 }),
   noHp: varchar('no_hp', { length: 50 }),
+  password: varchar('password', { length: 255 }).default('kebudiutamaan'),
   dataVerified: boolean('data_verified').default(false),
   academicApproved: boolean('academic_approved').default(false),
   academicRejected: boolean('academic_rejected').default(false),

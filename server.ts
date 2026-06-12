@@ -571,6 +571,7 @@ async function startServer() {
       sql += `  \`keterangan\` TEXT NULL,\n`;
       sql += `  \`email\` VARCHAR(255) NULL,\n`;
       sql += `  \`no_hp\` VARCHAR(50) NULL,\n`;
+      sql += `  \`password\` VARCHAR(255) NOT NULL DEFAULT 'kebudiutamaan',\n`;
       sql += `  \`data_verified\` BOOLEAN DEFAULT FALSE,\n`;
       sql += `  \`academic_approved\` BOOLEAN DEFAULT FALSE,\n`;
       sql += `  \`academic_rejected\` BOOLEAN DEFAULT FALSE,\n`;
@@ -594,6 +595,7 @@ async function startServer() {
           const ket = escapeString(std.keterangan);
           const email = escapeString(std.email);
           const hp = escapeString(std.noHp);
+          const psw = escapeString(std.password || 'kebudiutamaan');
           const dVer = std.dataVerified ? 'TRUE' : 'FALSE';
           const aApp = std.academicApproved ? 'TRUE' : 'FALSE';
           const aRej = std.academicRejected ? 'TRUE' : 'FALSE';
@@ -601,7 +603,7 @@ async function startServer() {
           const ktp = escapeJson(std.ktpDoc);
           const ijazah = escapeJson(std.ijazahSmaDoc);
 
-          sql += `INSERT INTO \`students\` (\`nim\`, \`nik\`, \`nama\`, \`tempat_lahir\`, \`tanggal_lahir\`, \`fakultas\`, \`program_studi\`, \`status_kelulusan\`, \`keterangan\`, \`email\`, \`no_hp\`, \`data_verified\`, \`academic_approved\`, \`academic_rejected\`, \`academic_rejection_reason\`, \`ktp_doc\`, \`ijazah_sma_doc\`) VALUES (${nim}, ${nik}, ${nama}, ${tmpt}, ${tgl}, ${fak}, ${prodi}, ${lulus}, ${ket}, ${email}, ${hp}, ${dVer}, ${aApp}, ${aRej}, ${aRejReason}, ${ktp}, ${ijazah});\n`;
+          sql += `INSERT INTO \`students\` (\`nim\`, \`nik\`, \`nama\`, \`tempat_lahir\`, \`tanggal_lahir\`, \`fakultas\`, \`program_studi\`, \`status_kelulusan\`, \`keterangan\`, \`email\`, \`no_hp\`, \`password\`, \`data_verified\`, \`academic_approved\`, \`academic_rejected\`, \`academic_rejection_reason\`, \`ktp_doc\`, \`ijazah_sma_doc\`) VALUES (${nim}, ${nik}, ${nama}, ${tmpt}, ${tgl}, ${fak}, ${prodi}, ${lulus}, ${ket}, ${email}, ${hp}, ${psw}, ${dVer}, ${aApp}, ${aRej}, ${aRejReason}, ${ktp}, ${ijazah});\n`;
         });
         sql += `\n`;
       }
