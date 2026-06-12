@@ -138,7 +138,7 @@ export default function BusinessProcessPresentation({ onClose }: { onClose?: () 
       icon: <Terminal className="w-10 h-10" />,
       bgColor: 'bg-slate-950 text-slate-200 border-slate-800',
       accentColor: 'slate',
-      summary: 'Khusus Superadmin, portal ini dilengkapi dashboard integrasi GitHub untuk sinkronisasi kode langsung dari repositori universitas-ibo/yudisium-wisuda-portal ke Docker Node container.',
+      summary: 'Khusus Superadmin, portal ini dilengkapi dashboard integrasi GitHub untuk sinkronisasi kode langsung dari repositori elfintermedia-glitch/siyudi-uibu ke Docker Node container.',
       keyBenefits: [
         'Webhooks mendeteksi Push commits dari branch "main"',
         'Proses pulling otomatis, npm install dependencies, dan Vite production SPA build',

@@ -74,7 +74,7 @@ export default function SuperAdminPanel({
   };
 
   // GitHub Update States
-  const [gitHubRepo, setGitHubRepo] = useState('universitas-ibo/yudisium-wisuda-portal');
+  const [gitHubRepo, setGitHubRepo] = useState('elfintermedia-glitch/siyudi-uibu');
   const [gitBranch, setGitBranch] = useState('main');
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateChecked, setUpdateChecked] = useState(false);
