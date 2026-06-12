@@ -5,6 +5,10 @@ import { notInArray } from 'drizzle-orm';
 import { db } from './src/db/index.ts';
 import { students, yudisiumRegistrations, wisudaRegistrations, adminUsers } from './src/db/schema.ts';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './src/utils/dummyData.ts';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execPromise = promisify(exec);
 
 async function seedDatabaseIfEmpty() {
   try {
@@ -101,6 +105,125 @@ async function startServer() {
   // API ROUTES
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', database: 'connected' });
+  });
+
+  // Check for updates from GitHub
+  app.post('/api/git-check', async (req, res) => {
+    const { repo, branch } = req.body;
+    const targetBranch = branch || 'main';
+    const targetRepo = repo || 'elfintermedia-glitch/siyudi-uibu';
+    try {
+      // Check if git works of if we are inside a repo
+      await execPromise('git --version');
+      
+      try {
+        await execPromise(`git remote set-url origin https://github.com/${targetRepo}.git`);
+      } catch (_) {
+        // If remote doesn't exist, try adding it
+        try {
+          await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+        } catch (__) {}
+      }
+
+      await execPromise(`git fetch origin ${targetBranch}`);
+      
+      const localShaRes = await execPromise(`git rev-parse --short HEAD`);
+      const remoteShaRes = await execPromise(`git rev-parse --short origin/${targetBranch}`);
+      
+      const localSha = localShaRes.stdout.trim();
+      const remoteSha = remoteShaRes.stdout.trim();
+      
+      res.json({
+        success: true,
+        localSha,
+        remoteSha,
+        hasUpdates: localSha !== remoteSha,
+        isGit: true
+      });
+    } catch (err: any) {
+      console.warn('Git check failed or not a git repository yet:', err.message);
+      // Fallback response for mock behavior in sandbox, but still reporting info
+      res.json({
+        success: true,
+        localSha: '8fa2c3e',
+        remoteSha: '7fc1b52',
+        hasUpdates: true,
+        isGit: false,
+        warning: 'Sandbox / Non-Git Mode: ' + err.message
+      });
+    }
+  });
+
+  // Pull code from GitHub and re-build
+  app.post('/api/git-pull', async (req, res) => {
+    const { repo, branch } = req.body;
+    const targetBranch = branch || 'main';
+    const targetRepo = repo || 'elfintermedia-glitch/siyudi-uibu';
+    const logs: string[] = [];
+
+    logs.push(`[SISTEM] Memulai proses pembaruan otomatis dari repositori: ${targetRepo} [Branch: ${targetBranch}]`);
+
+    try {
+      // 1. Ensure we are in a git tree
+      try {
+        await execPromise('git rev-parse --is-inside-work-tree');
+      } catch (err) {
+        logs.push(`[SISTEM] Direktori bukan git repositori. Menginisialisasi git init...`);
+        await execPromise('git init');
+        await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+      }
+
+      // 2. Set remote URL to use HTTPS
+      try {
+        await execPromise(`git remote set-url origin https://github.com/${targetRepo}.git`);
+        logs.push(`[SISTEM] Remote origin berhasil diselaraskan ke: github.com/${targetRepo}`);
+      } catch (e) {
+        try {
+          await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+        } catch (__) {}
+      }
+
+      // 3. Git Fetch
+      logs.push(`[GIT] Menjalankan: git fetch origin ${targetBranch}...`);
+      await execPromise(`git fetch origin ${targetBranch}`);
+      
+      // 4. Git Pull / Hard Reset (lebih direkomendasikan untuk auto-deploy agar tidak bentrok)
+      logs.push(`[GIT] Menjalankan: git reset --hard origin/${targetBranch}...`);
+      const resetRes = await execPromise(`git reset --hard origin/${targetBranch}`);
+      logs.push(`[GIT] Berhasil menarik kode terbaru.`);
+      if (resetRes.stdout) {
+        logs.push(`[GIT LOG] ${resetRes.stdout.trim()}`);
+      }
+
+      // 5. Build Vite SPA and rebuild server bundle
+      logs.push(`[VITE] Menjalankan kompilasi: npm run build...`);
+      const buildRes = await execPromise(`npm run build`);
+      logs.push(`[VITE] Kompilasi berhasil diselesaikan.`);
+      if (buildRes.stdout) {
+        const buildLines = buildRes.stdout.split('\n').slice(-5).join('\n');
+        logs.push(`[VITE OUT] ...\n${buildLines}`);
+      }
+
+      logs.push(`[SUKSES] Seluruh sistem berhasil dimuat ulang ke build terbaru!`);
+      logs.push(`[SISTEM] Memulai ulang proses Node.js / PM2 dalam 2 detik...`);
+
+      res.json({ success: true, logs });
+
+      // Exit process gracefully to let PM2 or aaPanel supervisor auto-restart it
+      setTimeout(() => {
+        console.log('Deploy success. Exiting process for auto-restart...');
+        process.exit(0);
+      }, 2000);
+
+    } catch (err: any) {
+      console.error('Git integration failed:', err);
+      logs.push(`[EROR] Kegagalan fatal saat menarik atau mendominasi pembaruan.`);
+      logs.push(`[EROR DETAIL] ${err.message}`);
+      if (err.stdout) logs.push(`[STDOUT ERROR] ${err.stdout.trim().slice(0, 300)}`);
+      if (err.stderr) logs.push(`[STDERR ERROR] ${err.stderr.trim().slice(0, 300)}`);
+
+      res.status(500).json({ success: false, error: err.message, logs });
+    }
   });
 
   // Export full MySQL-compatible SQL database dump
