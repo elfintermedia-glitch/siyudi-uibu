@@ -388,10 +388,10 @@ export default function App() {
                 Registrasi Yudisium & Pelulusan Sarjana
               </h2>
               <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
-                Silakan masuk menggunakan Nomor Induk Mahasiswa (NIM) untuk melengkapi berkas ijazah atau mendaftar yudisium. Bagian Administrasi silakan pilih Gerbang Admin.
+                Silakan masuk menggunakan Nomor Induk Mahasiswa (NIM) untuk melengkapi berkas ijazah atau mendaftar yudisium. Bagian Administrasi silakan pilih Admin.
               </p>
             </motion.div>
-
+ 
             {/* DUAL LOGIN FORMS */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
               
@@ -408,7 +408,7 @@ export default function App() {
                     }`}
                   >
                     <UserCheck2 className="w-4 h-4 text-indigo-600" />
-                    Gerbang Mahasiswa
+                    Mahasiswa
                   </button>
                   <button
                     id="tab-login-admin"
@@ -420,7 +420,7 @@ export default function App() {
                     }`}
                   >
                     <Shield className="w-4 h-4 text-gray-500" />
-                    Gerbang Admin
+                    Admin
                   </button>
                 </div>
 
