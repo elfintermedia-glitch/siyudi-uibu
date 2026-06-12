@@ -68,7 +68,7 @@ export default function App() {
   const handleStudentLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentNimInput.trim()) {
-      setLoginError('NIM wajib diisi untuk masuk!');
+      setLoginError('USERNAME wajib diisi untuk masuk!');
       return;
     }
 
@@ -79,7 +79,7 @@ export default function App() {
       setActiveRole('student');
       setLoginError(null);
     } else {
-      setLoginError(`NIM "${studentNimInput}" tidak terdaftar di database akademik! Hubungi admin untuk mengimpor dari data Excel.`);
+      setLoginError(`USERNAME "${studentNimInput}" tidak terdaftar di database akademik! Hubungi admin untuk mengimpor dari data Excel.`);
     }
   };
 
@@ -388,7 +388,7 @@ export default function App() {
                 Registrasi Yudisium & Pelulusan Sarjana
               </h2>
               <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
-                Silakan masuk menggunakan Nomor Induk Mahasiswa (NIM) untuk melengkapi berkas ijazah atau mendaftar yudisium. Bagian Administrasi silakan pilih Admin.
+                Silakan masuk menggunakan USERNAME untuk melengkapi berkas ijazah atau mendaftar yudisium. Bagian Administrasi silakan pilih Admin.
               </p>
             </motion.div>
  
@@ -435,22 +435,22 @@ export default function App() {
                   {loginTab === 'student' ? (
                     <form onSubmit={handleStudentLoginSubmit} className="space-y-3.5">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Nomor Induk Mahasiswa (NIM) <span className="text-rose-500">*</span></label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">USERNAME <span className="text-rose-500">*</span></label>
                         <input
                           id="input-nim-login"
                           type="text"
                           required
                           value={studentNimInput}
                           onChange={(e) => setStudentNimInput(e.target.value)}
-                          placeholder="Masukkan NIM (contoh: 120140085)"
+                          placeholder="Masukkan USERNAME (contoh: 120140085)"
                           className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
                         />
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex justify-between items-center">
-                          <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Kata Sandi Akun</label>
-                          <span className="text-[10px] text-gray-400">Gunakan sembarang sandi</span>
+                          <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD</label>
+                          <span className="text-[10px] text-gray-400">Gunakan sembarang password</span>
                         </div>
                         <input
                           id="input-password-student"
