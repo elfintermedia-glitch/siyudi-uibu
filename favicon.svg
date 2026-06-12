@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Left text curve (bottom to top) -->
+    <path id="textLeft" d="M 80,165 C 44,142 34,95 50,47" fill="none" />
+    <!-- Right text curve (top to bottom) -->
+    <path id="textRight" d="M 150,47 C 166,95 156,142 120,165" fill="none" />
+  </defs>
+
+  <!-- Background transparent -->
+  <rect width="200" height="200" fill="none"/>
+
+  <!-- Inner ribbed shield background background (grey stripes) -->
+  <path d="M 70,120 C 70,60 130,60 130,120" stroke="#f0f0f0" stroke-width="12" fill="none" stroke-linecap="round" />
+  <path d="M 80,130 C 80,75 120,75 120,130" stroke="#e0e0e0" stroke-width="8" fill="none" stroke-linecap="round" />
+  <path d="M 90,140 C 90,90 110,90 110,140" stroke="#d4d4d4" stroke-width="6" fill="none" stroke-linecap="round" />
+
+  <!-- Outer Horseshoe Shape -->
+  <!-- Left Wing (Vibrant Teal) -->
+  <path d="M 45,25 C 15,75 15,145 100,185 C 72,155 70,100 70,40 Z" fill="#00a2b9" />
+  <!-- Right Wing (Deep Navy Blue) -->
+  <path d="M 155,25 C 185,75 185,145 100,185 C 128,155 130,100 130,40 Z" fill="#111874" />
+
+  <!-- White stars at the bottom curve -->
+  <!-- Star helper function values manually mapped to avoid drawing logic -->
+  <!-- Left to right stars, progressively larger towards center, then smaller -->
+  <!-- Star 1 (Leftmost, small) -->
+  <polygon points="63,148 65,143 70,143 66,140 68,135 63,138 58,135 60,140 56,143 61,143" fill="#ffffff" />
+  <!-- Star 2 (Medium Left) -->
+  <polygon points="78,160 80,154 86,154 81,151 83,145 78,149 73,145 75,151 70,154 76,154" fill="#ffffff" />
+  <!-- Star 3 (Center, Large) -->
+  <polygon points="100,175 103,166 111,166 104,161 107,153 100,158 93,153 96,161 89,166 97,166" fill="#ffffff" />
+  <!-- Star 4 (Medium Right) -->
+  <polygon points="122,160 124,154 130,154 125,151 127,145 122,149 117,145 119,151 114,154 120,154" fill="#ffffff" />
+  <!-- Star 5 (Rightmost, small) -->
+  <polygon points="137,148 139,143 144,143 140,140 142,135 137,138 132,135 134,140 130,143 135,143" fill="#ffffff" />
+
+  <!-- Curved texts along path -->
+  <text font-size="11" font-family="'Inter', 'Arial', sans-serif" font-weight="900" fill="#ffffff" letter-spacing="1">
+    <textPath href="#textLeft" startOffset="50%" text-anchor="middle">UNIVERSITAS</textPath>
+  </text>
+  <text font-size="11" font-family="'Inter', 'Arial', sans-serif" font-weight="900" fill="#ffffff" letter-spacing="1">
+    <textPath href="#textRight" startOffset="50%" text-anchor="middle">BUDI UTOMO</textPath>
+  </text>
+
+  <!-- Inner "INSAN" small text at top -->
+  <text x="100" y="52" fill="#9e9e9e" font-size="10" font-family="'Inter', sans-serif" font-weight="900" letter-spacing="4" text-anchor="middle">INSAN</text>
+
+  <!-- Core bold initials "IBU" -->
+  <text x="100" y="118" font-size="44" font-family="'Impact', 'Arial Black', sans-serif" font-weight="950" text-anchor="middle" letter-spacing="-1">
+    <tspan fill="#d35400">I</tspan>
+    <tspan fill="#0d113a">B</tspan>
+    <tspan fill="#2563eb">U</tspan>
+  </text>
+</svg>

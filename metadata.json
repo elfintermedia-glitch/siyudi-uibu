@@ -1,0 +1,6 @@
+{
+  "name": "SiYudi UIBU",
+  "description": "Aplikasi kelulusan, pendaftaran yudisium, dan wisuda mahasiswa dengan pendaftaran terintegrasi basis data akademik excel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
