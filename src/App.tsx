@@ -78,20 +78,36 @@ export default function App() {
       setLoginError('NIM wajib diisi untuk masuk!');
       return;
     }
-
-    const found = state.students.find(s => s.nim === studentNimInput.trim());
-    if (found) {
-      const expectedPassword = found.password || 'kebudiutamaan';
-      if (studentPasswordInput.trim() === expectedPassword) {
-        setCurrentStudent(found);
-        setActiveRole('student');
-        setLoginError(null);
-      } else {
-        setLoginError('Password mahasiswa salah!');
-      }
-    } else {
-      setLoginError(`NIM "${studentNimInput}" tidak terdaftar di database akademik! Hubungi Program Studi/Fakultas anda.`);
+    if (!studentPasswordInput.trim()) {
+      setLoginError('Password wajib diisi!');
+      return;
     }
+
+    fetch('/api/student/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nim: studentNimInput.trim(),
+        password: studentPasswordInput.trim()
+      })
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Autentikasi gagal.');
+        }
+        return data;
+      })
+      .then(data => {
+        if (data.success && data.student) {
+          setCurrentStudent(data.student);
+          setActiveRole('student');
+          setLoginError(null);
+        }
+      })
+      .catch(err => {
+        setLoginError(err.message || 'Terjadi kesalahan saat masuk.');
+      });
   };
 
   const handleAdminLoginSubmit = (e: React.FormEvent) => {

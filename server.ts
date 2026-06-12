@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { notInArray } from 'drizzle-orm';
+import { notInArray, eq } from 'drizzle-orm';
 import { db, pool } from './src/db/index.ts';
 import { students, yudisiumRegistrations, wisudaRegistrations, adminUsers } from './src/db/schema.ts';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './src/utils/dummyData.ts';
@@ -61,6 +61,7 @@ const memoryDb = {
         keterangan: s.keterangan || null,
         email: s.email || null,
         noHp: s.noHp || null,
+        password: s.password || 'kebudiutamaan',
         dataVerified: s.dataVerified || false,
         academicApproved: s.academicApproved || false,
         academicRejected: s.academicRejected || false,
@@ -130,6 +131,7 @@ const memoryDb = {
       keterangan: std.keterangan || null,
       email: std.email || null,
       noHp: std.noHp || null,
+      password: std.password || 'kebudiutamaan',
       dataVerified: std.dataVerified || false,
       academicApproved: std.academicApproved || false,
       academicRejected: std.academicRejected || false,
@@ -178,6 +180,7 @@ async function initializeTables() {
         \`keterangan\` TEXT NULL,
         \`email\` VARCHAR(255) NULL,
         \`no_hp\` VARCHAR(50) NULL,
+        \`password\` VARCHAR(255) NOT NULL DEFAULT 'kebudiutamaan',
         \`data_verified\` BOOLEAN DEFAULT FALSE,
         \`academic_approved\` BOOLEAN DEFAULT FALSE,
         \`academic_rejected\` BOOLEAN DEFAULT FALSE,
@@ -187,6 +190,14 @@ async function initializeTables() {
         PRIMARY KEY (\`nim\`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    // Migrate existing table to add password if not present
+    try {
+      await pool.query(`ALTER TABLE \`students\` ADD COLUMN \`password\` VARCHAR(255) NOT NULL DEFAULT 'kebudiutamaan'`);
+      console.log('Successfully added password column to existing "students" table!');
+    } catch (e: any) {
+      // Column probably already exists, which is expected on subsequent runs
+    }
 
     // 2. admin_users Table
     await pool.query(`
@@ -280,6 +291,7 @@ async function seedDatabaseIfEmpty() {
           keterangan: std.keterangan || null,
           email: std.email || null,
           noHp: std.noHp || null,
+          password: std.password || 'kebudiutamaan',
           dataVerified: std.dataVerified || false,
           academicApproved: std.academicApproved || false,
           academicRejected: std.academicRejected || false,
@@ -790,6 +802,7 @@ async function startServer() {
               keterangan: std.keterangan || null,
               email: std.email || null,
               noHp: std.noHp || null,
+              password: std.password || 'kebudiutamaan',
               dataVerified: std.dataVerified || false,
               academicApproved: std.academicApproved || false,
               academicRejected: std.academicRejected || false,
@@ -809,6 +822,7 @@ async function startServer() {
                 keterangan: std.keterangan || null,
                 email: std.email || null,
                 noHp: std.noHp || null,
+                password: std.password || 'kebudiutamaan',
                 dataVerified: std.dataVerified || false,
                 academicApproved: std.academicApproved || false,
                 academicRejected: std.academicRejected || false,
@@ -927,6 +941,44 @@ async function startServer() {
     }
   });
 
+  // Student login verification against database (MySQL / memoryDb)
+  app.post('/api/student/login', async (req, res) => {
+    try {
+      const { nim, password } = req.body;
+      if (!nim) {
+        return res.status(400).json({ error: 'NIM wajib diisi!' });
+      }
+      if (!password) {
+        return res.status(400).json({ error: 'Password wajib diisi!' });
+      }
+
+      let studentRecord;
+      if (isDatabaseAvailable) {
+        // Query directly from MySQL table
+        const results = await db.select().from(students).where(eq(students.nim, nim.trim()));
+        studentRecord = results[0];
+      } else {
+        // Find in memoryDb
+        studentRecord = memoryDb.getStudents().find(s => s.nim === nim.trim());
+      }
+
+      if (!studentRecord) {
+        return res.status(404).json({ error: `NIM "${nim}" tidak terdaftar di database akademik! Hubungi Program Studi/Fakultas anda.` });
+      }
+
+      // Default password fallback: 'kebudiutamaan'
+      const expectedPassword = studentRecord.password || 'kebudiutamaan';
+      if (password.trim() !== expectedPassword.trim()) {
+        return res.status(401).json({ error: 'Password mahasiswa salah!' });
+      }
+
+      res.json({ success: true, student: studentRecord });
+    } catch (err: any) {
+      console.error('Error student login:', err);
+      res.status(500).json({ error: 'Terjadi kegagalan sistem saat memverifikasi login.', details: err.message });
+    }
+  });
+
   // Update a single student profile
   app.post('/api/students/profile', async (req, res) => {
     try {
@@ -950,6 +1002,7 @@ async function startServer() {
             keterangan: std.keterangan || null,
             email: std.email || null,
             noHp: std.noHp || null,
+            password: std.password || 'kebudiutamaan',
             dataVerified: std.dataVerified || false,
             academicApproved: std.academicApproved || false,
             academicRejected: std.academicRejected || false,
@@ -969,6 +1022,7 @@ async function startServer() {
               keterangan: std.keterangan || null,
               email: std.email || null,
               noHp: std.noHp || null,
+              password: std.password || 'kebudiutamaan',
               dataVerified: std.dataVerified || false,
               academicApproved: std.academicApproved || false,
               academicRejected: std.academicRejected || false,
