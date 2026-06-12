@@ -10,6 +10,7 @@ export interface StudentAcademic {
   keterangan?: string;
   email?: string;
   noHp?: string;
+  password?: string;
   dataVerified?: boolean;
   academicApproved?: boolean;
   academicRejected?: boolean;

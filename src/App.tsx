@@ -60,7 +60,7 @@ export default function App() {
       setCurrentStudent(found);
       setActiveRole('student');
       setStudentNimInput(found.nim);
-      setStudentPasswordInput('sukses'); // default
+      setStudentPasswordInput(found.password || 'kebudiutamaan');
       setLoginError(null);
     }
   };
@@ -68,18 +68,22 @@ export default function App() {
   const handleStudentLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentNimInput.trim()) {
-      setLoginError('USERNAME wajib diisi untuk masuk!');
+      setLoginError('NIM wajib diisi untuk masuk!');
       return;
     }
 
     const found = state.students.find(s => s.nim === studentNimInput.trim());
     if (found) {
-      // Allow general access using simple password (NIM as default or anything)
-      setCurrentStudent(found);
-      setActiveRole('student');
-      setLoginError(null);
+      const expectedPassword = found.password || 'kebudiutamaan';
+      if (studentPasswordInput.trim() === expectedPassword) {
+        setCurrentStudent(found);
+        setActiveRole('student');
+        setLoginError(null);
+      } else {
+        setLoginError('Password mahasiswa salah!');
+      }
     } else {
-      setLoginError(`USERNAME "${studentNimInput}" tidak terdaftar di database akademik! Hubungi admin untuk mengimpor dari data Excel.`);
+      setLoginError(`NIM "${studentNimInput}" tidak terdaftar di database akademik! Hubungi Program Studi/Fakultas anda.`);
     }
   };
 
@@ -448,10 +452,11 @@ export default function App() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD</label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD <span className="text-rose-500">*</span></label>
                         <input
                           id="input-password-student"
                           type="password"
+                          required
                           value={studentPasswordInput}
                           onChange={(e) => setStudentPasswordInput(e.target.value)}
                           placeholder="••••••••"

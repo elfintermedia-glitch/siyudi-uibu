@@ -15,6 +15,7 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     noHp: '081234567801',
     dataVerified: true,
     academicApproved: false,
+    password: 'kebudiutamaan',
     ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_budi.pdf', fileSize: '145 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'pending' },
     ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_budi.pdf', fileSize: '390 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'pending' }
   },
@@ -32,6 +33,7 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     noHp: '081234567802',
     dataVerified: true,
     academicApproved: true,
+    password: 'kebudiutamaan',
     ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_siti_rahma.pdf', fileSize: '180 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
     ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_siti.pdf', fileSize: '450 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
   },
@@ -49,6 +51,7 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     noHp: '081234567803',
     dataVerified: true,
     academicApproved: true,
+    password: 'kebudiutamaan',
     ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_michael.pdf', fileSize: '192 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
     ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_michael.pdf', fileSize: '410 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
   },
@@ -65,7 +68,8 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     email: 'ahmad.fauzi@univ.ac.id',
     noHp: '0812345567804',
     dataVerified: false,
-    academicApproved: false
+    academicApproved: false,
+    password: 'kebudiutamaan'
   },
   {
     nim: '120140301',
@@ -81,6 +85,7 @@ export const INITIAL_STUDENTS: StudentAcademic[] = [
     noHp: '081234567805',
     dataVerified: true,
     academicApproved: true,
+    password: 'kebudiutamaan',
     ktpDoc: { id: 'ktp', name: 'Kartu Tanda Penduduk', fileName: 'ktp_diana.pdf', fileSize: '175 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' },
     ijazahSmaDoc: { id: 'ijazah', name: 'Ijazah SMA / Sederajat', fileName: 'ijazah_sma_diana.pdf', fileSize: '430 KB', fileData: 'data:application/pdf;base64,JVBERi0xLjQKJ...', status: 'disetujui' }
   }

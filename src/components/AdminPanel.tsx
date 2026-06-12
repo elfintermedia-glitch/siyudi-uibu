@@ -128,7 +128,7 @@ export default function AdminPanel({
 
   const [studentForm, setStudentForm] = useState<Partial<StudentAcademic>>({
     nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan', programStudi: 'Pendidikan Matematika',
-    statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: ''
+    statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: '', password: 'kebudiutamaan'
   });
 
   // Expandable row states for submissions
@@ -157,6 +157,11 @@ export default function AdminPanel({
       return;
     }
 
+    const payload: StudentAcademic = {
+      password: 'kebudiutamaan',
+      ...studentForm
+    } as StudentAcademic;
+
     if (isAddingStudent) {
       if (state.students.some(s => s.nim === studentForm.nim)) {
         alert('Mahasiswa dengan NIM tersebut sudah terdaftar di sistem!');
@@ -166,7 +171,7 @@ export default function AdminPanel({
         alert(`Batal menambah: Mahasiswa dengan NIK "${studentForm.nik}" sudah terdaftar di sistem!`);
         return;
       }
-      onUpdateStudents([...state.students, studentForm as StudentAcademic]);
+      onUpdateStudents([...state.students, payload]);
       setIsAddingStudent(false);
     } else if (editingStudent) {
       if (state.students.some(s => s.nim !== editingStudent.nim && s.nik === studentForm.nik)) {
@@ -174,7 +179,7 @@ export default function AdminPanel({
         return;
       }
       const updatedList = state.students.map(s => 
-        s.nim === editingStudent.nim ? { ...s, ...studentForm } as StudentAcademic : s
+        s.nim === editingStudent.nim ? ({ ...s, ...studentForm } as StudentAcademic) : s
       );
       onUpdateStudents(updatedList);
       setEditingStudent(null);
@@ -182,13 +187,13 @@ export default function AdminPanel({
 
     setStudentForm({
       nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan', programStudi: 'Pendidikan Matematika',
-      statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: ''
+      statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: '', password: 'kebudiutamaan'
     });
   };
 
   const handleStartEdit = (stu: StudentAcademic) => {
     setEditingStudent(stu);
-    setStudentForm({ ...stu });
+    setStudentForm({ password: 'kebudiutamaan', ...stu });
     setIsAddingStudent(false);
   };
 
@@ -1869,6 +1874,18 @@ export default function AdminPanel({
                       <option value="Lulus">Lulus (Berhak Yudisium)</option>
                       <option value="Belum Lulus">Belum Lulus (Ujian Ditahan)</option>
                     </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label>Password Akun <span className="text-indigo-600 font-bold">*</span></label>
+                    <input
+                      id="form-password"
+                      type="text"
+                      value={studentForm.password || ''}
+                      onChange={(e) => setStudentForm(prev => ({ ...prev, password: e.target.value }))}
+                      className="p-2 border bg-white rounded-lg focus:outline-none focus:border-indigo-500 font-mono"
+                      placeholder="Contoh: kebudiutamaan"
+                    />
                   </div>
 
                   <div className="flex flex-col gap-1 md:col-span-2">

@@ -218,7 +218,8 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           statusKelulusan,
           keterangan: keterangan || (statusKelulusan === 'Lulus' ? 'Memenuhi syarat kelulusan' : 'Belum memenuhi syarat SKS'),
           email,
-          noHp
+          noHp,
+          password: 'kebudiutamaan'
         };
       });
 
@@ -274,7 +275,8 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         statusKelulusan: 'Lulus',
         keterangan: 'Memenuhi syarat kelulusan akademik secara penuh',
         email: 'rian.hidayat@univ.ac.id',
-        noHp: '085277884422'
+        noHp: '085277884422',
+        password: 'kebudiutamaan'
       },
       {
         nim: '120140888',
@@ -287,7 +289,8 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         statusKelulusan: 'Belum Lulus',
         keterangan: 'Skripsi belum selesai diunggah.',
         email: 'suryani@univ.ac.id',
-        noHp: '089912345678'
+        noHp: '089912345678',
+        password: 'kebudiutamaan'
       },
       {
         nim: '120140777',
@@ -300,7 +303,8 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         statusKelulusan: 'Lulus',
         keterangan: 'Memenuhi syarat kelulusan akademik',
         email: 'farhan.m@univ.ac.id',
-        noHp: '081242421212'
+        noHp: '081242421212',
+        password: 'kebudiutamaan'
       }
     ];
     onImport(mockData);
