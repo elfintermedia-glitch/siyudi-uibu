@@ -10,6 +10,157 @@ import { promisify } from 'util';
 
 const execPromise = promisify(exec);
 
+// In-Memory Database Fallback Configuration
+let isDatabaseAvailable = false;
+
+const memoryStore = {
+  students: [] as any[],
+  yudisiumRegistrations: [] as any[],
+  wisudaRegistrations: [] as any[],
+  adminUsers: [] as any[],
+};
+
+function initializeMemoryStore() {
+  memoryStore.students = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+  memoryStore.adminUsers = JSON.parse(JSON.stringify(INITIAL_ADMIN_USERS));
+  
+  memoryStore.yudisiumRegistrations = Object.values(INITIAL_YUDISIUMS).map(y => JSON.parse(JSON.stringify(y)));
+  memoryStore.wisudaRegistrations = Object.values(INITIAL_WISUDAS).map(w => JSON.parse(JSON.stringify(w)));
+}
+initializeMemoryStore();
+
+const memoryDb = {
+  getStudents: () => memoryStore.students,
+  getYudisiums: () => memoryStore.yudisiumRegistrations,
+  getWisudas: () => memoryStore.wisudaRegistrations,
+  getAdmins: () => memoryStore.adminUsers,
+
+  reset: () => {
+    initializeMemoryStore();
+  },
+
+  syncStudents: (incoming: any[]) => {
+    const incomingNims = incoming.map(s => s.nim);
+    if (incomingNims.length > 0) {
+      memoryStore.students = memoryStore.students.filter(s => incomingNims.includes(s.nim));
+    } else {
+      memoryStore.students = [];
+    }
+
+    for (const s of incoming) {
+      const idx = memoryStore.students.findIndex(x => x.nim === s.nim);
+      const cleanStudent = {
+        nim: s.nim,
+        nik: s.nik,
+        nama: s.nama,
+        tempatLahir: s.tempatLahir,
+        tanggalLahir: s.tanggalLahir,
+        fakultas: s.fakultas,
+        programStudi: s.programStudi,
+        statusKelulusan: s.statusKelulusan,
+        keterangan: s.keterangan || null,
+        email: s.email || null,
+        noHp: s.noHp || null,
+        dataVerified: s.dataVerified || false,
+        academicApproved: s.academicApproved || false,
+        academicRejected: s.academicRejected || false,
+        academicRejectionReason: s.academicRejectionReason || null,
+        ktpDoc: s.ktpDoc || null,
+        ijazahSmaDoc: s.ijazahSmaDoc || null,
+      };
+      if (idx !== -1) {
+        memoryStore.students[idx] = cleanStudent;
+      } else {
+        memoryStore.students.push(cleanStudent);
+      }
+    }
+  },
+
+  upsertYudisium: (y: any) => {
+    const idx = memoryStore.yudisiumRegistrations.findIndex(x => x.nim === y.nim);
+    const cleanYudisium = {
+      nim: y.nim,
+      judulSkripsi: y.judulSkripsi,
+      pembimbing1: y.pembimbing1,
+      pembimbing2: y.pembimbing2,
+      tanggalLulus: y.tanggalLulus,
+      registeredAt: y.registeredAt,
+      status: y.status,
+      rejectionReason: y.rejectionReason || null,
+      documents: y.documents || null,
+    };
+    if (idx !== -1) {
+      memoryStore.yudisiumRegistrations[idx] = cleanYudisium;
+    } else {
+      memoryStore.yudisiumRegistrations.push(cleanYudisium);
+    }
+  },
+
+  upsertWisuda: (w: any) => {
+    const idx = memoryStore.wisudaRegistrations.findIndex(x => x.nim === w.nim);
+    const cleanWisuda = {
+      nim: w.nim,
+      ukuranToga: w.ukuranToga,
+      namaAyah: w.namaAyah,
+      namaIbu: w.namaIbu,
+      noHpOrtu: w.noHpOrtu,
+      alamatPengiriman: w.alamatPengiriman,
+      registeredAt: w.registeredAt,
+      status: w.status,
+      rejectionReason: w.rejectionReason || null,
+    };
+    if (idx !== -1) {
+      memoryStore.wisudaRegistrations[idx] = cleanWisuda;
+    } else {
+      memoryStore.wisudaRegistrations.push(cleanWisuda);
+    }
+  },
+
+  upsertStudentProfile: (std: any) => {
+    const idx = memoryStore.students.findIndex(x => x.nim === std.nim);
+    const cleanStudent = {
+      nim: std.nim,
+      nik: std.nik,
+      nama: std.nama,
+      tempatLahir: std.tempatLahir,
+      tanggalLahir: std.tanggalLahir,
+      fakultas: std.fakultas,
+      programStudi: std.programStudi,
+      statusKelulusan: std.statusKelulusan,
+      keterangan: std.keterangan || null,
+      email: std.email || null,
+      noHp: std.noHp || null,
+      dataVerified: std.dataVerified || false,
+      academicApproved: std.academicApproved || false,
+      academicRejected: std.academicRejected || false,
+      academicRejectionReason: std.academicRejectionReason || null,
+      ktpDoc: std.ktpDoc || null,
+      ijazahSmaDoc: std.ijazahSmaDoc || null,
+    };
+    if (idx !== -1) {
+      memoryStore.students[idx] = cleanStudent;
+    } else {
+      memoryStore.students.push(cleanStudent);
+    }
+  },
+
+  upsertAdminUser: (adm: any) => {
+    const idx = memoryStore.adminUsers.findIndex(x => x.username === adm.username);
+    const cleanAdmin = {
+      id: adm.id,
+      nama: adm.nama,
+      username: adm.username,
+      password: adm.password,
+      role: adm.role,
+    };
+    if (idx !== -1) {
+      memoryStore.adminUsers[idx] = cleanAdmin;
+    } else {
+      memoryStore.adminUsers.push(cleanAdmin);
+    }
+  },
+};
+
 async function initializeTables() {
   try {
     console.log('Verifying or creating MySQL database tables...');
@@ -87,12 +238,19 @@ async function initializeTables() {
     console.log('Database tables verified/created successfully!');
   } catch (err: any) {
     console.error('Failed to initialize database tables:', err.message);
+    throw err;
   }
 }
 
 async function seedDatabaseIfEmpty() {
   try {
     await initializeTables();
+    
+    // Check connection with active query
+    await pool.query('SELECT 1');
+    isDatabaseAvailable = true;
+    console.log('--- DATABASE CONNECTION SUCCESSFUL! Running with true MySQL backend. ---');
+
     const existingAdmins = await db.select().from(adminUsers);
     if (existingAdmins.length === 0) {
       console.log('Database is empty. Seeding initial data...');
@@ -167,8 +325,11 @@ async function seedDatabaseIfEmpty() {
     } else {
       console.log('Database contains existing records. Skipping seed.');
     }
-  } catch (err) {
-    console.error('Failed to seed database:', err);
+  } catch (err: any) {
+    isDatabaseAvailable = false;
+    console.warn('--- DATABASE CONNECTION TO REAL MYSQL FAILED ---');
+    console.warn('Reason:', err.message);
+    console.warn('>>> Falling back to high-fidelity In-Memory Database for preview sandbox. <<<');
   }
 }
 
@@ -342,10 +503,18 @@ async function startServer() {
   // Export full MySQL-compatible SQL database dump
   app.get('/api/export-sql', async (req, res) => {
     try {
-      const allStudents = await db.select().from(students);
-      const allYudisiums = await db.select().from(yudisiumRegistrations);
-      const allWisudas = await db.select().from(wisudaRegistrations);
-      const allAdmins = await db.select().from(adminUsers);
+      let allStudents, allYudisiums, allWisudas, allAdmins;
+      if (isDatabaseAvailable) {
+        allStudents = await db.select().from(students);
+        allYudisiums = await db.select().from(yudisiumRegistrations);
+        allWisudas = await db.select().from(wisudaRegistrations);
+        allAdmins = await db.select().from(adminUsers);
+      } else {
+        allStudents = memoryDb.getStudents();
+        allYudisiums = memoryDb.getYudisiums();
+        allWisudas = memoryDb.getWisudas();
+        allAdmins = memoryDb.getAdmins();
+      }
 
       let sql = `-- ========================================================\n`;
       sql += `-- Yudisium & Wisuda Portal - MySQL Database Dump\n`;
@@ -527,14 +696,18 @@ async function startServer() {
   // Reset database state back to scratch
   app.post('/api/reset', async (req, res) => {
     try {
-      // Delete child records first to honor constraints
-      await db.delete(wisudaRegistrations);
-      await db.delete(yudisiumRegistrations);
-      await db.delete(students);
-      await db.delete(adminUsers);
+      if (isDatabaseAvailable) {
+        // Delete child records first to honor constraints
+        await db.delete(wisudaRegistrations);
+        await db.delete(yudisiumRegistrations);
+        await db.delete(students);
+        await db.delete(adminUsers);
 
-      // Trigger seed logic
-      await seedDatabaseIfEmpty();
+        // Trigger seed logic
+        await seedDatabaseIfEmpty();
+      } else {
+        memoryDb.reset();
+      }
       res.json({ message: 'Database reset and seeded successfully' });
     } catch (err: any) {
       console.error('Error resetting database:', err);
@@ -558,17 +731,25 @@ async function startServer() {
   // Get full state of system
   app.get('/api/state', async (req, res) => {
     try {
-      const allStudents = await db.select().from(students);
-      const allYudisiums = await db.select().from(yudisiumRegistrations);
-      const allWisudas = await db.select().from(wisudaRegistrations);
-      const allAdmins = await db.select().from(adminUsers);
+      let allStudents, allYudisiums, allWisudas, allAdmins;
+      if (isDatabaseAvailable) {
+        allStudents = await db.select().from(students);
+        allYudisiums = await db.select().from(yudisiumRegistrations);
+        allWisudas = await db.select().from(wisudaRegistrations);
+        allAdmins = await db.select().from(adminUsers);
+      } else {
+        allStudents = memoryDb.getStudents();
+        allYudisiums = memoryDb.getYudisiums();
+        allWisudas = memoryDb.getWisudas();
+        allAdmins = memoryDb.getAdmins();
+      }
 
-      const yudisiumApps: Record<string, typeof yudisiumRegistrations.$inferSelect> = {};
+      const yudisiumApps: Record<string, any> = {};
       allYudisiums.forEach((y) => {
         yudisiumApps[y.nim] = y;
       });
 
-      const wisudaApps: Record<string, typeof wisudaRegistrations.$inferSelect> = {};
+      const wisudaApps: Record<string, any> = {};
       allWisudas.forEach((w) => {
         wisudaApps[w.nim] = w;
       });
@@ -590,8 +771,169 @@ async function startServer() {
     try {
       const incomingStudents = req.body.students || [];
 
-      // Bulk upsert one by one to ensure safety
-      for (const std of incomingStudents) {
+      if (isDatabaseAvailable) {
+        // Bulk upsert one by one to ensure safety
+        for (const std of incomingStudents) {
+          await db
+            .insert(students)
+            .values({
+              nim: std.nim,
+              nik: std.nik,
+              nama: std.nama,
+              tempatLahir: std.tempatLahir,
+              tanggalLahir: std.tanggalLahir,
+              fakultas: std.fakultas,
+              programStudi: std.programStudi,
+              statusKelulusan: std.statusKelulusan,
+              keterangan: std.keterangan || null,
+              email: std.email || null,
+              noHp: std.noHp || null,
+              dataVerified: std.dataVerified || false,
+              academicApproved: std.academicApproved || false,
+              academicRejected: std.academicRejected || false,
+              academicRejectionReason: std.academicRejectionReason || null,
+              ktpDoc: std.ktpDoc || null,
+              ijazahSmaDoc: std.ijazahSmaDoc || null,
+            })
+            .onDuplicateKeyUpdate({
+              set: {
+                nik: std.nik,
+                nama: std.nama,
+                tempatLahir: std.tempatLahir,
+                tanggalLahir: std.tanggalLahir,
+                fakultas: std.fakultas,
+                programStudi: std.programStudi,
+                statusKelulusan: std.statusKelulusan,
+                keterangan: std.keterangan || null,
+                email: std.email || null,
+                noHp: std.noHp || null,
+                dataVerified: std.dataVerified || false,
+                academicApproved: std.academicApproved || false,
+                academicRejected: std.academicRejected || false,
+                academicRejectionReason: std.academicRejectionReason || null,
+                ktpDoc: std.ktpDoc || null,
+                ijazahSmaDoc: std.ijazahSmaDoc || null,
+              },
+            });
+        }
+
+        // Delete students and cascade associations for any student not included in the payload
+        const incomingNims = incomingStudents.map((s: any) => s.nim);
+        if (incomingNims.length > 0) {
+          await db.delete(students).where(notInArray(students.nim, incomingNims));
+        } else {
+          await db.delete(students);
+        }
+      } else {
+        memoryDb.syncStudents(incomingStudents);
+      }
+
+      res.json({ message: 'Synced student list successfully' });
+    } catch (err: any) {
+      console.error('Error syncing students:', err);
+      res.status(500).json({ error: 'Failed to sync students list', details: err.message });
+    }
+  });
+
+  // Submit or update a single yudisium app
+  app.post('/api/yudisium', async (req, res) => {
+    try {
+      const y = req.body;
+      if (!y.nim) {
+        return res.status(400).json({ error: 'Student NIM is required.' });
+      }
+
+      if (isDatabaseAvailable) {
+        await db
+          .insert(yudisiumRegistrations)
+          .values({
+            nim: y.nim,
+            judulSkripsi: y.judulSkripsi,
+            pembimbing1: y.pembimbing1,
+            pembimbing2: y.pembimbing2,
+            tanggalLulus: y.tanggalLulus,
+            registeredAt: y.registeredAt,
+            status: y.status,
+            rejectionReason: y.rejectionReason || null,
+            documents: y.documents || null,
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              judulSkripsi: y.judulSkripsi,
+              pembimbing1: y.pembimbing1,
+              pembimbing2: y.pembimbing2,
+              tanggalLulus: y.tanggalLulus,
+              registeredAt: y.registeredAt,
+              status: y.status,
+              rejectionReason: y.rejectionReason || null,
+              documents: y.documents || null,
+            },
+          });
+      } else {
+        memoryDb.upsertYudisium(y);
+      }
+
+      res.json({ message: 'Yudisium registration saved successfully' });
+    } catch (err: any) {
+      console.error('Error storing yudisium registration:', err);
+      res.status(500).json({ error: 'Failed to save yudisium registration', details: err.message });
+    }
+  });
+
+  // Submit or update a single wisuda registration
+  app.post('/api/wisuda', async (req, res) => {
+    try {
+      const w = req.body;
+      if (!w.nim) {
+        return res.status(400).json({ error: 'Student NIM is required.' });
+      }
+
+      if (isDatabaseAvailable) {
+        await db
+          .insert(wisudaRegistrations)
+          .values({
+            nim: w.nim,
+            ukuranToga: w.ukuranToga,
+            namaAyah: w.namaAyah,
+            namaIbu: w.namaIbu,
+            noHpOrtu: w.noHpOrtu,
+            alamatPengiriman: w.alamatPengiriman,
+            registeredAt: w.registeredAt,
+            status: w.status,
+            rejectionReason: w.rejectionReason || null,
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              ukuranToga: w.ukuranToga,
+              namaAyah: w.namaAyah,
+              namaIbu: w.namaIbu,
+              noHpOrtu: w.noHpOrtu,
+              alamatPengiriman: w.alamatPengiriman,
+              registeredAt: w.registeredAt,
+              status: w.status,
+              rejectionReason: w.rejectionReason || null,
+            },
+          });
+      } else {
+        memoryDb.upsertWisuda(w);
+      }
+
+      res.json({ message: 'Wisuda registration saved successfully' });
+    } catch (err: any) {
+      console.error('Error storing wisuda registration:', err);
+      res.status(500).json({ error: 'Failed to save wisuda registration', details: err.message });
+    }
+  });
+
+  // Update a single student profile
+  app.post('/api/students/profile', async (req, res) => {
+    try {
+      const std = req.body;
+      if (!std.nim) {
+        return res.status(455).json({ error: 'Student NIM is required.' });
+      }
+
+      if (isDatabaseAvailable) {
         await db
           .insert(students)
           .values({
@@ -633,154 +975,9 @@ async function startServer() {
               ijazahSmaDoc: std.ijazahSmaDoc || null,
             },
           });
-      }
-
-      // Delete students and cascade associations for any student not included in the payload
-      const incomingNims = incomingStudents.map((s: any) => s.nim);
-      if (incomingNims.length > 0) {
-        await db.delete(students).where(notInArray(students.nim, incomingNims));
       } else {
-        await db.delete(students);
+        memoryDb.upsertStudentProfile(std);
       }
-
-      res.json({ message: 'Synced student list successfully' });
-    } catch (err: any) {
-      console.error('Error syncing students:', err);
-      res.status(500).json({ error: 'Failed to sync students list', details: err.message });
-    }
-  });
-
-  // Submit or update a single yudisium app
-  app.post('/api/yudisium', async (req, res) => {
-    try {
-      const y = req.body;
-      if (!y.nim) {
-        return res.status(400).json({ error: 'Student NIM is required.' });
-      }
-
-      await db
-        .insert(yudisiumRegistrations)
-        .values({
-          nim: y.nim,
-          judulSkripsi: y.judulSkripsi,
-          pembimbing1: y.pembimbing1,
-          pembimbing2: y.pembimbing2,
-          tanggalLulus: y.tanggalLulus,
-          registeredAt: y.registeredAt,
-          status: y.status,
-          rejectionReason: y.rejectionReason || null,
-          documents: y.documents || null,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
-            judulSkripsi: y.judulSkripsi,
-            pembimbing1: y.pembimbing1,
-            pembimbing2: y.pembimbing2,
-            tanggalLulus: y.tanggalLulus,
-            registeredAt: y.registeredAt,
-            status: y.status,
-            rejectionReason: y.rejectionReason || null,
-            documents: y.documents || null,
-          },
-        });
-
-      res.json({ message: 'Yudisium registration saved successfully' });
-    } catch (err: any) {
-      console.error('Error storing yudisium registration:', err);
-      res.status(500).json({ error: 'Failed to save yudisium registration', details: err.message });
-    }
-  });
-
-  // Submit or update a single wisuda registration
-  app.post('/api/wisuda', async (req, res) => {
-    try {
-      const w = req.body;
-      if (!w.nim) {
-        return res.status(400).json({ error: 'Student NIM is required.' });
-      }
-
-      await db
-        .insert(wisudaRegistrations)
-        .values({
-          nim: w.nim,
-          ukuranToga: w.ukuranToga,
-          namaAyah: w.namaAyah,
-          namaIbu: w.namaIbu,
-          noHpOrtu: w.noHpOrtu,
-          alamatPengiriman: w.alamatPengiriman,
-          registeredAt: w.registeredAt,
-          status: w.status,
-          rejectionReason: w.rejectionReason || null,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
-            ukuranToga: w.ukuranToga,
-            namaAyah: w.namaAyah,
-            namaIbu: w.namaIbu,
-            noHpOrtu: w.noHpOrtu,
-            alamatPengiriman: w.alamatPengiriman,
-            registeredAt: w.registeredAt,
-            status: w.status,
-            rejectionReason: w.rejectionReason || null,
-          },
-        });
-
-      res.json({ message: 'Wisuda registration saved successfully' });
-    } catch (err: any) {
-      console.error('Error storing wisuda registration:', err);
-      res.status(500).json({ error: 'Failed to save wisuda registration', details: err.message });
-    }
-  });
-
-  // Update a single student profile
-  app.post('/api/students/profile', async (req, res) => {
-    try {
-      const std = req.body;
-      if (!std.nim) {
-        return res.status(455).json({ error: 'Student NIM is required.' });
-      }
-
-      await db
-        .insert(students)
-        .values({
-          nim: std.nim,
-          nik: std.nik,
-          nama: std.nama,
-          tempatLahir: std.tempatLahir,
-          tanggalLahir: std.tanggalLahir,
-          fakultas: std.fakultas,
-          programStudi: std.programStudi,
-          statusKelulusan: std.statusKelulusan,
-          keterangan: std.keterangan || null,
-          email: std.email || null,
-          noHp: std.noHp || null,
-          dataVerified: std.dataVerified || false,
-          academicApproved: std.academicApproved || false,
-          academicRejected: std.academicRejected || false,
-          academicRejectionReason: std.academicRejectionReason || null,
-          ktpDoc: std.ktpDoc || null,
-          ijazahSmaDoc: std.ijazahSmaDoc || null,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
-            nik: std.nik,
-            nama: std.nama,
-            tempatLahir: std.tempatLahir,
-            tanggalLahir: std.tanggalLahir,
-            fakultas: std.fakultas,
-            programStudi: std.programStudi,
-            statusKelulusan: std.statusKelulusan,
-            keterangan: std.keterangan || null,
-            email: std.email || null,
-            noHp: std.noHp || null,
-            dataVerified: std.dataVerified || false,
-            academicApproved: std.academicApproved || false,
-            academicRejected: std.academicRejected || false,
-            academicRejectionReason: std.academicRejectionReason || null,
-            ktpDoc: std.ktpDoc || null,
-            ijazahSmaDoc: std.ijazahSmaDoc || null,
-          },
-        });
 
       res.json({ message: 'Student profile updated successfully' });
     } catch (err: any) {
@@ -797,22 +994,26 @@ async function startServer() {
         return res.status(400).json({ error: 'Username is required.' });
       }
 
-      await db
-        .insert(adminUsers)
-        .values({
-          id: adm.id,
-          nama: adm.nama,
-          username: adm.username,
-          password: adm.password,
-          role: adm.role,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
+      if (isDatabaseAvailable) {
+        await db
+          .insert(adminUsers)
+          .values({
+            id: adm.id,
             nama: adm.nama,
+            username: adm.username,
             password: adm.password,
             role: adm.role,
-          },
-         });
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              nama: adm.nama,
+              password: adm.password,
+              role: adm.role,
+            },
+           });
+      } else {
+        memoryDb.upsertAdminUser(adm);
+      }
 
       res.json({ message: 'Admin user saved successfully' });
     } catch (err: any) {
