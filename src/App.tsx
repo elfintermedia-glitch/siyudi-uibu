@@ -96,7 +96,7 @@ export default function App() {
       setCurrentAdmin(found);
       setLoginError(null);
     } else {
-      setLoginError('Username atau sandi admin salah! SIlakan gunakan akun simulasi yang terdaftar.');
+      setLoginError('Username atau password admin salah!');
     }
   };
 
@@ -393,10 +393,10 @@ export default function App() {
             </motion.div>
  
             {/* DUAL LOGIN FORMS */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            <div className="max-w-md mx-auto w-full">
               
-              {/* Form Card (8 Columns) */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:col-span-7">
+              {/* Form Card */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
                 <div className="flex bg-gray-50 border-b border-gray-200 p-1">
                   <button
                     id="tab-login-student"
@@ -495,15 +495,6 @@ export default function App() {
                         />
                       </div>
 
-                      <div className="p-3 bg-indigo-50 border border-indigo-150 rounded-lg text-[10px] text-gray-700 leading-relaxed font-semibold">
-                        <strong className="text-indigo-805 uppercase tracking-wider block mb-1">Simulasi Hak Akses Kampus:</strong>
-                        <ul className="space-y-1 list-disc list-inside">
-                          <li><span className="font-bold text-rose-700">Superadmin:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span></li>
-                          <li><span className="font-bold text-indigo-700">Akademik:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">admin</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">admin</span></li>
-                          <li><span className="font-bold text-amber-700">Keuangan:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span></li>
-                        </ul>
-                      </div>
-
                       <button
                         id="submit-admin-login"
                         type="submit"
@@ -513,87 +504,6 @@ export default function App() {
                       </button>
                     </form>
                   )}
-                </div>
-              </div>
-
-              {/* SIMULATION DIAGNOSTIC / ACCOUNT POOL (5 Columns for fast review) */}
-              <div className="space-y-4 md:col-span-5">
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-3.5">
-                  <div className="flex items-center gap-1.5 uppercase font-bold text-[10px] text-gray-400 font-sans tracking-wider">
-                    <Database className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Akun Contoh Simulasi Alur</span>
-                  </div>
-                  <p className="text-[11px] text-gray-500 leading-normal font-medium">
-                    Klik cepat akun di bawah untuk mensimulasikan status kelulusan dan siklus audit dokumen yang berbeda:
-                  </p>
-
-                  <div className="space-y-2">
-                    {/* Presets Grid */}
-                    {state.students.map((stu) => {
-                      const yApp = state.yudisiumApps[stu.nim];
-                      const wApp = state.wisudaApps[stu.nim];
-                      
-                      let badgeColor = "bg-gray-100 text-gray-650 border-gray-200";
-                      let stateLabel = "Belum Yudisium";
-                      
-                      if (stu.statusKelulusan !== 'Lulus') {
-                        badgeColor = "bg-rose-50 text-rose-700 border-rose-100";
-                        stateLabel = "Akademik Belum Lulus";
-                      } else if (wApp?.status === 'diajukan') {
-                        badgeColor = "bg-purple-50 text-purple-700 border-purple-150";
-                        stateLabel = "Daftar Wisuda";
-                      } else if (yApp?.status === 'disetujui') {
-                        badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-150";
-                        stateLabel = "Yudisium Approved!";
-                      } else if (yApp?.status === 'diajukan' || yApp?.status === 'diproses') {
-                        badgeColor = "bg-blue-50 text-blue-700 border-blue-150";
-                        stateLabel = "Audit Dokumen";
-                      } else if (yApp?.status === 'ditolak') {
-                        badgeColor = "bg-amber-50 text-amber-800 border-amber-150";
-                        stateLabel = "Yudisium Ditolak";
-                      }
-
-                      return (
-                        <div 
-                          key={stu.nim}
-                          onClick={() => handleQuickLogin(stu.nim)}
-                          className="p-2.5 border border-gray-250 hover:border-indigo-400 bg-gray-50/50 hover:bg-indigo-50/20 rounded-lg cursor-pointer transition-all flex items-center justify-between gap-3 group shrink-0"
-                        >
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">{stu.nama}</p>
-                            <p className="text-[10px] text-gray-400 font-mono mt-0.5">NIM {stu.nim} • {stu.programStudi}</p>
-                          </div>
-                          
-                          <div className="text-right shrink-0">
-                            <span className={`inline-block px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded border ${badgeColor}`}>
-                              {stateLabel}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="pt-2 border-t border-gray-100">
-                    <button
-                      id="reset-state-btn"
-                      onClick={handleClearDatabase}
-                      className="text-gray-400 hover:text-indigo-650 text-[10px] uppercase tracking-wider font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                    >
-                      Setel Ulang Portal Kembali Semula
-                    </button>
-                  </div>
-                </div>
-
-                {/* Additional Info Box */}
-                <div className="bg-indigo-900 text-indigo-100 p-4 rounded-xl border border-indigo-950 shadow-sm flex gap-3 text-xs leading-relaxed">
-                  <HelpIcon className="w-5 h-5 text-indigo-300 shrink-0 mt-0.5" />
-                  <div className="space-y-1 font-sans font-medium">
-                    <span className="font-bold text-white text-[11px] uppercase tracking-wider block">Validasi Berkas Pintar</span>
-                    <p className="text-[11px] opacity-90">
-                      Sistem ini memungkinkan mahasiswa mendaftar Yudisium beralur digital. Di panel admin, Anda dapat menyetujui/menolak berkas spesifik, dan merevisi catatan secara real-time.
-                    </p>
-                  </div>
                 </div>
               </div>
 
