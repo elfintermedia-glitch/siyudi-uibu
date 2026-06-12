@@ -397,34 +397,6 @@ export default function AdminPanel({
           )}
         </button>
         <button
-          id="tab-submissions"
-          onClick={() => setActiveTab('submissions')}
-          className={`px-4 py-1.5 text-xs uppercase tracking-wider font-bold transition-all rounded-md relative cursor-pointer ml-1 ${
-            activeTab === 'submissions' 
-              ? 'bg-indigo-600 text-white shadow-sm' 
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
-        >
-          Verifikasi Yudisium
-          {pendingYudisiums.length > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse border border-white" />
-          )}
-        </button>
-        <button
-          id="tab-wisuda-submissions"
-          onClick={() => setActiveTab('wisuda_submissions')}
-          className={`px-4 py-1.5 text-xs uppercase tracking-wider font-bold transition-all rounded-md relative cursor-pointer ml-1 ${
-            activeTab === 'wisuda_submissions' 
-              ? 'bg-indigo-600 text-white shadow-sm' 
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
-        >
-          Verifikasi Wisuda
-          {pendingWisudas.length > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-teal-500 animate-pulse border border-white" />
-          )}
-        </button>
-        <button
           id="tab-students"
           onClick={() => setActiveTab('students')}
           className={`px-4 py-1.5 text-xs uppercase tracking-wider font-bold transition-all rounded-md cursor-pointer ml-1 ${
