@@ -355,7 +355,8 @@ export default function FinancePanel({
                         const sppStatus = sppDoc ? sppDoc.status : 'belum_unggah';
 
                         let docSummaryStatus = 'Pending';
-                        if (totalDocs === 0) docSummaryStatus = 'Antrean Keuangan';
+                        if (app.status === 'disetujui') docSummaryStatus = 'Keuangan Sudah Lengkap';
+                        else if (totalDocs === 0) docSummaryStatus = 'Antrean Keuangan';
                         else if (approvedDocsCount === totalDocs) docSummaryStatus = 'Semua Acc';
                         else if (rejectedDocsCount > 0) docSummaryStatus = `${rejectedDocsCount} Ditolak`;
                         else if (uploadedDocsCount < totalDocs) docSummaryStatus = `${totalDocs - uploadedDocsCount} Belum Unggah`;
@@ -422,7 +423,11 @@ export default function FinancePanel({
                                 )}
                               </td>
                               <td className="p-3 text-center">
-                                {docSummaryStatus === 'Semua Acc' ? (
+                                {docSummaryStatus === 'Keuangan Sudah Lengkap' ? (
+                                  <span className="inline-block px-2 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    Keuangan Sudah Lengkap
+                                  </span>
+                                ) : docSummaryStatus === 'Semua Acc' ? (
                                   <span className="inline-block px-2 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                                     ✓ Semua Acc
                                   </span>
