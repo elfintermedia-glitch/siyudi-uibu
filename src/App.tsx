@@ -435,23 +435,20 @@ export default function App() {
                   {loginTab === 'student' ? (
                     <form onSubmit={handleStudentLoginSubmit} className="space-y-3.5">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">USERNAME <span className="text-rose-500">*</span></label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">NIM <span className="text-rose-500">*</span></label>
                         <input
                           id="input-nim-login"
                           type="text"
                           required
                           value={studentNimInput}
                           onChange={(e) => setStudentNimInput(e.target.value)}
-                          placeholder="Masukkan USERNAME (contoh: 120140085)"
+                          placeholder="Masukkan NIM (contoh: 120140085)"
                           className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD</label>
-                          <span className="text-[10px] text-gray-400">Gunakan sembarang password</span>
-                        </div>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD</label>
                         <input
                           id="input-password-student"
                           type="password"
@@ -473,7 +470,7 @@ export default function App() {
                   ) : (
                     <form onSubmit={handleAdminLoginSubmit} className="space-y-3.5 font-semibold">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Username Biro Akademik <span className="text-rose-500">*</span></label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Username <span className="text-rose-500">*</span></label>
                         <input
                           id="input-username-admin"
                           type="text"
@@ -486,7 +483,7 @@ export default function App() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Sandi Administrasi <span className="text-rose-500">*</span></label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD <span className="text-rose-500">*</span></label>
                         <input
                           id="input-password-admin"
                           type="password"
@@ -501,9 +498,9 @@ export default function App() {
                       <div className="p-3 bg-indigo-50 border border-indigo-150 rounded-lg text-[10px] text-gray-700 leading-relaxed font-semibold">
                         <strong className="text-indigo-805 uppercase tracking-wider block mb-1">Simulasi Hak Akses Kampus:</strong>
                         <ul className="space-y-1 list-disc list-inside">
-                          <li><span className="font-bold text-rose-700">Superadmin:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span> • Sandi <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span></li>
-                          <li><span className="font-bold text-indigo-700">Akademik:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">admin</span> • Sandi <span className="font-mono bg-white px-1 border rounded font-bold">admin</span></li>
-                          <li><span className="font-bold text-amber-700">Keuangan:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span> • Sandi <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span></li>
+                          <li><span className="font-bold text-rose-700">Superadmin:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">superadmin</span></li>
+                          <li><span className="font-bold text-indigo-700">Akademik:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">admin</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">admin</span></li>
+                          <li><span className="font-bold text-amber-700">Keuangan:</span> User <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span> • Password <span className="font-mono bg-white px-1 border rounded font-bold">keuangan</span></li>
                         </ul>
                       </div>
 
