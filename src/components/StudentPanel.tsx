@@ -1959,10 +1959,10 @@ export default function StudentPanel({
 
       {/* BUKTI VERIFIKASI LANGKAH 1 MODAL */}
       {showProofModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-150 max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto flex items-start justify-center z-50 p-4 sm:p-6">
+          <div className="relative bg-white rounded-2xl shadow-xl border border-slate-150 max-w-2xl w-full my-auto sm:my-8 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
             {/* Header */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50 rounded-t-2xl">
               <div className="flex items-center gap-2 text-emerald-950">
                 <span className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg">
                   <CheckCircle2 className="w-5 h-5" />
@@ -1981,7 +1981,7 @@ export default function StudentPanel({
             </div>
 
             {/* Content */}
-            <div className="p-6 max-h-[75vh] overflow-y-auto space-y-6">
+            <div className="p-6 space-y-6 flex-1">
               
               {/* Document Header (Kop Surat) */}
               <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
