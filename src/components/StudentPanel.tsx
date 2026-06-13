@@ -311,6 +311,471 @@ export default function StudentPanel({
     }
   };
 
+  const previewStep2PDF = async () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Colors
+      const primaryColor = [79, 70, 229]; // Indigo
+      const darkColor = [30, 41, 59];
+      const greyColor = [100, 116, 139];
+
+      const width = 210;
+      const height = 297;
+
+      // Draw border
+      doc.setDrawColor(224, 231, 255); // Indigo 100
+      doc.setLineWidth(1);
+      doc.rect(10, 10, width - 20, height - 20);
+
+      // Inner border
+      doc.setDrawColor(79, 70, 229);
+      doc.setLineWidth(0.3);
+      doc.rect(12, 12, width - 24, height - 24);
+
+      // Kop Surat
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(30, 41, 59);
+      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
+      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: bauk@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
+
+      // Separator line
+      doc.setDrawColor(30, 41, 59);
+      doc.setLineWidth(1);
+      doc.line(15, 38, width - 15, 38);
+      doc.setDrawColor(79, 70, 229);
+      doc.setLineWidth(0.5);
+      doc.line(15, 40, width - 15, 40);
+
+      // Document Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(79, 70, 229);
+      doc.text('SURAT KETERANGAN BEBAS ADMINISTRASI KEUANGAN & KELAYAKAN YUDISIUM', width / 2, 50, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Nomor Dokumen: BAUK/IBU-VAL2/${student.nim}/${new Date().getFullYear()}`, width / 2, 55, { align: 'center' });
+
+      // Statement
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Biro Administrasi Umum dan Keuangan (BAUK) Universitas Insan Budi Utomo Malang, menerangkan:', 20, 68);
+
+      // Student Metadata Table
+      const metadataStartY = 75;
+      const rowHeight = 7;
+      
+      const details = [
+        ['Nama Lengkap', `: ${student.nama}`],
+        ['NIM', `: ${student.nim}`],
+        ['NIK', `: ${student.nik || '- (Belum Diisi)'}`],
+        ['Tempat, Tanggal Lahir', `: ${student.tempatLahir && student.tanggalLahir ? `${student.tempatLahir}, ${student.tanggalLahir}` : '- (Belum Diisi)'}`],
+        ['Fakultas', `: ${student.fakultas}`],
+        ['Program Studi', `: ${student.programStudi}`],
+        ['Email Resmi', `: ${student.email || '-'}`],
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      details.forEach((item, index) => {
+        const y = metadataStartY + (index * rowHeight);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 116, 139);
+        doc.text(item[0], 25, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+        doc.text(item[1], 75, y);
+      });
+
+      // Verification status details
+      const statusStartY = 135;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text('STATUS VERIFIKASI KEUANGAN YUDISIUM', 20, statusStartY);
+
+      // Render status box
+      const isApproved = yudisium?.status === 'disetujui';
+      const isRejected = yudisium?.status === 'ditolak';
+
+      const statusText = !student.academicApproved
+        ? 'PROSES TERKUNCI (LANGKAH 1 BELUM SELESAI)'
+        : isApproved
+          ? 'SAH & KEUANGAN SETUJU (ACC YUDISIUM)'
+          : isRejected
+            ? 'TOLAK / TANGGUH VERIFIKASI'
+            : 'ANTREAN VERIFIKASI BAUK KEUANGAN';
+
+      const statusDesc = !student.academicApproved
+        ? 'Langkah 1 (Akademik) belum disetujui. Verifikasi administrasi keuangan belum dibuka.'
+        : isApproved
+          ? 'Kebenaran administrasi keuangan lunas & BEBAS ADMINISTRASI KEUANGAN Yudisium.'
+          : isRejected
+            ? `Persetujuan ditangguhkan. Alasan: ${yudisium?.rejectionReason || 'Ada berkas yang perlu dikonfirmasi.'}`
+            : 'Mahasiswa berada dalam antrean peninjauan log tagihan keuangan oleh bagian BAUK.';
+
+      const boxColor = !student.academicApproved
+        ? [148, 163, 184] // Slate
+        : isApproved
+          ? [16, 185, 129] // Emerald
+          : isRejected
+            ? [239, 68, 68] // Rose
+            : [245, 158, 11]; // Amber
+
+      doc.setFillColor(248, 250, 252); // Off white
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(20, statusStartY + 4, width - 40, 25, 'F');
+      doc.rect(20, statusStartY + 4, width - 40, 25);
+
+      // Left indicator bar
+      doc.setFillColor(boxColor[0], boxColor[1], boxColor[2]);
+      doc.rect(20, statusStartY + 4, 3, 25, 'F');
+
+      // Status Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(boxColor[0], boxColor[1], boxColor[2]);
+      doc.text(statusText, 27, statusStartY + 12);
+
+      // Status Desc
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(statusDesc, 27, statusStartY + 19);
+
+      // Supporting checks
+      const docsStartY = 172;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('REKONSILIASI PENUNJANG ADMINISTRASI:', 20, docsStartY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const SPPStatus = isApproved ? 'Lunas / ACC' : isRejected ? 'Ada Tunggakan / Revisi' : 'Menunggu Verifikasi';
+      doc.text(`1. Biaya Perkuliahan & SPP       : [ ${SPPStatus} ]`, 25, docsStartY + 7);
+      doc.text(`2. Biaya Administrasi Yudisium : [ ${isApproved ? 'Lunas / ACC' : 'Menunggu Verifikasi'} ]`, 25, docsStartY + 13);
+
+      const disclaimerY = 195;
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SIYUDI Universitas Insan Budi Utomo Malang sebagai bukti kelayakan bebas tunjangan keuangan bagi mahasiswa.';
+      const splitText = doc.splitTextToSize(disclaimerText, width - 40);
+      doc.text(splitText, 20, disclaimerY);
+
+      // Signatures
+      const sigY = 215;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Malang, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), 130, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Kepala BAUK Universitas,', 130, sigY + 5);
+
+      // Stamp Box
+      if (isApproved) {
+        doc.setDrawColor(16, 185, 129); // Emerald
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7);
+        doc.setTextColor(16, 185, 129);
+        doc.rect(130, sigY + 9, 45, 12);
+        doc.text('[ TERVERIFIKASI SISTEM ]', 133, sigY + 14);
+        doc.text('BAUK Universitas IBU', 136, sigY + 18);
+      } else {
+        doc.setDrawColor(79, 70, 229); // Indigo
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7);
+        doc.setTextColor(79, 70, 229);
+        doc.rect(130, sigY + 9, 45, 12);
+        doc.text('[ VERIFIKASI ANTREAN ]', 134, sigY + 14);
+        doc.text('Biro Keuangan IBU', 136, sigY + 18);
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Adi, S.Pd., M.Pd.', 130, sigY + 30);
+
+      // QR Code bottom left
+      const qrY = sigY;
+      const qrX = 25;
+      
+      const qrBase64 = await getQRCodeBase64(student.nim);
+      if (qrBase64) {
+        doc.addImage(qrBase64, 'PNG', qrX, qrY + 2, 28, 28);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`NIM: ${student.nim}`, qrX, qrY + 34);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text('QR Code Otentikasi NIM', qrX, qrY + 37);
+      } else {
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(qrX, qrY + 2, 28, 28);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`NIM: ${student.nim}`, qrX, qrY + 34);
+      }
+
+      const pdfBlob = doc.output('blob');
+      const blobURL = URL.createObjectURL(pdfBlob);
+      window.open(blobURL, '_blank');
+    } catch (error) {
+      console.error('Gagal membuat PDF Langkah 2:', error);
+      alert('Terjadi kesalahan saat memproses file PDF bukti verifikasi.');
+    }
+  };
+
+  const previewStep3PDF = async () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Colors
+      const primaryColor = [13, 148, 136]; // Teal
+      const darkColor = [30, 41, 59];
+      const greyColor = [100, 116, 139];
+
+      const width = 210;
+      const height = 297;
+
+      // Draw border
+      doc.setDrawColor(204, 251, 241); // Teal 100
+      doc.setLineWidth(1);
+      doc.rect(10, 10, width - 20, height - 20);
+
+      // Inner border
+      doc.setDrawColor(13, 148, 136);
+      doc.setLineWidth(0.3);
+      doc.rect(12, 12, width - 24, height - 24);
+
+      // Kop Surat
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(30, 41, 59);
+      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
+      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: bauk@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
+
+      // Separator line
+      doc.setDrawColor(30, 41, 59);
+      doc.setLineWidth(1);
+      doc.line(15, 38, width - 15, 38);
+      doc.setDrawColor(13, 148, 136);
+      doc.setLineWidth(0.5);
+      doc.line(15, 40, width - 15, 40);
+
+      // Document Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(13, 148, 136);
+      doc.text('SURAT KETERANGAN KELAYAKAN LOGISTIK & PENDAFTARAN WISUDA', width / 2, 50, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Nomor Dokumen: BAUK/IBU-VAL3/${student.nim}/${new Date().getFullYear()}`, width / 2, 55, { align: 'center' });
+
+      // Statement
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Biro Administrasi Umum dan Keuangan (BAUK) Universitas Insan Budi Utomo Malang, menerangkan:', 20, 68);
+
+      // Student Metadata Table
+      const metadataStartY = 75;
+      const rowHeight = 7;
+      
+      const details = [
+        ['Nama Lengkap', `: ${student.nama}`],
+        ['NIM', `: ${student.nim}`],
+        ['NIK', `: ${student.nik || '- (Belum Diisi)'}`],
+        ['Tempat, Tanggal Lahir', `: ${student.tempatLahir && student.tanggalLahir ? `${student.tempatLahir}, ${student.tanggalLahir}` : '- (Belum Diisi)'}`],
+        ['Fakultas', `: ${student.fakultas}`],
+        ['Program Studi', `: ${student.programStudi}`],
+        ['Email Resmi', `: ${student.email || '-'}`],
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      details.forEach((item, index) => {
+        const y = metadataStartY + (index * rowHeight);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 116, 139);
+        doc.text(item[0], 25, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+        doc.text(item[1], 75, y);
+      });
+
+      // Verification status details
+      const statusStartY = 135;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text('STATUS VERIFIKASI LOGISTIK WISUDA', 20, statusStartY);
+
+      // Render status box
+      const isApproved = wisuda?.status === 'disetujui';
+      const isRejected = wisuda?.status === 'ditolak';
+
+      const statusText = yudisium?.status !== 'disetujui'
+        ? 'PROSES TERKUNCI (LANGKAH 2 BELUM ACC)'
+        : isApproved
+          ? 'SAH & KELAYAKAN WISUDA OK (ACC PANITIA)'
+          : isRejected
+            ? 'LOGISTIK TANGGUH / REVISI'
+            : 'ANTREAN VERIFIKASI KEANGGOTAAN WISUDA';
+
+      const statusDesc = yudisium?.status !== 'disetujui'
+        ? 'Langkah 2 (Yudisium) belum disetujui. Verifikasi pendaftaran wisuda belum dibuka.'
+        : isApproved
+          ? 'Registrasi wisuda dinyatakan SAH, LUNAS, dan siap untuk distribusi atribut wisuda.'
+          : isRejected
+            ? `Persetujuan ditangguhkan. Alasan: ${wisuda?.rejectionReason || 'Ada berkas yang perlu dikonfirmasi.'}`
+            : 'Mahasiswa berada dalam antrean peninjauan ukuran baju toga dan kelayakan wisuda.';
+
+      const boxColor = yudisium?.status !== 'disetujui'
+        ? [148, 163, 184] // Slate
+        : isApproved
+          ? [16, 185, 129] // Emerald
+          : isRejected
+            ? [239, 68, 68] // Rose
+            : [245, 158, 11]; // Amber
+
+      doc.setFillColor(248, 250, 252); // Off white
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(20, statusStartY + 4, width - 40, 25, 'F');
+      doc.rect(20, statusStartY + 4, width - 40, 25);
+
+      // Left indicator bar
+      doc.setFillColor(boxColor[0], boxColor[1], boxColor[2]);
+      doc.rect(20, statusStartY + 4, 3, 25, 'F');
+
+      // Status Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(boxColor[0], boxColor[1], boxColor[2]);
+      doc.text(statusText, 27, statusStartY + 12);
+
+      // Status Desc
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(statusDesc, 27, statusStartY + 19);
+
+      // Supporting checks
+      const docsStartY = 172;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('REKONSILIASI PENUNJANG ADMINISTRASI WISUDA:', 20, docsStartY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(`1. Ukuran Toga & Atribut      : [ Terpilih & Terdata ]`, 25, docsStartY + 7);
+      doc.text(`2. Bebas Tunggakan Wisuda     : [ ${isApproved ? 'Ready & ACC' : 'Menunggu Verifikasi'} ]`, 25, docsStartY + 13);
+
+      const disclaimerY = 195;
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SIYUDI Universitas Insan Budi Utomo Malang sebagai bukti pendaftaran & verifikasi kelayakan mengikuti wisuda.';
+      const splitText = doc.splitTextToSize(disclaimerText, width - 40);
+      doc.text(splitText, 20, disclaimerY);
+
+      // Signatures
+      const sigY = 215;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Malang, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), 130, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Kepala BAUK Universitas,', 130, sigY + 5);
+
+      // Stamp Box
+      if (isApproved) {
+        doc.setDrawColor(16, 185, 129); // Emerald
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7);
+        doc.setTextColor(16, 185, 129);
+        doc.rect(130, sigY + 9, 45, 12);
+        doc.text('[ TERVERIFIKASI SISTEM ]', 133, sigY + 14);
+        doc.text('BAUK Universitas IBU', 136, sigY + 18);
+      } else {
+        doc.setDrawColor(13, 148, 136); // Teal
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7);
+        doc.setTextColor(13, 148, 136);
+        doc.rect(130, sigY + 9, 45, 12);
+        doc.text('[ VERIFIKASI ANTREAN ]', 134, sigY + 14);
+        doc.text('Panitia Wisuda IBU', 136, sigY + 18);
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Adi, S.Pd., M.Pd.', 130, sigY + 30);
+
+      // QR Code bottom left
+      const qrY = sigY;
+      const qrX = 25;
+      
+      const qrBase64 = await getQRCodeBase64(student.nim);
+      if (qrBase64) {
+        doc.addImage(qrBase64, 'PNG', qrX, qrY + 2, 28, 28);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`NIM: ${student.nim}`, qrX, qrY + 34);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text('QR Code Otentikasi NIM', qrX, qrY + 37);
+      } else {
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(qrX, qrY + 2, 28, 28);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`NIM: ${student.nim}`, qrX, qrY + 34);
+      }
+
+      const pdfBlob = doc.output('blob');
+      const blobURL = URL.createObjectURL(pdfBlob);
+      window.open(blobURL, '_blank');
+    } catch (error) {
+      console.error('Gagal membuat PDF Langkah 3:', error);
+      alert('Terjadi kesalahan saat memproses file PDF bukti verifikasi.');
+    }
+  };
+
   const downloadVerificationPDF = () => {
     try {
       const doc = new jsPDF({
@@ -551,6 +1016,8 @@ export default function StudentPanel({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [showProofModal, setShowProofModal] = useState(false);
+  const [showProofModal2, setShowProofModal2] = useState(false);
+  const [showProofModal3, setShowProofModal3] = useState(false);
 
   useEffect(() => {
     setEditNik(student.nik || '');
@@ -1781,6 +2248,22 @@ export default function StudentPanel({
                       </span>
                     )}
                   </div>
+
+                  {/* Green proof button row inside Langkah 2 card */}
+                  <div className="pt-4 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2">
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">Bukti Verifikasi Yudisium</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Lembar bukti kelayakan pendaftaran Yudisium & bebas tunggakan administrasi keuangan.</p>
+                    </div>
+                    <button
+                      id="view-yudisium-proof-btn"
+                      onClick={() => setShowProofModal2(true)}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-xs font-bold text-white rounded-xl shadow-sm hover:shadow transition-all cursor-pointer border border-emerald-500/20 whitespace-nowrap"
+                    >
+                      <CheckCircle className="w-4 h-4 text-emerald-100" />
+                      Bukti Verifikasi Langkah 2 (Yudisium)
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1858,6 +2341,22 @@ export default function StudentPanel({
                           Status: Wisuda Disetujui (Lolos)
                         </span>
                       )}
+                    </div>
+
+                    {/* Green proof button row inside Langkah 3 card */}
+                    <div className="pt-4 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">Bukti Verifikasi Wisuda</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Lembar bukti keterangan kelayakan registrasi wisuda & kelengkapan atribut logistik.</p>
+                      </div>
+                      <button
+                        id="view-wisuda-proof-btn"
+                        onClick={() => setShowProofModal3(true)}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-xs font-bold text-white rounded-xl shadow-sm hover:shadow transition-all cursor-pointer border border-emerald-500/20 whitespace-nowrap"
+                      >
+                        <CheckCircle className="w-4 h-4 text-emerald-100" />
+                        Bukti Verifikasi Langkah 3 (Wisuda)
+                      </button>
                     </div>
                   </div>
                 )
@@ -2166,6 +2665,404 @@ export default function StudentPanel({
               <button
                 type="button"
                 onClick={() => setShowProofModal(false)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BUKTI VERIFIKASI LANGKAH 2 MODAL (Yudisium) */}
+      {showProofModal2 && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto flex items-start justify-center z-50 p-4 sm:p-6">
+          <div className="relative bg-white rounded-2xl shadow-xl border border-slate-150 max-w-2xl w-full my-auto sm:my-8 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-indigo-50 rounded-t-2xl">
+              <div className="flex items-center gap-2 text-indigo-950">
+                <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-indigo-900 leading-none">Bukti Verifikasi Langkah 2</h3>
+                  <p className="text-[10px] text-indigo-700 font-semibold mt-0.5">Kelayakan Keuangan & Pendaftaran Yudisium</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowProofModal2(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6 flex-1">
+              
+              {/* Document Header (Kop Surat) */}
+              <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xl">🎓</span>
+                  <h4 className="font-black text-sm tracking-tight text-slate-900 uppercase">Universitas Insan Budi Utomo Malang</h4>
+                </div>
+                <p className="text-[9px] text-slate-500 font-medium">
+                  Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119
+                </p>
+                <p className="text-[9px] text-slate-400 font-mono">
+                  Telp: (0341) 323214 | Email: bauk@budiutomomalang.ac.id
+                </p>
+              </div>
+
+              {/* Document Title */}
+              <div className="text-center space-y-1">
+                <h5 className="font-bold text-xs uppercase tracking-wide text-slate-800">
+                  SURAT KETERANGAN BEBAS ADMINISTRASI KEUANGAN & KELAYAKAN YUDISIUM
+                </h5>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  Nomor: BAUK/IBU-VAL2/{student.nim}/{new Date().getFullYear()}
+                </p>
+              </div>
+
+              {/* Status Header Block */}
+              {!student.academicApproved ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5 text-center">
+                  <div className="text-amber-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 animate-pulse" /> STATUS DATA: PROSES TERKUNCI
+                  </div>
+                  <p className="text-[10.5px] text-amber-700 leading-relaxed font-semibold">
+                    Langkah 1 (Akademik) belum disetujui. Verifikasi administrasi keuangan belum dibuka.
+                  </p>
+                </div>
+              ) : yudisium?.status === 'disetujui' ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-emerald-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" /> STATUS DATA: ACC BEBAS ADMINISTRASI KEUANGAN
+                  </div>
+                  <p className="text-[10.5px] text-emerald-700 leading-relaxed font-semibold">
+                    Kebenaran administrasi keuangan lunas & BEBAS ADMINISTRASI KEUANGAN Yudisium serta dinyatakan layak mengikuti Yudisium.
+                  </p>
+                </div>
+              ) : yudisium?.status === 'ditolak' ? (
+                <div className="p-4 bg-rose-50 border border-rose-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-rose-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 animate-pulse">
+                    <X className="w-4 h-4 text-rose-500" /> STATUS DATA: PENANGGUHAN VERIFIKASI KEUANGAN
+                  </div>
+                  <p className="text-[10.5px] text-rose-700 leading-relaxed font-semibold">
+                    Persetujuan yudisium ditangguhkan. Alasan: {yudisium?.rejectionReason || 'Ada berkas yang perlu dikonfirmasi.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-amber-50 border border-amber-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-amber-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-500 animate-pulse" /> STATUS DATA: ANTREAN VERIFIKASI KEUANGAN
+                  </div>
+                  <p className="text-[10.5px] text-amber-700 leading-relaxed font-semibold">
+                    Mahasiswa berada dalam antrean peninjauan log tagihan keuangan oleh bagian BAUK Universitas.
+                  </p>
+                </div>
+              )}
+
+              {/* Student Details Grid */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <h6 className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 mb-3 block">Detail Data Mahasiswa:</h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 text-xs">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Nama Lengkap</span>
+                    <span className="font-extrabold text-slate-900 block mt-0.5">{student.nama}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Nomor Induk Mahasiswa (NIM)</span>
+                    <span className="font-mono font-bold text-slate-900 block mt-0.5">{student.nim}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Fakultas Terdaftar</span>
+                    <span className="font-semibold text-slate-800 block mt-0.5">{student.fakultas}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Program Studi (Jenjang S1)</span>
+                    <span className="font-semibold text-slate-800 block mt-0.5">{student.programStudi}</span>
+                  </div>
+                </div>
+
+                {/* Sub-block Document checks */}
+                <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs">💰</span>
+                    <div className="text-[10.5px]">
+                      <span className="text-slate-500 font-bold block">Biaya Perkuliahan & SPP:</span>
+                      <span className={`font-bold uppercase ${yudisium?.status === 'disetujui' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {yudisium?.status === 'disetujui' ? 'Lunas / ACC' : 'Menunggu Verifikasi'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs">💰</span>
+                    <div className="text-[10.5px]">
+                      <span className="text-slate-500 font-bold block">Biaya Administrasi Yudisium:</span>
+                      <span className={`font-bold uppercase ${yudisium?.status === 'disetujui' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {yudisium?.status === 'disetujui' ? 'Lunas / ACC' : 'Menunggu Verifikasi'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Signatures & Certification details */}
+              <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                <div className="text-[10px] text-slate-500 font-medium text-center sm:text-left space-y-1">
+                  <p>Dicetak secara digital oleh:</p>
+                  <strong className="text-slate-800 font-bold block">Sistem SIYUDI BAUK</strong>
+                  <p className="font-mono text-[9px] text-slate-400">Waktu: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+
+                {/* NIM QR Code Centerpiece */}
+                <div className="flex flex-col items-center p-2.5 bg-white rounded-xl border border-slate-200 shadow-sm shrink-0">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(student.nim)}`} 
+                    alt={`QR Code NIM ${student.nim}`} 
+                    className="w-20 h-20 bg-white p-1 border border-slate-100 rounded-lg shadow-sm" 
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="font-mono font-bold text-slate-850 text-[10px] mt-1.5 bg-slate-100 px-2.5 py-0.5 rounded border border-slate-200">NIM: {student.nim}</span>
+                </div>
+
+                {/* Simulated Stamp / Seal based on status */}
+                <div className="relative shrink-0">
+                  {yudisium?.status === 'disetujui' ? (
+                    <div className="border-2 border-double border-emerald-500 bg-emerald-50/50 text-emerald-600 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center shadow-sm">
+                      [ BEBAS KEUANGAN BAUK ]<br />
+                      <span className="text-[7px] font-mono tracking-wider font-extrabold">ACC YUDISIUM OK</span>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-indigo-405 text-indigo-500 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center">
+                      [ MENUNGGU ACC BAUK ]<br />
+                      <span className="text-[7px]">proses verifikasi</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Informational Warning */}
+              <p className="text-[9.5px] italic text-slate-400 leading-normal text-center bg-slate-50 p-2.5 rounded-lg border border-slate-150">
+                Data verifikasi keuangan ini diterbitkan oleh BAUK Universitas Insan Budi Utomo Malang sebagai lembar bebas tunggakan resmi guna pendaftaran yudisium.
+              </p>
+
+            </div>
+
+            {/* Footer with actions */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={previewStep2PDF}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+                >
+                  <span>👁️</span> Pratinjau PDF (Tab Baru)
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowProofModal2(false)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BUKTI VERIFIKASI LANGKAH 3 MODAL (Wisuda) */}
+      {showProofModal3 && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto flex items-start justify-center z-50 p-4 sm:p-6">
+          <div className="relative bg-white rounded-2xl shadow-xl border border-slate-150 max-w-2xl w-full my-auto sm:my-8 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-teal-50 rounded-t-2xl">
+              <div className="flex items-center gap-2 text-teal-950">
+                <span className="p-1.5 bg-teal-100 text-teal-700 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-teal-900 leading-none">Bukti Verifikasi Langkah 3</h3>
+                  <p className="text-[10px] text-teal-700 font-semibold mt-0.5">Kelayakan Registrasi & Logistik Wisuda</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowProofModal3(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6 flex-1">
+              
+              {/* Document Header (Kop Surat) */}
+              <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xl">🎓</span>
+                  <h4 className="font-black text-sm tracking-tight text-slate-900 uppercase">Universitas Insan Budi Utomo Malang</h4>
+                </div>
+                <p className="text-[9px] text-slate-500 font-medium">
+                  Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119
+                </p>
+                <p className="text-[9px] text-slate-400 font-mono">
+                  Telp: (0341) 323214 | Email: bauk@budiutomomalang.ac.id
+                </p>
+              </div>
+
+              {/* Document Title */}
+              <div className="text-center space-y-1">
+                <h5 className="font-bold text-xs uppercase tracking-wide text-slate-800">
+                  SURAT KETERANGAN KELAYAKAN LOGISTIK & PENDAFTARAN WISUDA
+                </h5>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  Nomor: BAUK/IBU-VAL3/{student.nim}/{new Date().getFullYear()}
+                </p>
+              </div>
+
+              {/* Status Header Block */}
+              {yudisium?.status !== 'disetujui' ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5 text-center">
+                  <div className="text-amber-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 animate-pulse" /> STATUS DATA: PROSES TERKUNCI
+                  </div>
+                  <p className="text-[10.5px] text-amber-700 leading-relaxed font-semibold">
+                    Langkah 2 (Yudisium) belum disetujui. Verifikasi pendaftaran wisuda belum dibuka.
+                  </p>
+                </div>
+              ) : wisuda?.status === 'disetujui' ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-emerald-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" /> STATUS DATA: ACC PANITIA & KELAYAKAN WISUDA OK
+                  </div>
+                  <p className="text-[10.5px] text-emerald-700 leading-relaxed font-semibold">
+                    Registrasi wisuda dinyatakan SAH, LUNAS, dan siap untuk distribusi atribut wisuda (Toga, Undangan, Jas Almamater).
+                  </p>
+                </div>
+              ) : wisuda?.status === 'ditolak' ? (
+                <div className="p-4 bg-rose-50 border border-rose-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-rose-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 animate-pulse">
+                    <X className="w-4 h-4 text-rose-500" /> STATUS DATA: LOGISTIK TANGGUH / REVISI
+                  </div>
+                  <p className="text-[10.5px] text-rose-700 leading-relaxed font-semibold">
+                    Persetujuan registrasi wisuda ditangguhkan. Alasan: {wisuda?.rejectionReason || 'Hubungi panitia wisuda.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-amber-50 border border-amber-250 rounded-xl space-y-1.5 text-center">
+                  <div className="text-amber-850 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-500 animate-pulse" /> STATUS DATA: ANTREAN VERIFIKASI WISUDA
+                  </div>
+                  <p className="text-[10.5px] text-amber-700 leading-relaxed font-semibold">
+                    Mahasiswa berada dalam antrean peninjauan ukuran baju toga dan bebas biaya wisuda oleh panitia BAUK.
+                  </p>
+                </div>
+              )}
+
+              {/* Student Details Grid */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <h6 className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 mb-3 block">Detail Data Mahasiswa:</h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 text-xs">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Nama Lengkap</span>
+                    <span className="font-extrabold text-slate-900 block mt-0.5">{student.nama}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Nomor Induk Mahasiswa (NIM)</span>
+                    <span className="font-mono font-bold text-slate-900 block mt-0.5">{student.nim}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Fakultas Terdaftar</span>
+                    <span className="font-semibold text-slate-800 block mt-0.5">{student.fakultas}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Program Studi (Jenjang S1)</span>
+                    <span className="font-semibold text-slate-800 block mt-0.5">{student.programStudi}</span>
+                  </div>
+                </div>
+
+                {/* Sub-block Document checks */}
+                <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs">🎓</span>
+                    <div className="text-[10.5px]">
+                      <span className="text-slate-500 font-bold block">Ukuran Toga & Atribut:</span>
+                      <span className="font-bold uppercase text-emerald-600">
+                        Terpilih & Terdata
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs">💰</span>
+                    <div className="text-[10.5px]">
+                      <span className="text-slate-500 font-bold block">Registrasi Biaya Wisuda:</span>
+                      <span className={`font-bold uppercase ${wisuda?.status === 'disetujui' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {wisuda?.status === 'disetujui' ? 'Ready & ACC' : 'Menunggu Verifikasi'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Signatures & Certification details */}
+              <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                <div className="text-[10px] text-slate-500 font-medium text-center sm:text-left space-y-1">
+                  <p>Dicetak secara digital oleh:</p>
+                  <strong className="text-slate-800 font-bold block">Sistem SIYUDI BAUK</strong>
+                  <p className="font-mono text-[9px] text-slate-400">Waktu: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+
+                {/* NIM QR Code Centerpiece */}
+                <div className="flex flex-col items-center p-2.5 bg-white rounded-xl border border-slate-200 shadow-sm shrink-0">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(student.nim)}`} 
+                    alt={`QR Code NIM ${student.nim}`} 
+                    className="w-20 h-20 bg-white p-1 border border-slate-100 rounded-lg shadow-sm" 
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="font-mono font-bold text-slate-850 text-[10px] mt-1.5 bg-slate-100 px-2.5 py-0.5 rounded border border-slate-200">NIM: {student.nim}</span>
+                </div>
+
+                {/* Simulated Stamp / Seal based on status */}
+                <div className="relative shrink-0">
+                  {wisuda?.status === 'disetujui' ? (
+                    <div className="border-2 border-double border-emerald-500 bg-emerald-50/50 text-emerald-600 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center shadow-sm">
+                      [ TERVERIFIKASI BAUK ]<br />
+                      <span className="text-[7px] font-mono tracking-wider font-extrabold">ACC WISUDA & TOGA OK</span>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-indigo-405 text-indigo-500 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center">
+                      [ MENUNGGU ACC BAUK ]<br />
+                      <span className="text-[7px]">antrean logistik</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Informational Warning */}
+              <p className="text-[9.5px] italic text-slate-400 leading-normal text-center bg-slate-50 p-2.5 rounded-lg border border-slate-150">
+                Pendaftaran & kelayakan atribut wisuda ini diotentikasi secara digital oleh sistem SIYUDI BAUK Universitas Insan Budi Utomo Malang.
+              </p>
+
+            </div>
+
+            {/* Footer with actions */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={previewStep3PDF}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+                >
+                  <span>👁️</span> Pratinjau PDF (Tab Baru)
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowProofModal3(false)}
                 className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
                 Selesai
