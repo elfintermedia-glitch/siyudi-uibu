@@ -751,6 +751,67 @@ export default function StudentPanel({
         </div>
       </div>
 
+      {/* Festive Graduation Celebration Card displayed at the top if student is graduated, regardless of step 1 status */}
+      {student.statusKelulusan === 'Lulus' && (
+        <div 
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 shadow-xl border-2 border-amber-300 p-6 sm:p-8 text-white"
+          style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #7e22ce 100%)' }}
+        >
+          {/* Ambient decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
+          
+          {/* Sparkles & Confetti Visual Accents */}
+          <div className="absolute top-4 left-6 text-amber-300 animate-pulse pointer-events-none">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div className="absolute bottom-4 right-6 text-amber-300 animate-bounce pointer-events-none" style={{ animationDuration: '3s' }}>
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="absolute top-1/2 right-12 text-white/20 pointer-events-none">
+            <GraduationCap className="w-16 h-16 rotate-12" />
+          </div>
+
+          <div className="relative flex flex-col md:flex-row items-center gap-6 z-10">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-slate-900 text-3xl font-bold font-sans shadow-lg animate-bounce shrink-0">
+              🎓
+            </div>
+            
+            <div className="text-center md:text-left space-y-2 flex-grow">
+              <span className="inline-block px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-100 text-[10px] uppercase font-bold tracking-widest rounded-full animate-pulse">
+                ✨ KABAR KELULUSAN RESMI ✨
+              </span>
+              <h2 
+                className="text-xl sm:text-2xl font-black tracking-tight leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] text-amber-300 bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-100"
+                style={{
+                  backgroundImage: 'linear-gradient(to right, #fde68a, #facc15, #fde68a)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  color: '#facc15' // Fallback color
+                }}
+              >
+                Selamat Untuk <span className="underline decoration-amber-400/50 decoration-wavy underline-offset-4">{student.nama}</span> Telah dinyatakan LULUS
+              </h2>
+              <p className="text-xs text-indigo-100 font-medium max-w-xl leading-relaxed">
+                Selamat atas pencapaian luar biasa ini! Kerja keras, ketangguhan, dan dedikasi Anda di Universitas Insan Budi Utomo Malang telah membuahkan hasil terbaik. Silakan lanjutkan verifikasi kelayakan akademik, keuangan yudisium, dan pendaftaran wisuda Anda di bawah ini.
+              </p>
+            </div>
+
+            {/* Minor celebratory stats badge */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-3 text-center shrink-0 min-w-[120px]">
+              <p className="text-[9px] uppercase tracking-wider text-indigo-200 font-bold">NIM Mahasiswa</p>
+              <p className="text-sm font-mono font-bold text-amber-300 mt-0.5">{student.nim}</p>
+            </div>
+          </div>
+
+          {/* Simulated mini visual confetti dots */}
+          <div className="absolute top-2 right-1/4 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping pointer-events-none" />
+          <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-pink-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute bottom-4 left-10 w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse pointer-events-none" />
+        </div>
+      )}
+
       {/* STEPS PRE-FLOW: Academic Verification Form */}
       {!student.dataVerified || student.academicRejected ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
@@ -1099,65 +1160,6 @@ export default function StudentPanel({
       {student.statusKelulusan === 'Lulus' && (
         <div className="space-y-6">
           
-          {/* Festive Graduation Celebration Card */}
-          <div 
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 shadow-xl border-2 border-amber-300 p-6 sm:p-8 text-white"
-            style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #7e22ce 100%)' }}
-          >
-            {/* Ambient decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
-            
-            {/* Sparkles & Confetti Visual Accents */}
-            <div className="absolute top-4 left-6 text-amber-300 animate-pulse pointer-events-none">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="absolute bottom-4 right-6 text-amber-300 animate-bounce pointer-events-none" style={{ animationDuration: '3s' }}>
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="absolute top-1/2 right-12 text-white/20 pointer-events-none">
-              <GraduationCap className="w-16 h-16 rotate-12" />
-            </div>
-
-            <div className="relative flex flex-col md:flex-row items-center gap-6 z-10">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-slate-900 text-3xl font-bold font-sans shadow-lg animate-bounce shrink-0">
-                🎓
-              </div>
-              
-              <div className="text-center md:text-left space-y-2 flex-grow">
-                <span className="inline-block px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-100 text-[10px] uppercase font-bold tracking-widest rounded-full animate-pulse">
-                  ✨ KABAR KELULUSAN RESMI ✨
-                </span>
-                <h2 
-                  className="text-xl sm:text-2xl font-black tracking-tight leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] text-amber-300 bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-100"
-                  style={{
-                    backgroundImage: 'linear-gradient(to right, #fde68a, #facc15, #fde68a)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    color: '#facc15' // Fallback color
-                  }}
-                >
-                  Selamat Untuk <span className="underline decoration-amber-400/50 decoration-wavy underline-offset-4">{student.nama}</span> Telah dinyatakan LULUS
-                </h2>
-                <p className="text-xs text-indigo-100 font-medium max-w-xl leading-relaxed">
-                  Selamat atas pencapaian luar biasa ini! Kerja keras, ketangguhan, dan dedikasi Anda di Universitas Insan Budi Utomo Malang telah membuahkan hasil terbaik. Silakan lanjutkan verifikasi kelayakan akademik, keuangan yudisium, dan pendaftaran wisuda Anda di bawah ini.
-                </p>
-              </div>
-
-              {/* Minor celebratory stats badge */}
-              <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-3 text-center shrink-0 min-w-[120px]">
-                <p className="text-[9px] uppercase tracking-wider text-indigo-200 font-bold">NIM Mahasiswa</p>
-                <p className="text-sm font-mono font-bold text-amber-300 mt-0.5">{student.nim}</p>
-              </div>
-            </div>
-
-            {/* Simulated mini visual confetti dots */}
-            <div className="absolute top-2 right-1/4 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping pointer-events-none" />
-            <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-pink-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }} />
-            <div className="absolute bottom-4 left-10 w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse pointer-events-none" />
-          </div>
-
           {/* Success Banner when all steps are approved */}
           {student.academicApproved && yudisium?.status === 'disetujui' && wisuda?.status === 'disetujui' && (
             <div 
