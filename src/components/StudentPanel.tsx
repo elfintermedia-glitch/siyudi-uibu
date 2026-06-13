@@ -1099,7 +1099,10 @@ export default function StudentPanel({
         <div className="space-y-6">
           
           {/* Festive Graduation Celebration Card */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 shadow-xl border-2 border-amber-300 p-6 sm:p-8 text-white">
+          <div 
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 shadow-xl border-2 border-amber-300 p-6 sm:p-8 text-white"
+            style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #7e22ce 100%)' }}
+          >
             {/* Ambient decorative elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
@@ -1124,8 +1127,16 @@ export default function StudentPanel({
                 <span className="inline-block px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-100 text-[10px] uppercase font-bold tracking-widest rounded-full animate-pulse">
                   ✨ KABAR KELULUSAN RESMI ✨
                 </span>
-                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight drop-shadow">
-                  Selamat Untuk <span className="text-amber-300 underline decoration-amber-400 decoration-wavy underline-offset-4 font-black">{student.nama}</span> Telah dinyatakan LULUS
+                <h2 
+                  className="text-xl sm:text-2xl font-black tracking-tight leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] text-amber-300 bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-100"
+                  style={{
+                    backgroundImage: 'linear-gradient(to right, #fde68a, #facc15, #fde68a)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    color: '#facc15' // Fallback color
+                  }}
+                >
+                  Selamat Untuk <span className="underline decoration-amber-400/50 decoration-wavy underline-offset-4">{student.nama}</span> Telah dinyatakan LULUS
                 </h2>
                 <p className="text-xs text-indigo-100 font-medium max-w-xl leading-relaxed">
                   Selamat atas pencapaian luar biasa ini! Kerja keras, ketangguhan, dan dedikasi Anda di Universitas Insan Budi Utomo Malang telah membuahkan hasil terbaik. Silakan lanjutkan verifikasi kelayakan akademik, keuangan yudisium, dan pendaftaran wisuda Anda di bawah ini.
@@ -1148,7 +1159,10 @@ export default function StudentPanel({
 
           {/* Success Banner when all steps are approved */}
           {student.academicApproved && yudisium?.status === 'disetujui' && wisuda?.status === 'disetujui' && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-md p-6 text-white animate-fade-in flex flex-col md:flex-row items-center justify-between gap-4">
+            <div 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-md p-6 text-white animate-fade-in flex flex-col md:flex-row items-center justify-between gap-4"
+              style={{ backgroundImage: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)' }}
+            >
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-2xl shrink-0 shadow-inner">
                   🎉
