@@ -953,9 +953,6 @@ export default function StudentPanel({
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
       doc.text('Adi, S.Pd., M.Pd.', 25, sigY + 30);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 116, 139);
-      doc.text('NIP. 197410212002121003', 25, sigY + 34);
 
       // Right sign: Kepala BAAK
       doc.setFont('helvetica', 'normal');
