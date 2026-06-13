@@ -3,6 +3,7 @@ import {
   User, GraduationCap, CheckCircle2, CheckCircle, AlertTriangle, FileText, Upload, 
   Trash2, Send, HelpCircle, Check, MapPin, Sparkles, BookOpen, Clock, FileWarning, X
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { StudentAcademic, YudisiumRegistration, WisudaRegistration, DocumentUpload, RegistrationStatus } from '../types';
 import { REQUIRED_DOC_TEMPLATES } from '../utils/dummyData';
 import { ALLOWED_PROGRAM_STUDI } from './ExcelImporter';
@@ -31,6 +32,250 @@ export default function StudentPanel({
   allStudents = []
 }: StudentPanelProps) {
   
+  // Tab states for verification steps
+  const [activeStepTab, setActiveStepTab] = useState<number>(() => {
+    if (!student.academicApproved) return 1;
+    if (yudisium?.status !== 'disetujui') return 2;
+    return 3;
+  });
+
+  useEffect(() => {
+    if (student.academicApproved) {
+      if (yudisium?.status !== 'disetujui') {
+        setActiveStepTab(2);
+      } else {
+        setActiveStepTab(3);
+      }
+    } else {
+      setActiveStepTab(1);
+    }
+  }, [student.academicApproved, yudisium?.status]);
+
+  const downloadVerificationPDF = () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Colors
+      const primaryColor = [13, 148, 136]; // Teal #0d9488
+      const darkColor = [30, 41, 59]; // Slate 800
+      const greyColor = [100, 116, 139]; // Slate 500
+
+      // Margins & Dimensions
+      const margin = 20;
+      const width = 210;
+      const height = 297;
+
+      // Draw elegant border
+      doc.setDrawColor(226, 232, 240); // Slate 200
+      doc.setLineWidth(1);
+      doc.rect(10, 10, width - 20, height - 20);
+
+      // Inner double border
+      doc.setDrawColor(13, 148, 136); // Teal
+      doc.setLineWidth(0.3);
+      doc.rect(12, 12, width - 24, height - 24);
+
+      // Kop Surat (Header)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(30, 41, 59);
+      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
+      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: info@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
+
+      // Separator line
+      doc.setDrawColor(30, 41, 59);
+      doc.setLineWidth(1);
+      doc.line(15, 38, width - 15, 38);
+      doc.setDrawColor(13, 148, 136);
+      doc.setLineWidth(0.5);
+      doc.line(15, 40, width - 15, 40);
+
+      // Document Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(13, 148, 136);
+      doc.text('SURAT KETERANGAN BEBAS ADMINISTRASI YUDISIUM & WISUDA', width / 2, 50, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      const uuid = 'IBU-' + student.nim + '-' + Math.floor(1000 + Math.random() * 9000);
+      doc.text(`Nomor Dokumen: ${uuid}/BAAK/IBU/VI/2026`, width / 2, 55, { align: 'center' });
+
+      // Statement
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Rektor Universitas Insan Budi Utomo Malang, menerangkan bahwa mahasiswa di bawah ini:', 20, 68);
+
+      // Student Metadata Table
+      const metadataStartY = 75;
+      const rowHeight = 7;
+      
+      const details = [
+        ['Nama Lengkap', `: ${student.nama}`],
+        ['NIM', `: ${student.nim}`],
+        ['NIK', `: ${student.nik || '-'}`],
+        ['Tempat, Tanggal Lahir', `: ${student.tempatLahir}, ${student.tanggalLahir}`],
+        ['Fakultas', `: ${student.fakultas}`],
+        ['Program Studi', `: ${student.programStudi}`],
+        ['Status Kelulusan', ': MEMENUHI SYARAT / LULUS']
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      details.forEach((item, index) => {
+        const y = metadataStartY + (index * rowHeight);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 116, 139);
+        doc.text(item[0], 25, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+        if (item[0] === 'Status Kelulusan') {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(13, 148, 136);
+        }
+        doc.text(item[1], 75, y);
+      });
+
+      // Verification flow section
+      const flowStartY = 130;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text('STATUS REKONSILIASI ALUR VERIFIKASI KELULUSAN', 20, flowStartY);
+
+      // Draw a table for active steps verification
+      doc.setDrawColor(203, 213, 225); // Slate 300
+      doc.setFillColor(248, 250, 252); // Slate 50
+      doc.rect(20, flowStartY + 4, width - 40, 42, 'F');
+      
+      // Header row
+      doc.setDrawColor(203, 213, 225);
+      doc.line(20, flowStartY + 4, width - 20, flowStartY + 4);
+      doc.line(20, flowStartY + 12, width - 20, flowStartY + 12);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Langkah Alur Verifikasi', 24, flowStartY + 9);
+      doc.text('Instansi Penanggung Jawab', 90, flowStartY + 9);
+      doc.text('Status Verifikasi', 150, flowStartY + 9);
+
+      // Rows
+      const rows = [
+        ['1. Kelulusan Akademik', 'Biro Administrasi Akademik (BAAK)', 'DISETUJUI / LUNAS DATA'],
+        ['2. Kelayakan Yudisium', 'Biro Administrasi Keuangan (BAK)', 'DISETUJUI / BEBAS SPP'],
+        ['3. Pendaftaran Wisuda', 'Panitia Registrasi & Logistik Wisuda', 'DISETUJUI & TERDATA']
+      ];
+
+      rows.forEach((row, idx) => {
+        const y = flowStartY + 18 + (idx * 9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+        doc.text(row[0], 24, y);
+        doc.text(row[1], 90, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(13, 148, 136); // Emerald text for approved
+        doc.text(row[2], 150, y);
+      });
+
+      // Footer border for the table
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.rect(20, flowStartY + 4, width - 40, 42);
+
+      // Statement of complete
+      const stmtY = 184;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(71, 85, 105);
+      
+      const stmtText = 'Berdasarkan data audit log sistem informasi registrasi SIYUDI, mahasiswa tersebut di atas dinyatakan BEBAS DARI SEGALA TANGGUNGAN ADMINISTRASI AKADEMIK DAN KEUANGAN. Dokumen ini sah dan diterbitkan secara digital oleh Universitas Insan Budi Utomo Malang.';
+      const splitText = doc.splitTextToSize(stmtText, width - 40);
+      doc.text(splitText, 20, stmtY);
+
+      // Signatures
+      const sigY = 215;
+      
+      // Left sign: Biro Keuangan
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Malang, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), 25, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Biro Administrasi Keuangan,', 25, sigY + 5);
+      
+      // Mock Digital Stamp
+      doc.setDrawColor(13, 148, 136);
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7);
+      doc.setTextColor(13, 148, 136);
+      doc.rect(25, sigY + 9, 45, 12);
+      doc.text('[ VERIFIKASI DIGITAL ACC ]', 29, sigY + 14);
+      doc.text('Biro Keuangan IBU', 32, sigY + 18);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Drs. Joko Purwanto, M.Si.', 25, sigY + 30);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text('NIP. 197410212002121003', 25, sigY + 34);
+
+      // Right sign: Kepala BAAK
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Disahkan Oleh,', 130, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Kepala BAAK Universitas,', 130, sigY + 5);
+
+      // Mock Digital Stamp
+      doc.setDrawColor(79, 70, 229); // Indigo
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7);
+      doc.setTextColor(79, 70, 229);
+      doc.rect(130, sigY + 9, 45, 12);
+      doc.text('[ BERKAS RESMI DI_LOCK ]', 133, sigY + 14);
+      doc.text('BAAK Universitas IBU', 136, sigY + 18);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Dr. Heri Wahyono, M.Pd.', 130, sigY + 30);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text('NIP. 196805121995031002', 130, sigY + 34);
+
+      // Bottom Note / Barcode representation
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 275, width - 15, 275);
+      
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Keamanan Dokumen: Lembar ini diterbitkan secara otomatis dan terotentikasi digital nomor seri ${uuid}.`, width / 2, 281, { align: 'center' });
+      doc.text('Dokumen ini tidak memerlukan tanda tangan basah dan sah secara yuridis.', width / 2, 284, { align: 'center' });
+
+      // Save PDF
+      doc.save(`Bukti_Bebas_Yudisium_Wisuda_${student.nim}.pdf`);
+    } catch (error) {
+      console.error('Gagal membuat PDF:', error);
+      alert('Terjadi kesalahan saat membuat file PDF bukti verifikasi.');
+    }
+  };
+
   // Student profile edit states
   const [editNik, setEditNik] = useState(student.nik || '');
   const [editNama, setEditNama] = useState(student.nama || '');
@@ -851,288 +1096,483 @@ export default function StudentPanel({
 
       {/* Main Flow: If student status is graduated */}
       {student.statusKelulusan === 'Lulus' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
           
-          {/* STEP TRACKER - Left column */}
-          <div className="space-y-4 lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-3">
-              <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500">Alur Verifikasi Anda</h3>
-              
-              <div className="relative pl-5 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-150">
-                {/* Step 1 */}
-                <div className="relative">
-                  <span className={`absolute -left-5 top-0.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
-                    student.academicApproved 
-                      ? 'bg-emerald-500' 
-                      : student.academicRejected
-                        ? 'bg-rose-500 shadow-sm animate-pulse'
-                        : 'bg-amber-500 animate-pulse'
-                  }`}>
-                    {student.academicApproved ? (
-                      <Check className="w-2.5 h-2.5 text-white" />
-                    ) : student.academicRejected ? (
-                      <X className="w-2.5 h-2.5 text-white" />
-                    ) : (
-                      <Clock className="w-2.5 h-2.5 text-white" />
-                    )}
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-800">1. Kelulusan Akademik</h4>
-                    <p className={`text-[10px] font-semibold ${
-                      student.academicApproved 
-                        ? 'text-emerald-600' 
-                        : student.academicRejected
-                          ? 'text-rose-600 font-bold'
-                          : 'text-amber-600'
-                    }`}>
-                      {student.academicApproved 
-                        ? 'Disetujui Admin (Lulus)' 
-                        : student.academicRejected
-                          ? '✗ Tolak / Revisi Berkas'
-                          : '⏳ Menunggu Persetujuan Admin'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Step 2 */}
-                <div className="relative">
-                  <span className={`absolute -left-5 top-0.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
-                    !student.academicApproved
-                      ? 'bg-gray-200 grayscale text-gray-400'
-                      : yudisium?.status === 'disetujui' 
-                        ? 'bg-emerald-500' 
-                        : yudisium?.status === 'diajukan' || yudisium?.status === 'diproses'
-                          ? 'bg-blue-500 animate-pulse'
-                          : yudisium?.status === 'ditolak'
-                            ? 'bg-rose-500'
-                            : 'bg-gray-200'
-                  }`}>
-                    {student.academicApproved && yudisium?.status === 'disetujui' && <Check className="w-2.5 h-2.5 text-white" />}
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-800">2. Pendaftaran Yudisium</h4>
-                    <p className="text-[10px] text-gray-550 leading-normal font-semibold">
-                      {!student.academicApproved 
-                        ? 'Terkunci (Selesaikan Langkah 1)' 
-                        : !yudisium 
-                          ? 'Unggah berkas persyaratan.' 
-                          : `Status: ${yudisium.status.toUpperCase()}`}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Step 3 */}
-                <div className="relative">
-                  <span className={`absolute -left-5 top-0.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
-                    wisuda?.status === 'disetujui' 
-                      ? 'bg-emerald-500'
-                      : wisuda?.status === 'diajukan'
-                        ? 'bg-purple-500'
-                        : 'bg-gray-200'
-                  }`}>
-                    {wisuda?.status === 'disetujui' && <Check className="w-2.5 h-2.5 text-white" />}
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-800">3. Pendaftaran Wisuda</h4>
-                    <p className="text-[10px] text-gray-400 leading-normal font-semibold">
-                      {yudisium?.status !== 'disetujui' 
-                        ? 'Terkunci. Yudisium belum disetujui.' 
-                        : !wisuda || wisuda.status === 'belum_daftar'
-                          ? 'Silakan isi formulir wisuda.'
-                          : wisuda.status === 'disetujui'
-                            ? 'Status: Disetujui'
-                            : wisuda.status === 'diajukan' || wisuda.status === 'diproses'
-                              ? 'Status: Diajukan'
-                              : 'Status: Ditolak / Perbaikan'}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* Festive Graduation Celebration Card */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 shadow-xl border-2 border-amber-300 p-6 sm:p-8 text-white">
+            {/* Ambient decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
+            
+            {/* Sparkles & Confetti Visual Accents */}
+            <div className="absolute top-4 left-6 text-amber-300 animate-pulse pointer-events-none">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="absolute bottom-4 right-6 text-amber-300 animate-bounce pointer-events-none" style={{ animationDuration: '3s' }}>
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="absolute top-1/2 right-12 text-white/20 pointer-events-none">
+              <GraduationCap className="w-16 h-16 rotate-12" />
             </div>
 
-            {/* Help Card */}
-            <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex gap-2.5 items-start">
-              <HelpCircle className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-              <div className="space-y-1">
-                <h5 className="font-bold text-xs text-indigo-950">Alur Penyelesaian Ijazah</h5>
-                <p className="text-[10px] text-indigo-850 leading-relaxed font-semibold">
-                  Semua berkas kelengkapan akan diverifikasi administrasi oleh Biro Akademik Kemahasiswaan. Pendaftaran wisuda hanya dapat dibuka setelah pendaftaran Yudisium Anda berstatus <strong className="text-indigo-900">"DISETUJUI"</strong>.
+            <div className="relative flex flex-col md:flex-row items-center gap-6 z-10">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-slate-900 text-3xl font-bold font-sans shadow-lg animate-bounce shrink-0">
+                🎓
+              </div>
+              
+              <div className="text-center md:text-left space-y-2 flex-grow">
+                <span className="inline-block px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-100 text-[10px] uppercase font-bold tracking-widest rounded-full animate-pulse">
+                  ✨ KABAR KELULUSAN RESMI ✨
+                </span>
+                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight drop-shadow">
+                  Selamat Untuk <span className="text-amber-300 underline decoration-amber-400 decoration-wavy underline-offset-4 font-black">{student.nama}</span> Telah dinyatakan LULUS
+                </h2>
+                <p className="text-xs text-indigo-100 font-medium max-w-xl leading-relaxed">
+                  Selamat atas pencapaian luar biasa ini! Kerja keras, ketangguhan, dan dedikasi Anda di Universitas Insan Budi Utomo Malang telah membuahkan hasil terbaik. Silakan lanjutkan verifikasi kelayakan akademik, keuangan yudisium, dan pendaftaran wisuda Anda di bawah ini.
                 </p>
               </div>
+
+              {/* Minor celebratory stats badge */}
+              <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-3 text-center shrink-0 min-w-[120px]">
+                <p className="text-[9px] uppercase tracking-wider text-indigo-200 font-bold">NIM Mahasiswa</p>
+                <p className="text-sm font-mono font-bold text-amber-300 mt-0.5">{student.nim}</p>
+              </div>
             </div>
+
+            {/* Simulated mini visual confetti dots */}
+            <div className="absolute top-2 right-1/4 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping pointer-events-none" />
+            <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-pink-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute bottom-4 left-10 w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse pointer-events-none" />
           </div>
 
-          {/* DYNAMIC FORMS WORKSPACE - Right column (2 columns) */}
-          <div className="space-y-6 lg:col-span-2">
-            
-            {/* STAGE A: YUDISIUM FORM & ATTACHMENT */}
-            {!student.academicApproved ? (
-              student.academicRejected ? (
-                <div className="bg-white rounded-xl border border-rose-200 shadow-sm p-6 text-center space-y-4 animate-fade-in">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shadow-sm">
-                    <X className="w-6 h-6 text-rose-650" />
-                  </div>
-                  <div className="max-w-md mx-auto space-y-2.5">
-                    <h4 className="font-bold text-rose-950 text-xs uppercase tracking-wider">Langkah 1: Kelayakan Akademik Ditolak / Perlu Revisi</h4>
-                    <p className="text-xs text-rose-800 leading-relaxed font-medium">
-                      Berkas kelayakan akademik Langkah 1 Anda ditolak oleh admin karena belum sesuai dengan kriteria kelayakan.
-                    </p>
-                    <div className="text-left bg-rose-50/75 border border-rose-150 rounded-lg p-3 space-y-1">
-                      <p className="text-[11px] font-bold text-rose-950">Catatan Rejeksi Admin:</p>
-                      <p className="text-xs text-rose-900 font-mono font-semibold bg-white p-2.5 rounded border border-rose-100 leading-relaxed">
-                        {student.academicRejectionReason || "Tidak ada alasan tertulis."}
-                      </p>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
-                      Silakan klik tombol <strong className="text-amber-700">"Ubah Data Akademik"</strong> di pojok kanan profil atas untuk mengunggah ulang dokumen revisi Anda.
-                    </p>
-                  </div>
+          {/* Success Banner when all steps are approved */}
+          {student.academicApproved && yudisium?.status === 'disetujui' && wisuda?.status === 'disetujui' && (
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-md p-6 text-white animate-fade-in flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-2xl shrink-0 shadow-inner">
+                  🎉
                 </div>
-              ) : (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center space-y-4">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500 animate-pulse shadow-sm">
-                    <Clock className="w-6 h-6" />
-                  </div>
-                  <div className="max-w-md mx-auto space-y-2.5">
-                    <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Langkah 2: Pendaftaran Yudisium (Terkunci)</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                      Formulir Pendaftaran Yudisium ini masih terkunci karena berkas kelayakan akademik Langkah 1 (KTP & ijazah SMA) yang Anda kumpulkan sedang dalam proses peninjauan dan wajib disetujui secara manual oleh <strong className="text-indigo-600">bagian Admin Akademik</strong> terlebih dahulu.
-                    </p>
-                    <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-amber-50/75 border border-amber-150 rounded-xl text-[10px] text-amber-850 font-bold font-mono shadow-sm mt-2">
-                      <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
-                      Status: Menunggu Persetujuan Admin Akademik
-                    </div>
-                  </div>
-                </div>
-              )
-            ) : yudisium?.status !== 'disetujui' && (
-              <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-5 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-600" />
-                
                 <div>
-                  <h3 id="yudisium-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-                    <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
-                    Langkah 2: Kelayakan Keuangan & Verifikasi Yudisium
-                  </h3>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    Ajuan kelayakan akademik Langkah 1 Anda telah disahkan. Akun Anda telah terdaftar otomatis dalam antrean verifikasi yudisium untuk disetujui ikut yudisium oleh bagian keuangan.
+                  <h3 className="font-extrabold text-base tracking-tight">Selamat! Semua Langkah Verifikasi Selesai</h3>
+                  <p className="text-xs text-white/90 leading-relaxed mt-1 max-w-xl">
+                    Anda telah menyelesaikan seluruh rangkaian verifikasi (Data Akademik, Keuangan Yudisium, dan Registrasi Wisuda). Silakan unduh surat bukti bebas administrasi resmi di sebelah kanan.
                   </p>
                 </div>
+              </div>
+              <button
+                id="download-bukti-pdf-btn"
+                onClick={downloadVerificationPDF}
+                className="px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 cursor-pointer shrink-0 uppercase tracking-widest leading-none border border-transparent hover:scale-[1.02]"
+              >
+                📥 Unduh Bukti Verifikasi (PDF)
+              </button>
+            </div>
+          )}
 
-                {/* If rejected, show rejection box closely and beautifully */}
-                {yudisium?.status === 'ditolak' && yudisium.rejectionReason && (
-                  <div className="p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-lg">
-                    <div className="flex gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* STEP TRACKER - Left column */}
+            <div className="space-y-4 lg:col-span-1">
+              <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500">Alur Verifikasi Anda</h3>
+                  <span className="text-[10px] text-slate-400 font-semibold">(Silakan Klik tiap Langkah)</span>
+                </div>
+                
+                <div className="relative pl-5 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-150">
+                  {/* Step 1 */}
+                  <div 
+                    id="tab-step-1"
+                    onClick={() => setActiveStepTab(1)}
+                    className={`relative p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                      activeStepTab === 1
+                        ? 'bg-indigo-50/70 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm'
+                        : 'border-transparent hover:bg-slate-50/70'
+                    }`}
+                  >
+                    <span className={`absolute -left-5 top-3.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
+                      student.academicApproved 
+                        ? 'bg-emerald-500' 
+                        : student.academicRejected
+                          ? 'bg-rose-500 shadow-sm animate-pulse'
+                          : 'bg-amber-500 animate-pulse'
+                    }`}>
+                      {student.academicApproved ? (
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      ) : student.academicRejected ? (
+                        <X className="w-2.5 h-2.5 text-white" />
+                      ) : (
+                        <Clock className="w-2.5 h-2.5 text-white" />
+                      )}
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-bold text-gray-800">1. Kelulusan Akademik</h4>
+                      <p className={`text-[10px] font-semibold ${
+                        student.academicApproved 
+                          ? 'text-emerald-600' 
+                          : student.academicRejected
+                            ? 'text-rose-600 font-bold'
+                            : 'text-amber-600'
+                      }`}>
+                        {student.academicApproved 
+                          ? 'Disetujui Admin (Lulus)' 
+                          : student.academicRejected
+                            ? '✗ Tolak / Revisi Berkas'
+                            : '⏳ Menunggu Persetujuan Admin'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div 
+                    id="tab-step-2"
+                    onClick={() => setActiveStepTab(2)}
+                    className={`relative p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                      activeStepTab === 2
+                        ? 'bg-indigo-50/70 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm'
+                        : 'border-transparent hover:bg-slate-50/70'
+                    }`}
+                  >
+                    <span className={`absolute -left-5 top-3.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
+                      !student.academicApproved
+                        ? 'bg-gray-200 grayscale text-gray-400'
+                        : yudisium?.status === 'disetujui' 
+                          ? 'bg-emerald-500' 
+                          : yudisium?.status === 'diajukan' || yudisium?.status === 'diproses'
+                            ? 'bg-blue-500 animate-pulse'
+                            : yudisium?.status === 'ditolak'
+                              ? 'bg-rose-500'
+                              : 'bg-gray-200'
+                    }`}>
+                      {student.academicApproved && yudisium?.status === 'disetujui' ? (
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      ) : yudisium?.status === 'ditolak' ? (
+                        <X className="w-2.5 h-2.5 text-white" />
+                      ) : (
+                        <Clock className="w-2.5 h-2.5 text-white" />
+                      )}
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-bold text-gray-800">2. Pendaftaran Yudisium</h4>
+                      <p className="text-[10px] text-gray-550 leading-normal font-semibold">
+                        {!student.academicApproved 
+                          ? 'Terkunci (Selesaikan Langkah 1)' 
+                          : !yudisium 
+                            ? 'Unggah berkas persyaratan.' 
+                            : yudisium.status === 'disetujui'
+                              ? 'Disetujui Keuangan'
+                              : yudisium.status === 'ditolak'
+                                ? '✗ Ditangguhkan Keuangan'
+                                : '⏳ Antrean Keuangan'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div 
+                    id="tab-step-3"
+                    onClick={() => setActiveStepTab(3)}
+                    className={`relative p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                      activeStepTab === 3
+                        ? 'bg-indigo-50/70 border-indigo-200 ring-2 ring-indigo-500/15 shadow-sm'
+                        : 'border-transparent hover:bg-slate-50/70'
+                    }`}
+                  >
+                    <span className={`absolute -left-5 top-3.5 w-4 h-4 rounded-full border border-white flex items-center justify-center ${
+                      yudisium?.status !== 'disetujui'
+                        ? 'bg-gray-200 grayscale text-gray-400'
+                        : wisuda?.status === 'disetujui' 
+                          ? 'bg-emerald-500'
+                          : wisuda?.status === 'diajukan' || wisuda?.status === 'diproses' || !wisuda
+                            ? 'bg-purple-500 animate-pulse'
+                            : wisuda?.status === 'ditolak'
+                              ? 'bg-rose-500'
+                              : 'bg-gray-200'
+                    }`}>
+                      {wisuda?.status === 'disetujui' ? (
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      ) : wisuda?.status === 'ditolak' ? (
+                        <X className="w-2.5 h-2.5 text-white" />
+                      ) : (
+                        <Clock className="w-2.5 h-2.5 text-white" />
+                      )}
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-bold text-gray-800">3. Pendaftaran Wisuda</h4>
+                      <p className="text-[10px] text-gray-400 leading-normal font-semibold">
+                        {yudisium?.status !== 'disetujui' 
+                          ? 'Terkunci. Yudisium belum disetujui.' 
+                          : !wisuda || wisuda.status === 'belum_daftar'
+                            ? 'Silakan isi formulir wisuda.'
+                            : wisuda.status === 'disetujui'
+                              ? 'Wisuda Disetujui (Lolos)'
+                              : wisuda.status === 'ditolak'
+                                ? '✗ Ditangguhkan Keuangan'
+                                : '⏳ Antrean Wisuda'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Help Card */}
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex gap-2.5 items-start">
+                <HelpCircle className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                <div className="space-y-1">
+                  <h5 className="font-bold text-xs text-indigo-950">Alur Penyelesaian Ijazah</h5>
+                  <p className="text-[10px] text-indigo-850 leading-relaxed font-semibold">
+                    Semua berkas kelengkapan akan diverifikasi administrasi oleh Biro Akademik Kemahasiswaan. Pendaftaran wisuda hanya dapat dibuka setelah pendaftaran Yudisium Anda berstatus <strong className="text-indigo-900">"DISETUJUI"</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* DYNAMIC FORMS WORKSPACE - Right column (2 columns) */}
+            <div className="space-y-6 lg:col-span-2 animate-fade-in animate-duration-300">
+              
+              {activeStepTab === 1 && (
+                <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-505 bg-indigo-500" />
+                  
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                        <CheckCircle className="w-4.5 h-4.5 text-emerald-600" />
+                        Langkah 1: Tinjauan Berkas Data Akademik
+                      </h3>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        Data akademik Anda telah divalidasi dan dikunci secara resmi untuk mencatatkan kelayakan wisuda.
+                      </p>
+                    </div>
+                    <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-1 shrink-0">
+                      ✓ TERVERIFIKASI
+                    </span>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl space-y-3">
+                    <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">📋 Profil Akademik Terdaftar</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-xs">
                       <div>
-                        <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Keuangan:</h4>
-                        <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
-                          {yudisium.rejectionReason}
-                        </p>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Nama Lengkap</span>
+                        <span className="font-semibold text-slate-800">{student.nama}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">NIM</span>
+                        <span className="font-mono font-semibold text-slate-800">{student.nim}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Nomor Induk Kependudukan (NIK)</span>
+                        <span className="font-mono font-semibold text-slate-800">{student.nik || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Tempat, Tanggal Lahir</span>
+                        <span className="font-semibold text-slate-800">{student.tempatLahir}, {student.tanggalLahir}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Program Studi</span>
+                        <span className="font-semibold text-slate-800">{student.programStudi}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Fakultas</span>
+                        <span className="font-semibold text-slate-800">{student.fakultas}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">Email</span>
+                        <span className="font-semibold text-slate-800">{student.email || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-400 block uppercase text-[10px]">No. Telepon / WhatsApp</span>
+                        <span className="font-semibold text-slate-800">{student.noHp || '-'}</span>
                       </div>
                     </div>
                   </div>
-                )}
 
-                {/* Informational block - no documents needed */}
-                <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-center">
-                  <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-indigo-950">Informasi Berkas Yudisium</p>
-                    <p className="text-[11px] text-indigo-900 font-medium leading-relaxed mt-0.5">
-                      Dokumen kelengkapan persyaratan fisik tidak perlu diunggah secara mandiri. Silakan langsung datang ke bagian keuangan untuk mendapatkan persetujuan mengikuti yudisium dengan membawa bukti pembayaran yudisium.
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {student.ktpDoc && (
+                      <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-700 truncate">Kartu Tanda Penduduk (KTP)</p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{student.ktpDoc.fileName}</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => openFilePreview(student.ktpDoc!.fileData!, student.ktpDoc!.fileName || 'KTP.pdf')}
+                          className="px-2.5 py-1 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 text-[10px] font-bold rounded border border-indigo-150 shrink-0 cursor-pointer"
+                        >
+                          Preview
+                        </button>
+                      </div>
+                    )}
+
+                    {student.ijazahSmaDoc && (
+                      <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-700 truncate">Ijazah SMA / Sederajat</p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{student.ijazahSmaDoc.fileName}</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => openFilePreview(student.ijazahSmaDoc!.fileData!, student.ijazahSmaDoc!.fileName || 'Ijazah_SMA.pdf')}
+                          className="px-2.5 py-1 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 text-[10px] font-bold rounded border border-indigo-150 shrink-0 cursor-pointer"
+                        >
+                          Preview
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
+              )}
 
-                {/* Submission Action (Read-only status info) */}
-                <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                  <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
-                  {(yudisium?.status === 'diajukan' || yudisium?.status === 'diproses' || !yudisium) ? (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                      Status: Menunggu Verifikasi Keuangan
-                    </span>
-                  ) : yudisium?.status === 'ditolak' ? (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                      Status: Ditangguhkan Keuangan
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      Status: Yudisium Disetujui
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* STAGE B: WISUDA STATUS CARD (UNLOCKED IF YUDISIUM APPROVED) */}
-            {yudisium?.status === 'disetujui' && (
-              <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-4 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-indigo-600" />
-                
-                <div className="flex items-start justify-between gap-4">
+              {activeStepTab === 2 && (
+                <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500" />
+                  
                   <div>
-                    <h3 id="wisuda-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-                       <GraduationCap className="w-5 h-5 text-teal-600" />
-                       Langkah 3: Pendaftaran Wisuda (Terdaftar Otomatis)
+                    <h3 id="yudisium-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                      <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
+                      Langkah 2: Kelayakan Keuangan & Verifikasi Yudisium
                     </h3>
                     <p className="text-[11px] text-gray-500 mt-1">
-                      Selamat, Yudisium Anda disetujui! Akun Anda telah terdaftar otomatis dalam antrean verifikasi wisuda oleh bagian keuangan.
+                      Ajuan kelayakan akademik Langkah 1 Anda telah disahkan. Akun Anda telah terdaftar otomatis dalam antrean verifikasi yudisium untuk disetujui ikut yudisium oleh bagian keuangan.
                     </p>
                   </div>
-                  <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Yudisium Lulus!
-                  </span>
-                </div>
 
-                {wisuda?.rejectionReason && (
-                  <div className="p-4 bg-rose-50 border border-rose-150 rounded-xl">
-                    <div className="flex gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
+                  {/* If rejected, show rejection box closely and beautifully */}
+                  {yudisium?.status === 'ditolak' && yudisium.rejectionReason && (
+                    <div className="p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-lg">
+                      <div className="flex gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Keuangan:</h4>
+                          <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
+                            {yudisium.rejectionReason}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Informational block - no documents needed */}
+                  <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-center">
+                    <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-indigo-950">Informasi Berkas Yudisium</p>
+                      <p className="text-[11px] text-indigo-900 font-medium leading-relaxed mt-0.5">
+                        Dokumen kelengkapan persyaratan fisik tidak perlu diunggah secara mandiri. Silakan langsung datang ke bagian keuangan untuk mendapatkan persetujuan mengikuti yudisium dengan membawa bukti pembayaran yudisium.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Submission Action (Read-only status info) */}
+                  <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                    <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
+                    {(yudisium?.status === 'diajukan' || yudisium?.status === 'diproses' || !yudisium) ? (
+                      <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                        Status: Menunggu Verifikasi Keuangan
+                      </span>
+                    ) : yudisium?.status === 'ditolak' ? (
+                      <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                        Status: Ditangguhkan Keuangan
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Status: Yudisium Disetujui
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeStepTab === 3 && (
+                yudisium?.status !== 'disetujui' ? (
+                  <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-6 text-center space-y-4 animate-fade-in">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 shadow-sm">
+                      🔒
+                    </div>
+                    <div className="max-w-md mx-auto space-y-2">
+                      <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Langkah 3: Pendaftaran Wisuda (Terkunci)</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                        Formulir pendaftaran wisuda Anda masih terkunci secara otomatis. Selesaikan Langkah 2 (Pendaftaran Yudisium divalidasi dan disetujui oleh keuangan) terlebih dahulu sebelum dapat diverifikasi untuk logistik wisuda.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl border border-gray-250 shadow-sm p-5 space-y-4 relative overflow-hidden animate-fade-in">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-indigo-600" />
+                    
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Wisuda:</h4>
-                        <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
-                          {wisuda.rejectionReason}
+                        <h3 id="wisuda-header" className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                           <GraduationCap className="w-5 h-5 text-teal-600" />
+                           Langkah 3: Pendaftaran Wisuda (Terdaftar Otomatis)
+                        </h3>
+                        <p className="text-[11px] text-gray-500 mt-1">
+                          Selamat, Yudisium Anda disetujui! Akun Anda telah terdaftar otomatis dalam antrean verifikasi wisuda oleh bagian keuangan.
+                        </p>
+                      </div>
+                      <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-1 shrink-0">
+                        <Sparkles className="w-3 h-3" /> Yudisium Lulus!
+                      </span>
+                    </div>
+
+                    {wisuda?.rejectionReason && (
+                      <div className="p-4 bg-rose-50 border border-rose-150 rounded-xl">
+                        <div className="flex gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rose-650 shrink-0 mt-0.5" />
+                          <div>
+                            <h4 className="font-bold text-xs text-rose-950">Alasan Penangguhan / Rejection Wisuda:</h4>
+                            <p className="text-xs text-rose-800 font-mono mt-1 leading-normal bg-white/70 p-3 rounded-lg border border-rose-100">
+                              {wisuda.rejectionReason}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-4 bg-teal-50/30 border border-teal-100 rounded-xl flex gap-3 items-center">
+                      <FileText className="w-5 h-5 text-teal-600 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-teal-950">Informasi Berkas Wisuda</p>
+                        <p className="text-[11px] text-teal-900 font-medium leading-relaxed mt-0.5">
+                          Segala pengisian data pendukung seperti ukuran baju toga, data wisudawan, orang tua, dan alamat pengiriman ijazah/undangan kini dikelola dan diverifikasi langsung secara administratif untuk mempermudah pendaftaran wisuda Anda. Anda tidak perlu mengirim/mengisi formulir manual apa pun.
                         </p>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                <div className="p-4 bg-teal-50/30 border border-teal-100 rounded-xl flex gap-3 items-center">
-                  <FileText className="w-5 h-5 text-teal-600 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-teal-950">Informasi Berkas Wisuda</p>
-                    <p className="text-[11px] text-teal-900 font-medium leading-relaxed mt-0.5">
-                      Segala pengisian data pendukung seperti ukuran baju toga, data wisudawan, orang tua, dan alamat pengiriman ijazah/undangan kini dikelola dan diverifikasi langsung secara administratif untuk mempermudah pendaftaran wisuda Anda. Anda tidak perlu mengirim/mengisi formulir manual apa pun.
-                    </p>
+                    <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                      <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
+                      {(wisuda?.status === 'diajukan' || wisuda?.status === 'diproses' || !wisuda) ? (
+                        <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                          Status: Menunggu Verifikasi Wisuda Keuangan
+                        </span>
+                      ) : wisuda?.status === 'ditolak' ? (
+                        <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                          Status: Ditangguhkan Keuangan
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Status: Wisuda Disetujui (Lolos)
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )
+              )}
 
-                <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                  <span className="text-slate-400 font-sans font-semibold text-[11px]">Tidak perlu melakukan pengiriman formulir.</span>
-                  {(wisuda?.status === 'diajukan' || wisuda?.status === 'diproses' || !wisuda) ? (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                      Status: Menunggu Verifikasi Wisuda Keuangan
-                    </span>
-                  ) : wisuda?.status === 'ditolak' ? (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                      Status: Ditangguhkan Keuangan
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1.5 inline-flex items-center gap-1.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-700 font-bold text-[10px] font-mono shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      Status: Wisuda Disetujui (Lolos)
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
+            </div>
 
           </div>
 
