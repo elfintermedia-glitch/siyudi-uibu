@@ -74,7 +74,7 @@ export default function StudentPanel({
     });
   };
 
-  const downloadStep1PDF = async () => {
+  const previewStep1PDF = async () => {
     try {
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -301,8 +301,10 @@ export default function StudentPanel({
         doc.text('Otentikasi NIM Berkas', qrX, qrY + 37);
       }
 
-      // Save PDF
-      doc.save(`Bukti_Verifikasi_Langkah1_${student.nim}.pdf`);
+      // Preview PDF in new tab
+      const pdfBlob = doc.output('blob');
+      const blobURL = URL.createObjectURL(pdfBlob);
+      window.open(blobURL, '_blank');
     } catch (error) {
       console.error('Gagal membuat PDF Langkah 1:', error);
       alert('Terjadi kesalahan saat memproses file PDF bukti verifikasi.');
@@ -2155,19 +2157,10 @@ export default function StudentPanel({
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={downloadStep1PDF}
+                  onClick={previewStep1PDF}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
                 >
-                  <span>📥</span> Unduh PDF Resmi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.print();
-                  }}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <span>🖨️</span> Cetak Printer
+                  <span>👁️</span> Pratinjau PDF (Tab Baru)
                 </button>
               </div>
               <button
