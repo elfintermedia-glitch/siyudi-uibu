@@ -952,7 +952,7 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      doc.text('Drs. Joko Purwanto, M.Si.', 25, sigY + 30);
+      doc.text('Adi, S.Pd., M.Pd.', 25, sigY + 30);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 116, 139);
       doc.text('NIP. 197410212002121003', 25, sigY + 34);
@@ -990,8 +990,10 @@ export default function StudentPanel({
       doc.text(`Keamanan Dokumen: Lembar ini diterbitkan secara otomatis dan terotentikasi digital nomor seri ${uuid}.`, width / 2, 281, { align: 'center' });
       doc.text('Dokumen ini tidak memerlukan tanda tangan basah dan sah secara yuridis.', width / 2, 284, { align: 'center' });
 
-      // Save PDF
-      doc.save(`Bukti_Bebas_Yudisium_Wisuda_${student.nim}.pdf`);
+      // Open PDF in a new tab instead of downloading
+      const pdfBlob = doc.output('blob');
+      const blobURL = URL.createObjectURL(pdfBlob);
+      window.open(blobURL, '_blank');
     } catch (error) {
       console.error('Gagal membuat PDF:', error);
       alert('Terjadi kesalahan saat membuat file PDF bukti verifikasi.');
@@ -1905,7 +1907,7 @@ export default function StudentPanel({
                 <div>
                   <h3 className="font-extrabold text-base tracking-tight">Selamat! Semua Langkah Verifikasi Selesai</h3>
                   <p className="text-xs text-white/90 leading-relaxed mt-1 max-w-xl">
-                    Anda telah menyelesaikan seluruh rangkaian verifikasi (Data Akademik, Keuangan Yudisium, dan Registrasi Wisuda). Silakan unduh surat bukti bebas administrasi resmi di sebelah kanan.
+                    Anda telah menyelesaikan seluruh rangkaian verifikasi (Data Akademik, Keuangan Yudisium, dan Registrasi Wisuda). Silakan lihat surat bukti bebas administrasi resmi di sebelah kanan.
                   </p>
                 </div>
               </div>
@@ -1914,7 +1916,7 @@ export default function StudentPanel({
                 onClick={downloadVerificationPDF}
                 className="px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 text-xs font-bold rounded-xl shadow transition-all flex items-center gap-2 cursor-pointer shrink-0 uppercase tracking-widest leading-none border border-transparent hover:scale-[1.02]"
               >
-                📥 Unduh Bukti Verifikasi (PDF)
+                👁️ Lihat Bukti Verifikasi (PDF)
               </button>
             </div>
           )}
