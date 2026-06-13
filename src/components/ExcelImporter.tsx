@@ -18,6 +18,12 @@ export const ALLOWED_PROGRAM_STUDI = [
   'Teknik Elektro'
 ];
 
+export const ALLOWED_FAKULTAS = [
+  'Fakultas Eksakta dan Keolahragaan (FEK)',
+  'Fakultas Sosial dan Humaniora (FSH)',
+  'Fakultas Sains dan Teknologi (FST)'
+];
+
 interface ExcelImporterProps {
   onImport: (newStudents: StudentAcademic[]) => void;
   existingStudentsCount: number;
@@ -38,6 +44,7 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
     nama: '',
     tempatLahir: '',
     tanggalLahir: '',
+    fakultas: '',
     programStudi: '',
     statusKelulusan: '',
     keterangan: '',
@@ -53,6 +60,7 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
     { key: 'nama', label: 'Nama Lengkap' },
     { key: 'tempatLahir', label: 'Tempat Lahir' },
     { key: 'tanggalLahir', label: 'Tanggal Lahir (YYYY-MM-DD)' },
+    { key: 'fakultas', label: 'Fakultas' },
     { key: 'programStudi', label: 'Program Studi / Jurusan' },
     { key: 'statusKelulusan', label: 'Status Kelulusan (Lulus / Belum Lulus)' }
   ];
@@ -138,6 +146,7 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
                    (field.key === 'nama' && (hLower === 'nama' || hLower.includes('name'))) ||
                    (field.key === 'tempatLahir' && (hLower.includes('tempat') || hLower.includes('tmplahir') || hLower.includes('lahir'))) ||
                    (field.key === 'tanggalLahir' && (hLower.includes('tanggal') || hLower.includes('tgl') || hLower.includes('tgllahir') || hLower.includes('tgl_lah'))) ||
+                   (field.key === 'fakultas' && (hLower.includes('fakultas') || hLower.includes('faculty') || hLower.includes('fak'))) ||
                    (field.key === 'statusKelulusan' && (hLower.includes('lulus') || hLower.includes('status')));
           });
           autoMappings[field.key] = match || '';
@@ -185,6 +194,7 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         const rawNama = String(row[mappings.nama] || '').trim();
         const rawTempatLahir = String(row[mappings.tempatLahir] || '').trim();
         const rawTanggalLahir = String(row[mappings.tanggalLahir] || '').trim();
+        const rawFakultas = String(row[mappings.fakultas] || '').trim();
         const rawProdi = String(row[mappings.programStudi] || '').trim();
 
         let rawStatusText = String(row[mappings.statusKelulusan] || '').toLowerCase().trim();
@@ -201,11 +211,19 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           throw new Error(`Baris ke-${index + 1} tidak memiliki NIM, NIK, Nama Lengkap, Tempat Lahir, atau Tanggal Lahir.`);
         }
 
-        const isTeknik = rawProdi.startsWith('Teknik');
-        const isMagister = rawProdi.startsWith('Magister');
-        let computedFakultas = 'Fakultas Keguruan dan Ilmu Pendidikan';
-        if (isTeknik) computedFakultas = 'Fakultas Teknik';
-        else if (isMagister) computedFakultas = 'Pascasarjana';
+        let computedFakultas = rawFakultas || 'Fakultas Eksakta dan Keolahragaan (FEK)';
+        const lowerFak = computedFakultas.toLowerCase();
+        if (lowerFak.includes('eksakta') || lowerFak.includes('olahraga') || lowerFak.includes('fek')) {
+          computedFakultas = 'Fakultas Eksakta dan Keolahragaan (FEK)';
+        } else if (lowerFak.includes('sosial') || lowerFak.includes('humaniora') || lowerFak.includes('fsh')) {
+          computedFakultas = 'Fakultas Sosial dan Humaniora (FSH)';
+        } else if (lowerFak.includes('sains') || lowerFak.includes('teknologi') || lowerFak.includes('fst') || lowerFak.includes('ipa') || lowerFak.includes('komputer')) {
+          computedFakultas = 'Fakultas Sains dan Teknologi (FST)';
+        } else {
+          if (!ALLOWED_FAKULTAS.includes(computedFakultas)) {
+            computedFakultas = 'Fakultas Eksakta dan Keolahragaan (FEK)';
+          }
+        }
 
         return {
           nim: rawNim,
@@ -239,10 +257,10 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
 
   const downloadSampleTemplate = () => {
     const sampleData = [
-      ['NIM', 'NIK', 'NAMA LENGKAP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'PROGRAM STUDI', 'STATUS KELULUSAN', 'KETERANGAN', 'EMAIL', 'NO HANDPHONE'],
-      ['120140999', '3573011212990001', 'Rian Hidayat', 'Malang', '2004-05-12', 'Pendidikan Matematika', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'rian.hidayat@univ.ac.id', '085277884422'],
-      ['120140888', '3573011212990002', 'Suryani Atika', 'Surabaya', '2004-08-22', 'Teknik Mesin', 'Belum Lulus', 'Kurang mata kuliah pilihan', 'suryani@univ.ac.id', '089912345678'],
-      ['120140777', '3573011212990003', 'Farhan Mahendra', 'Blitar', '2003-11-04', 'Pendidikan Bahasa Inggris', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'farhan.m@univ.ac.id', '081242421212']
+      ['NIM', 'NIK', 'NAMA LENGKAP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'FAKULTAS', 'PROGRAM STUDI', 'STATUS KELULUSAN', 'KETERANGAN', 'EMAIL', 'NO HANDPHONE'],
+      ['120140999', '3573011212990001', 'Rian Hidayat', 'Malang', '2004-05-12', 'Fakultas Sains dan Teknologi (FST)', 'Pendidikan Matematika', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'rian.hidayat@univ.ac.id', '085277884422'],
+      ['120140888', '3573011212990002', 'Suryani Atika', 'Surabaya', '2004-08-22', 'Fakultas Sains dan Teknologi (FST)', 'Teknik Mesin', 'Belum Lulus', 'Kurang mata kuliah pilihan', 'suryani@univ.ac.id', '089912345678'],
+      ['120140777', '3573011212990003', 'Farhan Mahendra', 'Blitar', '2003-11-04', 'Fakultas Eksakta dan Keolahragaan (FEK)', 'Pendidikan Bahasa Inggris', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'farhan.m@univ.ac.id', '081242421212']
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(sampleData);
@@ -262,55 +280,6 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
     document.body.removeChild(link);
   };
 
-  const handleCreateMockSample = () => {
-    const mockData: StudentAcademic[] = [
-      {
-        nim: '120140999',
-        nik: '3573011212990001',
-        nama: 'Rian Hidayat',
-        tempatLahir: 'Malang',
-        tanggalLahir: '2004-05-12',
-        fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan',
-        programStudi: 'Pendidikan Matematika',
-        statusKelulusan: 'Lulus',
-        keterangan: 'Memenuhi syarat kelulusan akademik secara penuh',
-        email: 'rian.hidayat@univ.ac.id',
-        noHp: '085277884422',
-        password: 'kebudiutamaan'
-      },
-      {
-        nim: '120140888',
-        nik: '3573011212990002',
-        nama: 'Suryani Atika',
-        tempatLahir: 'Surabaya',
-        tanggalLahir: '2004-08-22',
-        fakultas: 'Fakultas Teknik',
-        programStudi: 'Teknik Mesin',
-        statusKelulusan: 'Belum Lulus',
-        keterangan: 'Skripsi belum selesai diunggah.',
-        email: 'suryani@univ.ac.id',
-        noHp: '089912345678',
-        password: 'kebudiutamaan'
-      },
-      {
-        nim: '120140777',
-        nik: '3573011212990003',
-        nama: 'Farhan Mahendra',
-        tempatLahir: 'Blitar',
-        tanggalLahir: '2003-11-04',
-        fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan',
-        programStudi: 'Pendidikan Bahasa Inggris',
-        statusKelulusan: 'Lulus',
-        keterangan: 'Memenuhi syarat kelulusan akademik',
-        email: 'farhan.m@univ.ac.id',
-        noHp: '081242421212',
-        password: 'kebudiutamaan'
-      }
-    ];
-    onImport(mockData);
-    setSuccessCount(mockData.length);
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -321,19 +290,6 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           <p className="text-[11px] text-gray-500 mt-0.5">
             Impor data mahasiswa langsung dari file Excel atau CSV secara digital.
           </p>
-          <div className="mt-2.5 p-3 bg-slate-50 border border-slate-205 rounded-xl space-y-1.5 max-h-40 overflow-y-auto">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500 flex items-center gap-1">
-              <School className="w-3.5 h-3.5 text-indigo-600" /> Program Studi Universitas IBU (12 Pilihan):
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1 text-[10px] text-slate-650">
-              {ALLOWED_PROGRAM_STUDI.map((prodi, idx) => (
-                <div key={idx} className="flex items-center gap-1 font-medium truncate">
-                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0"></span>
-                  {prodi}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -343,14 +299,6 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           >
             <Download className="w-3.5 h-3.5" />
             Unduh Template CSV
-          </button>
-          <button
-            id="inject-mock-btn"
-            onClick={handleCreateMockSample}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-150 rounded-lg transition-colors cursor-pointer"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            Gunakan Sampel Cepat
           </button>
         </div>
       </div>
