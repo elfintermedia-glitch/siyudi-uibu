@@ -10,7 +10,6 @@ import StudentPanel from './components/StudentPanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
 import FinancePanel from './components/FinancePanel';
-import BusinessProcessPresentation from './components/BusinessProcessPresentation';
 
 export default function App() {
   // 1. Initial State Load from Database with local fallbacks
@@ -58,7 +57,6 @@ export default function App() {
   
   // Tab within the login container
   const [loginTab, setLoginTab] = useState<'student' | 'admin'>('student');
-  const [showBusinessPresentation, setShowBusinessPresentation] = useState(false);
 
   // Helper quick diagnostic presets log in
   const handleQuickLogin = (nim: string) => {
@@ -416,14 +414,6 @@ export default function App() {
 
             {/* Quick switcher during testing environment */}
             <div className="flex items-center gap-3">
-              <button
-                id="btn-show-presentation"
-                onClick={() => setShowBusinessPresentation(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 text-xs font-bold rounded-xl border border-indigo-200 transition-all cursor-pointer uppercase tracking-wider whitespace-nowrap"
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-indigo-600" /> Desain Bisnis Proses
-              </button>
-
               <div className="flex items-center gap-2">
                 {activeRole !== 'guest' ? (
                 <div className="flex items-center gap-2.5 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-lg">
@@ -828,14 +818,6 @@ export default function App() {
           <span className="text-[10px] text-gray-300 font-mono">v2.4.1-stable</span>
         </div>
       </footer>
-
-      {showBusinessPresentation && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 md:p-8 lg:p-12 z-[100] animate-fade-in">
-          <div className="max-w-6xl w-full h-[90vh] bg-slate-905 rounded-3xl overflow-hidden shadow-2xl">
-            <BusinessProcessPresentation onClose={() => setShowBusinessPresentation(false)} />
-          </div>
-        </div>
-      )}
 
     </div>
   );
