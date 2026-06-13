@@ -859,11 +859,12 @@ export default function StudentPanel({
 
               {/* Program Studi */}
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-500">Program Studi / Jurusan <span className="text-rose-500">*</span></label>
+                <label className="text-[11px] font-bold text-slate-500">Program Studi / Jurusan <span className="text-rose-500">*</span> <span className="text-slate-400 text-[10px] font-normal">(Tidak Dapat Diubah)</span></label>
                 <select
                   value={editProdi}
                   onChange={(e) => handleProdiChange(e.target.value)}
-                  className="p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800 cursor-pointer"
+                  className="p-2.5 text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-500 rounded-lg focus:outline-none cursor-not-allowed"
+                  disabled
                   required
                 >
                   {ALLOWED_PROGRAM_STUDI.map((prodi) => (
