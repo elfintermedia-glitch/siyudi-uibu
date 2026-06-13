@@ -74,8 +74,92 @@ export default function StudentPanel({
     });
   };
 
+  const getLogoBase64 = (): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 300, 300);
+          resolve(canvas.toDataURL('image/png'));
+        } else {
+          resolve('');
+        }
+      };
+      img.onerror = () => {
+        resolve('');
+      };
+      img.src = '/favicon.svg';
+    });
+  };
+
+  const drawHeaderKOP = (doc: any, logoBase64: string, primaryColor: number[]) => {
+    // Left Logo
+    if (logoBase64) {
+      try {
+        doc.addImage(logoBase64, 'PNG', 15, 12, 25, 25);
+      } catch (e) {
+        console.error('Error adding logo to PDF:', e);
+      }
+    } else {
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(15, 12, 25, 25);
+    }
+
+    // Center text - Serif (times) style like the logo
+    doc.setTextColor(30, 41, 59);
+    
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.text('Universitas Insan', 43, 17);
+    
+    doc.setFont('times', 'bold');
+    doc.setFontSize(23);
+    doc.text('Budi Utomo', 43, 25);
+    
+    doc.setFont('times', 'bold');
+    doc.setFontSize(8.5);
+    doc.text('dh. IKIP Budi Utomo dan STTI Turen', 43, 29.5);
+    
+    doc.setFont('times', 'italic');
+    doc.setFontSize(8);
+    doc.text('Where Minds & Hearts Find Harmony', 43, 33.5);
+
+    // Right Column - Akkreditasi box & details
+    doc.setFillColor(0, 0, 0); // Solid black for badge background
+    doc.rect(148, 12.5, 47, 4.5, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(8);
+    doc.text('T E R A K R E D I T A S I', 171.5, 16, { align: 'center' });
+
+    doc.setTextColor(51, 65, 85);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(7.5);
+    doc.text('Jl. Simpang Arjuno 14 B Malang', 171.5, 21, { align: 'center' });
+    doc.text('Jl. Citandui 46 Malang', 171.5, 24, { align: 'center' });
+    doc.text('(0341) 323214 - 326019, Fax. 335070', 171.5, 27, { align: 'center' });
+    doc.text('uibu.ac.id', 171.5, 30, { align: 'center' });
+    doc.text('info@budiutomomalang.ac.id', 171.5, 33, { align: 'center' });
+
+    // Separator double line
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(1);
+    doc.line(15, 38, 210 - 15, 38);
+    
+    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.setLineWidth(0.5);
+    doc.line(15, 39.5, 210 - 15, 39.5);
+  };
+
   const previewStep1PDF = async () => {
     try {
+      const logoBase64 = await getLogoBase64();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -102,24 +186,7 @@ export default function StudentPanel({
       doc.rect(12, 12, width - 24, height - 24);
 
       // Kop Surat (Header)
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(30, 41, 59);
-      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
-      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: baak@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
-
-      // Separator line
-      doc.setDrawColor(30, 41, 59);
-      doc.setLineWidth(1);
-      doc.line(15, 38, width - 15, 38);
-      doc.setDrawColor(5, 150, 105);
-      doc.setLineWidth(0.5);
-      doc.line(15, 40, width - 15, 40);
+      drawHeaderKOP(doc, logoBase64, primaryColor);
 
       // Document Title
       doc.setFont('helvetica', 'bold');
@@ -313,6 +380,7 @@ export default function StudentPanel({
 
   const previewStep2PDF = async () => {
     try {
+      const logoBase64 = await getLogoBase64();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -338,24 +406,7 @@ export default function StudentPanel({
       doc.rect(12, 12, width - 24, height - 24);
 
       // Kop Surat
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(30, 41, 59);
-      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
-      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: bauk@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
-
-      // Separator line
-      doc.setDrawColor(30, 41, 59);
-      doc.setLineWidth(1);
-      doc.line(15, 38, width - 15, 38);
-      doc.setDrawColor(79, 70, 229);
-      doc.setLineWidth(0.5);
-      doc.line(15, 40, width - 15, 40);
+      drawHeaderKOP(doc, logoBase64, primaryColor);
 
       // Document Title
       doc.setFont('helvetica', 'bold');
@@ -546,6 +597,7 @@ export default function StudentPanel({
 
   const previewStep3PDF = async () => {
     try {
+      const logoBase64 = await getLogoBase64();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -571,24 +623,7 @@ export default function StudentPanel({
       doc.rect(12, 12, width - 24, height - 24);
 
       // Kop Surat
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(30, 41, 59);
-      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
-      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: bauk@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
-
-      // Separator line
-      doc.setDrawColor(30, 41, 59);
-      doc.setLineWidth(1);
-      doc.line(15, 38, width - 15, 38);
-      doc.setDrawColor(13, 148, 136);
-      doc.setLineWidth(0.5);
-      doc.line(15, 40, width - 15, 40);
+      drawHeaderKOP(doc, logoBase64, primaryColor);
 
       // Document Title
       doc.setFont('helvetica', 'bold');
@@ -776,8 +811,9 @@ export default function StudentPanel({
     }
   };
 
-  const downloadVerificationPDF = () => {
+  const downloadVerificationPDF = async () => {
     try {
+      const logoBase64 = await getLogoBase64();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -805,24 +841,7 @@ export default function StudentPanel({
       doc.rect(12, 12, width - 24, height - 24);
 
       // Kop Surat (Header)
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(30, 41, 59);
-      doc.text('UNIVERSITAS INSAN BUDI UTOMO MALANG', width / 2, 25, { align: 'center' });
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Jl. Simpang Arjuno No.17-B, Kauman, Kec. Klojen, Kota Malang, Jawa Timur 65119', width / 2, 30, { align: 'center' });
-      doc.text('Telp: (0341) 323214 | Website: http://budiutomomalang.ac.id | Email: info@budiutomomalang.ac.id', width / 2, 34, { align: 'center' });
-
-      // Separator line
-      doc.setDrawColor(30, 41, 59);
-      doc.setLineWidth(1);
-      doc.line(15, 38, width - 15, 38);
-      doc.setDrawColor(13, 148, 136);
-      doc.setLineWidth(0.5);
-      doc.line(15, 40, width - 15, 40);
+      drawHeaderKOP(doc, logoBase64, primaryColor);
 
       // Document Title
       doc.setFont('helvetica', 'bold');
