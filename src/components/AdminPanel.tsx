@@ -5,7 +5,7 @@ import {
   Briefcase, Save, School, GraduationCap, ArrowUpDown, Info
 } from 'lucide-react';
 import { StudentAcademic, YudisiumRegistration, WisudaRegistration, DocumentUpload, SystemState } from '../types';
-import ExcelImporter, { ALLOWED_PROGRAM_STUDI } from './ExcelImporter';
+import ExcelImporter, { ALLOWED_PROGRAM_STUDI, ALLOWED_FAKULTAS } from './ExcelImporter';
 import StatsOverview from './StatsOverview';
 import { openFilePreview } from '../utils/filePreview';
 
@@ -127,7 +127,7 @@ export default function AdminPanel({
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
 
   const [studentForm, setStudentForm] = useState<Partial<StudentAcademic>>({
-    nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan', programStudi: 'Pendidikan Matematika',
+    nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Eksakta dan Keolahragaan (FEK)', programStudi: 'Pendidikan Matematika',
     statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: '', password: 'kebudiutamaan'
   });
 
@@ -186,7 +186,7 @@ export default function AdminPanel({
     }
 
     setStudentForm({
-      nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan', programStudi: 'Pendidikan Matematika',
+      nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Eksakta dan Keolahragaan (FEK)', programStudi: 'Pendidikan Matematika',
       statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: '', password: 'kebudiutamaan'
     });
   };
@@ -1758,7 +1758,7 @@ export default function AdminPanel({
                     setIsAddingStudent(true);
                     setEditingStudent(null);
                     setStudentForm({
-                      nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Keguruan dan Ilmu Pendidikan', programStudi: 'Pendidikan Matematika',
+                      nim: '', nik: '', nama: '', tempatLahir: '', tanggalLahir: '', fakultas: 'Fakultas Eksakta dan Keolahragaan (FEK)', programStudi: 'Pendidikan Matematika',
                       ipk: 3.5, sks: 144, statusKelulusan: 'Lulus', keterangan: '', email: '', noHp: ''
                     });
                   }}
@@ -1857,24 +1857,25 @@ export default function AdminPanel({
                   </div>
 
                   <div className="flex flex-col gap-1">
+                    <label>Fakultas <span className="text-rose-500">*</span></label>
+                    <select
+                      id="form-fakultas"
+                      value={studentForm.fakultas || 'Fakultas Eksakta dan Keolahragaan (FEK)'}
+                      onChange={(e) => setStudentForm(prev => ({ ...prev, fakultas: e.target.value }))}
+                      className="p-2 border bg-white rounded-lg focus:outline-none focus:border-indigo-500 font-medium text-xs text-slate-800"
+                    >
+                      {ALLOWED_FAKULTAS.map((fak, i) => (
+                        <option key={i} value={fak}>{fak}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
                     <label>Program Studi</label>
                     <select
                       id="form-prodi"
                       value={studentForm.programStudi}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const isTeknik = val.startsWith('Teknik');
-                        const isMagister = val.startsWith('Magister');
-                        let computedFakultas = 'Fakultas Keguruan dan Ilmu Pendidikan';
-                        if (isTeknik) computedFakultas = 'Fakultas Teknik';
-                        else if (isMagister) computedFakultas = 'Pascasarjana';
-                        
-                        setStudentForm(prev => ({ 
-                          ...prev, 
-                          programStudi: val,
-                          fakultas: computedFakultas
-                        }));
-                      }}
+                      onChange={(e) => setStudentForm(prev => ({ ...prev, programStudi: e.target.value }))}
                       className="p-2 border bg-white rounded-lg focus:outline-none focus:border-indigo-500 font-medium text-xs text-slate-800"
                     >
                       {ALLOWED_PROGRAM_STUDI.map((prodi, i) => (
@@ -2088,15 +2089,6 @@ export default function AdminPanel({
                           </div>
                         </td>
                         <td className="p-3 text-right space-x-1 whitespace-nowrap">
-                          {stu.dataVerified && !stu.academicApproved && (
-                            <button
-                              onClick={() => handleApproveStudentAcademic(stu.nim, true)}
-                              className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-700 hover:shadow text-white rounded text-[10px] font-bold transition-all cursor-pointer"
-                              title="Sahkan / Setujui Data & Dokumen Langkah 1"
-                            >
-                              Sahkan Langkah 1
-                            </button>
-                          )}
                           <button
                             id={`edit-stu-btn-${stu.nim}`}
                             onClick={() => handleStartEdit(stu)}
