@@ -776,6 +776,19 @@ async function startServer() {
     return `'${escaped}'`;
   }
 
+  function safeParseJSON(val: any) {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'string') {
+      try {
+        return JSON.parse(val);
+      } catch (e) {
+        console.error('Failed to parse JSON string:', val, e);
+        return [];
+      }
+    }
+    return val;
+  }
+
   // Get full state of system
   app.get('/api/state', async (req, res) => {
     try {
@@ -792,8 +805,20 @@ async function startServer() {
         allAdmins = memoryDb.getAdmins();
       }
 
+      // Safe parse JSON fields from database
+      const parsedStudents = allStudents.map((s: any) => ({
+        ...s,
+        ktpDoc: safeParseJSON(s.ktpDoc),
+        ijazahSmaDoc: safeParseJSON(s.ijazahSmaDoc)
+      }));
+
+      const parsedYudisiums = allYudisiums.map((y: any) => ({
+        ...y,
+        documents: safeParseJSON(y.documents) || []
+      }));
+
       const yudisiumApps: Record<string, any> = {};
-      allYudisiums.forEach((y) => {
+      parsedYudisiums.forEach((y) => {
         yudisiumApps[y.nim] = y;
       });
 
@@ -803,7 +828,7 @@ async function startServer() {
       });
 
       res.json({
-        students: allStudents,
+        students: parsedStudents,
         yudisiumApps,
         wisudaApps,
         adminUsers: allAdmins,
@@ -1047,7 +1072,13 @@ async function startServer() {
         return res.status(401).json({ error: 'Password mahasiswa salah!' });
       }
 
-      res.json({ success: true, student: studentRecord });
+      const parsedStudent = {
+        ...studentRecord,
+        ktpDoc: safeParseJSON(studentRecord.ktpDoc),
+        ijazahSmaDoc: safeParseJSON(studentRecord.ijazahSmaDoc)
+      };
+
+      res.json({ success: true, student: parsedStudent });
     } catch (err: any) {
       console.error('Error student login:', err);
       res.status(500).json({ error: 'Terjadi kegagalan sistem saat memverifikasi login.', details: err.message });

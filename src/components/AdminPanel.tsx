@@ -139,6 +139,19 @@ export default function AdminPanel({
   const [docNotes, setDocNotes] = useState<Record<string, string>>({}); // keyed by nim_docId
   const [globalRejectionReason, setGlobalRejectionReason] = useState<Record<string, string>>({}); // keyed by nim
 
+  const getSafeDocs = (app: any): any[] => {
+    if (!app || !app.documents) return [];
+    if (typeof app.documents === 'string') {
+      try {
+        const parsed = JSON.parse(app.documents);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+    return Array.isArray(app.documents) ? app.documents : [];
+  };
+
   // 1. Excel Importer adapter
   const handleExcelImport = (newStudents: StudentAcademic[]) => {
     // Merge new students, avoiding duplicate NIMs (preferring uploaded files)
@@ -300,7 +313,7 @@ export default function AdminPanel({
     const noteKey = `${nim}_${docId}`;
     const note = docNotes[noteKey] || '';
 
-    const updatedDocs = app.documents.map(doc => {
+    const updatedDocs = getSafeDocs(app).map(doc => {
       if (doc.id === docId) {
         return {
           ...doc,
@@ -1116,7 +1129,7 @@ export default function AdminPanel({
                       filteredYudisiums.map((app) => {
                         const studentInfo = state.students.find(s => s.nim === app.nim);
                         const isExpanded = !!expandedYudisium[app.nim];
-                        const docsList = app.documents || [];
+                        const docsList = getSafeDocs(app);
                         const totalDocs = docsList.length;
                         const uploadedDocsCount = docsList.filter(d => d.fileName).length;
                         const approvedDocsCount = docsList.filter(d => d.status === 'disetujui').length;
@@ -1264,16 +1277,16 @@ export default function AdminPanel({
 
                                     {/* Documents check blocks */}
                                     <div className="space-y-3">
-                                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pemeriksaan Dokumen Persyaratan ({(app.documents || []).length})</h4>
+                                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pemeriksaan Dokumen Persyaratan ({getSafeDocs(app).length})</h4>
                                       
-                                      {(app.documents || []).length === 0 ? (
+                                      {getSafeDocs(app).length === 0 ? (
                                         <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl text-center">
                                           <p className="text-xs font-bold text-slate-600">Pendaftaran Yudisium Tanpa Dokumen Kelengkapan</p>
                                           <p className="text-[11px] text-slate-400 mt-0.5">Persyaratan berkas digital dinonaktifkan. Silakan langsung verifikasi kelayakan akademik di bawah ini.</p>
                                         </div>
                                       ) : (
                                         <div className="space-y-2.5">
-                                          {app.documents.map((doc) => {
+                                          {getSafeDocs(app).map((doc) => {
                                           const noteKey = `${app.nim}_${doc.id}`;
                                           return (
                                             <div key={doc.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">

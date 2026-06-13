@@ -1198,7 +1198,14 @@ export default function StudentPanel({
   // Document uploads matching templates
   const [uploadedDocs, setUploadedDocs] = useState<DocumentUpload[]>(() => {
     if (yudisium?.documents) {
-      return [...yudisium.documents];
+      if (typeof yudisium.documents === 'string') {
+        try {
+          const parsed = JSON.parse(yudisium.documents);
+          if (Array.isArray(parsed)) return [...parsed];
+        } catch (_) {}
+      } else if (Array.isArray(yudisium.documents)) {
+        return [...yudisium.documents];
+      }
     }
     return REQUIRED_DOC_TEMPLATES.map(t => ({
       id: t.id,

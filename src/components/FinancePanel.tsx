@@ -41,6 +41,19 @@ export default function FinancePanel({
   const [docNotes, setDocNotes] = useState<Record<string, string>>({}); // keyed by nim_docId
   const [globalRejectionReason, setGlobalRejectionReason] = useState<Record<string, string>>({}); // keyed by nim
 
+  const getSafeDocs = (app: any): any[] => {
+    if (!app || !app.documents) return [];
+    if (typeof app.documents === 'string') {
+      try {
+        const parsed = JSON.parse(app.documents);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+    return Array.isArray(app.documents) ? app.documents : [];
+  };
+
   // 1. Audit individual document in Yudisium
   const handleAuditDocument = (nim: string, docId: string, status: 'disetujui' | 'ditolak') => {
     const app = state.yudisiumApps[nim];
@@ -49,7 +62,7 @@ export default function FinancePanel({
     const noteKey = `${nim}_${docId}`;
     const note = docNotes[noteKey] || '';
 
-    const updatedDocs = app.documents.map(doc => {
+    const updatedDocs = getSafeDocs(app).map(doc => {
       if (doc.id === docId) {
         return {
           ...doc,
@@ -344,7 +357,7 @@ export default function FinancePanel({
                       filteredYudisiums.map((app) => {
                         const studentInfo = state.students.find(s => s.nim === app.nim);
                         const isExpanded = !!expandedYudisium[app.nim];
-                        const docsList = app.documents || [];
+                        const docsList = getSafeDocs(app);
                         const totalDocs = docsList.length;
                         const uploadedDocsCount = docsList.filter(d => d.fileName).length;
                         const approvedDocsCount = docsList.filter(d => d.status === 'disetujui').length;
@@ -474,16 +487,16 @@ export default function FinancePanel({
 
                                       {/* Documents check blocks */}
                                       <div className="space-y-3">
-                                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider font-sans">Pemeriksaan Dokumen Persyaratan ({(app.documents || []).length})</h4>
+                                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider font-sans">Pemeriksaan Dokumen Persyaratan ({getSafeDocs(app).length})</h4>
                                         
-                                        {(app.documents || []).length === 0 ? (
+                                        {getSafeDocs(app).length === 0 ? (
                                           <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl text-center">
                                             <p className="text-xs font-bold text-slate-600">Pendaftaran Yudisium Tanpa Berkas Digital Mandiri</p>
                                             <p className="text-[11px] text-slate-400 mt-0.5">Persyaratan dokumen berkas digital dinonaktifkan. Silakan langsung validasi kelayakan pembayaran / yudisium di bawah ini.</p>
                                           </div>
                                         ) : (
                                           <div className="space-y-2.5">
-                                            {app.documents.map((doc) => {
+                                            {getSafeDocs(app).map((doc) => {
                                               const noteKey = `${app.nim}_${doc.id}`;
                                               const isBebasSpp = doc.id === 'bebas_spp';
                                               return (
