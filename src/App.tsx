@@ -30,6 +30,18 @@ export default function App() {
       .then(data => {
         if (data && Array.isArray(data.students)) {
           setState(data);
+          
+          // Hydrate and update student record with the latest state from backend/DB if active
+          const cachedStudent = localStorage.getItem('siyudi_current_student');
+          if (cachedStudent) {
+            try {
+              const parsed = JSON.parse(cachedStudent);
+              const refreshed = data.students.find((s: any) => s.nim === parsed.nim);
+              if (refreshed) {
+                setCurrentStudent(refreshed);
+              }
+            } catch (_) {}
+          }
         }
       })
       .catch(e => {
@@ -37,16 +49,55 @@ export default function App() {
       });
   }, []);
 
-  // Auth States
-  const [activeRole, setActiveRole] = useState<'guest' | 'student' | 'admin'>('guest');
-  const [studentNimInput, setStudentNimInput] = useState('');
-  const [studentPasswordInput, setStudentPasswordInput] = useState('');
-  const [adminUsername, setAdminUsername] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
+  // Auth States with Local Cache Initializers
+  const [activeRole, setActiveRole] = useState<'guest' | 'student' | 'admin'>(() => {
+    return (localStorage.getItem('siyudi_active_role') as 'guest' | 'student' | 'admin') || 'guest';
+  });
+  const [studentNimInput, setStudentNimInput] = useState(() => localStorage.getItem('siyudi_student_nim_input') || '');
+  const [studentPasswordInput, setStudentPasswordInput] = useState(() => localStorage.getItem('siyudi_student_password_input') || '');
+  const [adminUsername, setAdminUsername] = useState(() => localStorage.getItem('siyudi_admin_username') || '');
+  const [adminPassword, setAdminPassword] = useState(() => localStorage.getItem('siyudi_admin_password') || '');
   
-  const [currentStudent, setCurrentStudent] = useState<StudentAcademic | null>(null);
-  const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
+  const [currentStudent, setCurrentStudent] = useState<StudentAcademic | null>(() => {
+    const cached = localStorage.getItem('siyudi_current_student');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (_) {}
+    }
+    return null;
+  });
+  const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(() => {
+    const cached = localStorage.getItem('siyudi_current_admin');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (_) {}
+    }
+    return null;
+  });
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Sync state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('siyudi_active_role', activeRole);
+    localStorage.setItem('siyudi_student_nim_input', studentNimInput);
+    localStorage.setItem('siyudi_student_password_input', studentPasswordInput);
+    localStorage.setItem('siyudi_admin_username', adminUsername);
+    localStorage.setItem('siyudi_admin_password', adminPassword);
+    
+    if (currentStudent) {
+      localStorage.setItem('siyudi_current_student', JSON.stringify(currentStudent));
+    } else {
+      localStorage.removeItem('siyudi_current_student');
+    }
+    
+    if (currentAdmin) {
+      localStorage.setItem('siyudi_current_admin', JSON.stringify(currentAdmin));
+    } else {
+      localStorage.removeItem('siyudi_current_admin');
+    }
+  }, [activeRole, studentNimInput, studentPasswordInput, adminUsername, adminPassword, currentStudent, currentAdmin]);
   
   // Admin password change states
   const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
@@ -134,6 +185,13 @@ export default function App() {
     setAdminUsername('');
     setAdminPassword('');
     setLoginError(null);
+    localStorage.removeItem('siyudi_active_role');
+    localStorage.removeItem('siyudi_student_nim_input');
+    localStorage.removeItem('siyudi_student_password_input');
+    localStorage.removeItem('siyudi_admin_username');
+    localStorage.removeItem('siyudi_admin_password');
+    localStorage.removeItem('siyudi_current_student');
+    localStorage.removeItem('siyudi_current_admin');
   };
 
   // State update handlers passed down to Admin or Student panel
