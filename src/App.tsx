@@ -590,7 +590,7 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD <span className="text-rose-500">*</span></label>
-                        <div className="relative">
+                        <div className="relative" dir="ltr">
                           <input
                             id="input-password-student"
                             type={showStudentPassword ? "text" : "password"}
@@ -603,7 +603,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => setShowStudentPassword(!showStudentPassword)}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                            className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
                             title={showStudentPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                           >
                             {showStudentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -636,7 +636,7 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD <span className="text-rose-500">*</span></label>
-                        <div className="relative">
+                        <div className="relative" dir="ltr">
                           <input
                             id="input-password-admin"
                             type={showAdminPassword ? "text" : "password"}
@@ -649,7 +649,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => setShowAdminPassword(!showAdminPassword)}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                            className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
                             title={showAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                           >
                             {showAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -839,7 +839,7 @@ export default function App() {
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
-                          <div className="relative">
+                          <div className="relative" dir="ltr">
                             <input 
                               type={showNewAdminPassword ? "text" : "password"}
                               required
@@ -851,7 +851,7 @@ export default function App() {
                             <button
                               type="button"
                               onClick={() => setShowNewAdminPassword(!showNewAdminPassword)}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                              className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
                               title={showNewAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                             >
                               {showNewAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -861,7 +861,7 @@ export default function App() {
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
-                          <div className="relative">
+                          <div className="relative" dir="ltr">
                             <input 
                               type={showConfirmAdminPassword ? "text" : "password"}
                               required
@@ -873,7 +873,7 @@ export default function App() {
                             <button
                               type="button"
                               onClick={() => setShowConfirmAdminPassword(!showConfirmAdminPassword)}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                              className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
                               title={showConfirmAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
                             >
                               {showConfirmAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
