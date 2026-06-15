@@ -76,6 +76,9 @@ export default function SuperAdminPanel({
   // GitHub Update States
   const [gitHubRepo, setGitHubRepo] = useState('elfintermedia-glitch/siyudi-uibu');
   const [gitBranch, setGitBranch] = useState('main');
+  const [gitToken, setGitToken] = useState(() => {
+    return localStorage.getItem('siyudi_git_token') || '';
+  });
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateChecked, setUpdateChecked] = useState(false);
   const [hasNewVersion, setHasNewVersion] = useState(false);
@@ -86,6 +89,10 @@ export default function SuperAdminPanel({
   const [deployStep, setDeployStep] = useState(-1);
   const [deployLogs, setDeployLogs] = useState<string[]>([]);
   const consoleBottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('siyudi_git_token', gitToken);
+  }, [gitToken]);
 
   const [commits, setCommits] = useState<any[]>([]);
   const [isLoadingCommits, setIsLoadingCommits] = useState(false);
@@ -98,7 +105,7 @@ export default function SuperAdminPanel({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch }),
+        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch, token: gitToken }),
       });
       if (response.ok) {
         const data = await response.json();
@@ -130,7 +137,7 @@ export default function SuperAdminPanel({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch }),
+        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch, token: gitToken }),
       });
       if (!response.ok) {
         throw new Error(`Deteksi Git gagal dengan status ${response.status}`);
@@ -179,7 +186,7 @@ export default function SuperAdminPanel({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch }),
+        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch, token: gitToken }),
       });
 
       const data = await response.json();
@@ -749,6 +756,26 @@ export default function SuperAdminPanel({
                   />
                   <Github className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-slate-505 uppercase tracking-wider">GitHub Personal Access Token / PAT (Opsional)</label>
+                  <span className="text-[9px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded font-bold">Untuk Repositori Privat</span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="password"
+                    placeholder="Contoh: github_pat_..."
+                    value={gitToken}
+                    onChange={(e) => setGitToken(e.target.value)}
+                    className="w-full text-xs font-mono font-bold p-2.5 pl-8 border border-slate-250 hover:border-slate-350 rounded-xl bg-white text-slate-850 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                  <span className="absolute left-3 top-2.5 text-xs">🔑</span>
+                </div>
+                <p className="text-[9px] text-slate-400 leading-normal">
+                  Masukkan token akses di sini jika repositori GitHub Anda bersifat privat. Ini mencegah kegagalan otentikasi / TTY di aaPanel.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

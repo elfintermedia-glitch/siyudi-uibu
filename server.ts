@@ -8,7 +8,33 @@ import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USE
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-const execPromise = promisify(exec);
+const originalExecPromise = promisify(exec);
+const execPromise = (cmd: string, options: any = {}): Promise<any> => {
+  const mergedOptions = {
+    ...options,
+    env: {
+      ...process.env,
+      GIT_TERMINAL_PROMPT: '0',
+      GIT_ASKPASS: 'true',
+      ...options.env
+    }
+  };
+  return originalExecPromise(cmd, mergedOptions) as any;
+};
+
+function getGitRemoteUrl(repo: string, token?: string): string {
+  let cleanedRepo = repo.trim();
+  if (cleanedRepo.endsWith('.git')) {
+    cleanedRepo = cleanedRepo.substring(0, cleanedRepo.length - 4);
+  }
+  cleanedRepo = cleanedRepo.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
+  cleanedRepo = cleanedRepo.replace(/^[^/]+@github\.com\//i, '');
+
+  if (token && token.trim()) {
+    return `https://${token.trim()}@github.com/${cleanedRepo}.git`;
+  }
+  return `https://github.com/${cleanedRepo}.git`;
+}
 
 // In-Memory Database Fallback Configuration
 let isDatabaseAvailable = false;
@@ -397,19 +423,20 @@ async function startServer() {
 
   // Check for updates from GitHub
   app.post('/api/git-check', async (req, res) => {
-    const { repo, branch } = req.body;
+    const { repo, branch, token } = req.body;
     const targetBranch = branch || 'main';
     const targetRepo = repo || 'elfintermedia-glitch/siyudi-uibu';
     try {
       // Check if git works of if we are inside a repo
       await execPromise('git --version');
       
+      const remoteUrl = getGitRemoteUrl(targetRepo, token);
       try {
-        await execPromise(`git remote set-url origin https://github.com/${targetRepo}.git`);
+        await execPromise(`git remote set-url origin ${remoteUrl}`);
       } catch (_) {
         // If remote doesn't exist, try adding it
         try {
-          await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+          await execPromise(`git remote add origin ${remoteUrl}`);
         } catch (__) {}
       }
 
@@ -526,7 +553,7 @@ async function startServer() {
 
   // Pull code from GitHub and re-build
   app.post('/api/git-pull', async (req, res) => {
-    const { repo, branch } = req.body;
+    const { repo, branch, token } = req.body;
     const targetBranch = branch || 'main';
     const targetRepo = repo || 'elfintermedia-glitch/siyudi-uibu';
     const logs: string[] = [];
@@ -534,22 +561,25 @@ async function startServer() {
     logs.push(`[SISTEM] Memulai proses pembaruan otomatis dari repositori: ${targetRepo} [Branch: ${targetBranch}]`);
 
     try {
+      const remoteUrl = getGitRemoteUrl(targetRepo, token);
+
       // 1. Ensure we are in a git tree
       try {
         await execPromise('git rev-parse --is-inside-work-tree');
       } catch (err) {
         logs.push(`[SISTEM] Direktori bukan git repositori. Menginisialisasi git init...`);
         await execPromise('git init');
-        await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+        await execPromise(`git remote add origin ${remoteUrl}`);
       }
 
       // 2. Set remote URL to use HTTPS
       try {
-        await execPromise(`git remote set-url origin https://github.com/${targetRepo}.git`);
-        logs.push(`[SISTEM] Remote origin berhasil diselaraskan ke: github.com/${targetRepo}`);
+        await execPromise(`git remote set-url origin ${remoteUrl}`);
+        const logSafeUrl = remoteUrl.replace(/:[^@]+@/g, ':***@'); // hide token in log
+        logs.push(`[SISTEM] Remote origin berhasil diselaraskan ke: ${logSafeUrl}`);
       } catch (e) {
         try {
-          await execPromise(`git remote add origin https://github.com/${targetRepo}.git`);
+          await execPromise(`git remote add origin ${remoteUrl}`);
         } catch (__) {}
       }
 
