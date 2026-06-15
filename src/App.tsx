@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   GraduationCap, UserCheck, Shield, HelpCircle, LogOut, CheckCircle, 
-  Database, UserCheck2, Landmark, HelpCircle as HelpIcon, ChevronRight
+  Database, UserCheck2, Landmark, HelpCircle as HelpIcon, ChevronRight,
+  Eye, EyeOff
 } from 'lucide-react';
 import { StudentAcademic, YudisiumRegistration, WisudaRegistration, SystemState, DocumentUpload, AdminUser } from './types';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './utils/dummyData';
@@ -77,6 +78,8 @@ export default function App() {
     return null;
   });
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   // Sync state changes to localStorage
   useEffect(() => {
@@ -105,6 +108,8 @@ export default function App() {
   const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
   const [adminPasswordSuccess, setAdminPasswordSuccess] = useState<string | null>(null);
+  const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
+  const [showConfirmAdminPassword, setShowConfirmAdminPassword] = useState(false);
   
   // Tab within the login container
   const [loginTab, setLoginTab] = useState<'student' | 'admin'>('student');
@@ -585,15 +590,25 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD <span className="text-rose-500">*</span></label>
-                        <input
-                          id="input-password-student"
-                          type="password"
-                          required
-                          value={studentPasswordInput}
-                          onChange={(e) => setStudentPasswordInput(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
-                        />
+                        <div className="relative">
+                          <input
+                            id="input-password-student"
+                            type={showStudentPassword ? "text" : "password"}
+                            required
+                            value={studentPasswordInput}
+                            onChange={(e) => setStudentPasswordInput(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full pl-3 pr-10 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowStudentPassword(!showStudentPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                            title={showStudentPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                          >
+                            {showStudentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
                       </div>
 
                       <button
@@ -621,15 +636,25 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD <span className="text-rose-500">*</span></label>
-                        <input
-                          id="input-password-admin"
-                          type="password"
-                          required
-                          value={adminPassword}
-                          onChange={(e) => setAdminPassword(e.target.value)}
-                          placeholder="admin"
-                          className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white"
-                        />
+                        <div className="relative">
+                          <input
+                            id="input-password-admin"
+                            type={showAdminPassword ? "text" : "password"}
+                            required
+                            value={adminPassword}
+                            onChange={(e) => setAdminPassword(e.target.value)}
+                            placeholder="admin"
+                            className="w-full pl-3 pr-10 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white text-gray-900"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowAdminPassword(!showAdminPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                            title={showAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                          >
+                            {showAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
                       </div>
 
                       <button
@@ -706,6 +731,8 @@ export default function App() {
                     setConfirmAdminPassword('');
                     setAdminPasswordError(null);
                     setAdminPasswordSuccess(null);
+                    setShowNewAdminPassword(false);
+                    setShowConfirmAdminPassword(false);
                     setIsChangingAdminPassword(true);
                   }}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm border border-indigo-500 cursor-pointer flex items-center gap-1.5 transition-colors"
@@ -812,26 +839,46 @@ export default function App() {
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
-                          <input 
-                            type="password"
-                            required
-                            value={newAdminPassword}
-                            onChange={(e) => setNewAdminPassword(e.target.value)}
-                            placeholder="Masukkan password baru"
-                            className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
-                          />
+                          <div className="relative">
+                            <input 
+                              type={showNewAdminPassword ? "text" : "password"}
+                              required
+                              value={newAdminPassword}
+                              onChange={(e) => setNewAdminPassword(e.target.value)}
+                              placeholder="Masukkan password baru"
+                              className="w-full pl-3 pr-10 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewAdminPassword(!showNewAdminPassword)}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                              title={showNewAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                            >
+                              {showNewAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            </button>
+                          </div>
                         </div>
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
-                          <input 
-                            type="password"
-                            required
-                            value={confirmAdminPassword}
-                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
-                            placeholder="Ulangi password baru"
-                            className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
-                          />
+                          <div className="relative">
+                            <input 
+                              type={showConfirmAdminPassword ? "text" : "password"}
+                              required
+                              value={confirmAdminPassword}
+                              onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                              placeholder="Ulangi password baru"
+                              className="w-full pl-3 pr-10 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmAdminPassword(!showConfirmAdminPassword)}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none"
+                              title={showConfirmAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+                            >
+                              {showConfirmAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            </button>
+                          </div>
                         </div>
 
                         {adminPasswordError && (
