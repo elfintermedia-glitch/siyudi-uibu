@@ -805,7 +805,10 @@ export default function SuperAdminPanel({
               <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-slate-400" /> Riwayat Commit Repositori ("{gitBranch}")
               </span>
-              <div className="max-h-[200px] overflow-y-auto pr-1 divide-y divide-slate-100 text-[11px] font-semibold text-slate-705 scrollbar-thin scrollbar-thumb-slate-200">
+              <div 
+                className="overflow-y-auto pr-1.5 divide-y divide-slate-100 text-[11px] font-semibold text-slate-705"
+                style={{ maxHeight: '185px', overflowY: 'auto', display: 'block' }}
+              >
                 {isLoadingCommits ? (
                   <div className="py-8 text-center text-slate-400 space-y-1.5 font-bold uppercase tracking-wider text-[10px]">
                     <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent mx-auto rounded-full animate-spin"></div>
