@@ -1437,7 +1437,6 @@ export default function AdminPanel({
             w.nim.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             studentProdi.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             studentNik.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
-            w.ukuranToga.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.namaAyah.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.namaIbu.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.alamatPengiriman.toLowerCase().includes(wisudaSearch.toLowerCase());
@@ -1569,7 +1568,6 @@ export default function AdminPanel({
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Mahasiswa Wisudawan</th>
                       <th className="p-3">Program Studi</th>
-                      <th className="p-3 text-center">Ukuran Toga</th>
                       <th className="p-3">Orang Tua / Wali</th>
                       <th className="p-3 text-center">Status Verifikasi</th>
                     </tr>
@@ -1577,7 +1575,7 @@ export default function AdminPanel({
                   <tbody className="divide-y divide-slate-150 text-xs text-slate-700">
                     {filteredWisudas.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                        <td colSpan={5} className="p-8 text-center text-slate-400">
                           <GraduationCap className="w-10 h-10 mx-auto text-slate-300 stroke-1" />
                           <p className="text-xs font-bold mt-2.5 uppercase tracking-wide">Data Tidak Ditemukan</p>
                           <p className="text-[11px] text-slate-400 mt-0.5">Tidak ada wisudawan yang cocok dengan kriteria filter.</p>
@@ -1626,11 +1624,6 @@ export default function AdminPanel({
                                 <div className="text-[10px] text-slate-400 font-mono mt-0.5">NIM. {app.nim}</div>
                               </td>
                               <td className="p-3 text-slate-600 font-medium">{studentInfo?.programStudi || '-'}</td>
-                              <td className="p-3 text-center">
-                                <span className="inline-block bg-indigo-50 border border-indigo-200 text-indigo-750 font-extrabold px-3 py-1 rounded text-xs select-none">
-                                  {app.ukuranToga}
-                                </span>
-                              </td>
                               <td className="p-3">
                                 <div className="text-slate-700 font-semibold text-[11px]">Ayah: {app.namaAyah}</div>
                                 <div className="text-slate-700 font-semibold text-[11px]">Ibu: {app.namaIbu}</div>
@@ -1642,7 +1635,7 @@ export default function AdminPanel({
                             {/* Expanded sub-section */}
                             {isExpanded && (
                               <tr className="bg-indigo-50/10">
-                                <td colSpan={6} className="p-4 border-t border-b border-indigo-100">
+                                <td colSpan={5} className="p-4 border-t border-b border-indigo-100">
                                   <div className="bg-white rounded-xl border border-indigo-100/80 shadow-md p-4 space-y-4">
                                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                                       <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wide flex items-center gap-1.5">
@@ -1655,9 +1648,6 @@ export default function AdminPanel({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/60 space-y-1.5">
                                         <p className="text-[11px] font-bold text-indigo-850 uppercase tracking-wider mb-2">📦 Informasi Pengiriman & Logistik</p>
-                                        <div className="text-[11px] text-slate-600">
-                                          <span className="font-bold text-slate-500">Ukuran Toga Wisuda:</span> <span className="font-mono bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold text-xs">{app.ukuranToga}</span>
-                                        </div>
                                         <div className="text-[11px] text-slate-600">
                                           <span className="font-bold text-slate-500">Alamat Pengiriman Atribut:</span>
                                           <p className="font-medium text-slate-800 bg-white p-2 border border-slate-200 rounded mt-1 shadow-inner leading-relaxed">

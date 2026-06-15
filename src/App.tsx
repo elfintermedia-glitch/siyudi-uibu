@@ -108,7 +108,6 @@ export default function App() {
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
   const [adminPasswordSuccess, setAdminPasswordSuccess] = useState<string | null>(null);
   const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
-  const [showConfirmAdminPassword, setShowConfirmAdminPassword] = useState(false);
   
   // Tab within the login container
   const [loginTab, setLoginTab] = useState<'student' | 'admin'>('student');
@@ -735,7 +734,6 @@ export default function App() {
                     setAdminPasswordError(null);
                     setAdminPasswordSuccess(null);
                     setShowNewAdminPassword(false);
-                    setShowConfirmAdminPassword(false);
                     setIsChangingAdminPassword(true);
                   }}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm border border-indigo-500 cursor-pointer flex items-center gap-1.5 transition-colors"
@@ -850,6 +848,18 @@ export default function App() {
                             placeholder="Masukkan password baru"
                             className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
                           />
+                        </div>
+
+                        <div className="space-y-1 text-left">
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
+                          <input 
+                            type={showNewAdminPassword ? "text" : "password"}
+                            required
+                            value={confirmAdminPassword}
+                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                            placeholder="Ulangi password baru"
+                            className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          />
                           <div className="flex items-center gap-1.5 mt-1 px-0.5">
                             <input
                               id="toggle-new-admin-pass"
@@ -859,30 +869,6 @@ export default function App() {
                               className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
                             <label htmlFor="toggle-new-admin-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
-                              Tampilkan Password
-                            </label>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1 text-left">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
-                          <input 
-                            type={showConfirmAdminPassword ? "text" : "password"}
-                            required
-                            value={confirmAdminPassword}
-                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
-                            placeholder="Ulangi password baru"
-                            className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
-                          />
-                          <div className="flex items-center gap-1.5 mt-1 px-0.5">
-                            <input
-                              id="toggle-confirm-admin-pass"
-                              type="checkbox"
-                              checked={showConfirmAdminPassword}
-                              onChange={() => setShowConfirmAdminPassword(!showConfirmAdminPassword)}
-                              className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                            />
-                            <label htmlFor="toggle-confirm-admin-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
                               Tampilkan Password
                             </label>
                           </div>

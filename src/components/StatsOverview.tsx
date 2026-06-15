@@ -114,9 +114,9 @@ export default function StatsOverview({ students, yudisiums, wisudas }: StatsOve
       </div>
 
       {/* Statistics Breakdown Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Column 1: Academic Distribution & GPA */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm lg:col-span-2 space-y-3.5">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3.5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h4 className="font-bold text-sm text-slate-800 uppercase tracking-wider">Distribusi Program Studi Kelulusan</h4>
           </div>
@@ -172,49 +172,6 @@ export default function StatsOverview({ students, yudisiums, wisudas }: StatsOve
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Column 2: Toga Sizes & Logistics */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3.5">
-          <div className="border-b border-slate-100 pb-3">
-            <h4 className="font-bold text-sm text-slate-800 uppercase tracking-wider">Logistik Wisuda (Ukuran Toga)</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Berdasarkan pendaftar wisuda yang diajukan</p>
-          </div>
-
-          <div className="space-y-3">
-            {Object.entries(togaSizes).map(([size, count]) => {
-              const maxCount = Math.max(...Object.values(togaSizes), 1);
-              const percentage = Math.round((count / maxCount) * 100);
-              return (
-                <div key={size} className="flex items-center gap-3">
-                  <div className="w-10 font-bold text-xs text-slate-600 font-mono flex items-center justify-center p-1.5 bg-slate-50 border border-slate-200/80 rounded-lg shrink-0">
-                    Siz. {size}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between text-xs text-slate-500 mb-1">
-                      <span className="font-semibold text-slate-700">{count} Set Pakaian</span>
-                      <span>{percentage}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-purple-500 h-full rounded-full" 
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {totalWisuda === 0 && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-100 rounded-lg text-amber-800">
-              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-              <p className="text-[11px] font-medium leading-normal">
-                Belum ada berkas pendaftaran wisuda masuk. Distribusi ukuran baju toga belum tersedia.
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -692,7 +692,7 @@ export default function StudentPanel({
           ? 'Registrasi wisuda dinyatakan SAH, LUNAS, dan siap untuk distribusi atribut wisuda.'
           : isRejected
             ? `Persetujuan ditangguhkan. Alasan: ${wisuda?.rejectionReason || 'Ada berkas yang perlu dikonfirmasi.'}`
-            : 'Mahasiswa berada dalam antrean peninjauan ukuran baju toga dan kelayakan wisuda.';
+            : 'Mahasiswa berada dalam antrean peninjauan kelayakan wisuda.';
 
       const boxColor = yudisium?.status !== 'disetujui'
         ? [148, 163, 184] // Slate
@@ -732,7 +732,7 @@ export default function StudentPanel({
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.text(`1. Ukuran Toga & Atribut      : [ Terpilih & Terdata ]`, 25, docsStartY + 7);
+      doc.text(`1. Atribut & Kelengkapan Logistik : [ Terdata ]`, 25, docsStartY + 7);
       doc.text(`2. Bebas Tunggakan Wisuda     : [ ${isApproved ? 'Ready & ACC' : 'Menunggu Verifikasi'} ]`, 25, docsStartY + 13);
 
       const disclaimerY = 195;
@@ -1033,6 +1033,7 @@ export default function StudentPanel({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
   const [showProofModal2, setShowProofModal2] = useState(false);
   const [showProofModal3, setShowProofModal3] = useState(false);
@@ -1472,6 +1473,7 @@ export default function StudentPanel({
                 setNewPassword('');
                 setConfirmPassword('');
                 setPasswordError(null);
+                setShowNewPassword(false);
                 setIsChangingPassword(true);
               }} 
               className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-xs font-semibold text-indigo-700 rounded-lg border border-indigo-250 transition-colors cursor-pointer flex items-center gap-1"
@@ -2343,7 +2345,7 @@ export default function StudentPanel({
                       <div>
                         <p className="text-xs font-bold text-teal-950">Informasi Berkas Wisuda</p>
                         <p className="text-[11px] text-teal-900 font-medium leading-relaxed mt-0.5">
-                          Segala pengisian data pendukung seperti ukuran baju toga, data wisudawan, orang tua, dan alamat pengiriman ijazah/undangan kini dikelola dan diverifikasi langsung secara administratif untuk mempermudah pendaftaran wisuda Anda. Anda tidak perlu mengirim/mengisi formulir manual apa pun.
+                          Segala pengisian data pendukung seperti data wisudawan, orang tua, dan alamat pengiriman ijazah/undangan kini dikelola dan diverifikasi langsung secara administratif untuk mempermudah pendaftaran wisuda Anda. Anda tidak perlu mengirim/mengisi formulir manual apa pun.
                         </p>
                       </div>
                     </div>
@@ -2436,25 +2438,37 @@ export default function StudentPanel({
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
                 <input 
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Masukkan password baru Anda"
-                  className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                  className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
                 <input 
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password baru Anda"
-                  className="w-full p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                  className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
                 />
+                <div className="flex items-center gap-1.5 mt-1.5 px-0.5">
+                  <input
+                    id="toggle-student-new-pass"
+                    type="checkbox"
+                    checked={showNewPassword}
+                    onChange={() => setShowNewPassword(!showNewPassword)}
+                    className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="toggle-student-new-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
+                    Tampilkan Password
+                  </label>
+                </div>
               </div>
 
               {passwordError && (
@@ -2964,7 +2978,7 @@ export default function StudentPanel({
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" /> STATUS DATA: ACC PANITIA & KELAYAKAN WISUDA OK
                   </div>
                   <p className="text-[10.5px] text-emerald-700 leading-relaxed font-semibold">
-                    Registrasi wisuda dinyatakan SAH, LUNAS, dan siap untuk distribusi atribut wisuda (Toga, Undangan, Jas Almamater).
+                    Registrasi wisuda dinyatakan SAH, LUNAS, dan siap untuk distribusi atribut wisuda (Undangan, Jas Almamater).
                   </p>
                 </div>
               ) : wisuda?.status === 'ditolak' ? (
@@ -2982,7 +2996,7 @@ export default function StudentPanel({
                     <Clock className="w-4 h-4 text-amber-500 animate-pulse" /> STATUS DATA: ANTREAN VERIFIKASI WISUDA
                   </div>
                   <p className="text-[10.5px] text-amber-700 leading-relaxed font-semibold">
-                    Mahasiswa berada dalam antrean peninjauan ukuran baju toga dan bebas biaya wisuda oleh panitia BAUK.
+                    Mahasiswa berada dalam antrean peninjauan kelayakan wisuda dan bebas biaya wisuda oleh panitia BAUK.
                   </p>
                 </div>
               )}
@@ -3014,9 +3028,9 @@ export default function StudentPanel({
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400 text-xs">🎓</span>
                     <div className="text-[10.5px]">
-                      <span className="text-slate-500 font-bold block">Ukuran Toga & Atribut:</span>
+                      <span className="text-slate-500 font-bold block">Atribut & Logistik Wisuda:</span>
                       <span className="font-bold uppercase text-emerald-600">
-                        Terpilih & Terdata
+                        Terdata
                       </span>
                     </div>
                   </div>
@@ -3056,7 +3070,7 @@ export default function StudentPanel({
                   {wisuda?.status === 'disetujui' ? (
                     <div className="border-2 border-double border-emerald-500 bg-emerald-50/50 text-emerald-600 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center shadow-sm">
                       [ TERVERIFIKASI BAUK ]<br />
-                      <span className="text-[7px] font-mono tracking-wider font-extrabold">ACC WISUDA & TOGA OK</span>
+                      <span className="text-[7px] font-mono tracking-wider font-extrabold">ACC WISUDA OK</span>
                     </div>
                   ) : (
                     <div className="border-2 border-dashed border-indigo-405 text-indigo-500 rotate-[-8deg] uppercase font-bold text-[9px] px-3 py-1.5 rounded text-center">

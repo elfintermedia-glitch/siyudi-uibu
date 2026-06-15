@@ -644,7 +644,6 @@ export default function FinancePanel({
             w.nim.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             studentProdi.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             studentNik.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
-            w.ukuranToga.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.namaAyah.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.namaIbu.toLowerCase().includes(wisudaSearch.toLowerCase()) ||
             w.alamatPengiriman.toLowerCase().includes(wisudaSearch.toLowerCase());
@@ -671,7 +670,7 @@ export default function FinancePanel({
                     Bilik Verifikasi Administrasi & Registrasi Wisuda
                   </h3>
                   <p className="text-[11px] text-gray-500 mt-0.5">
-                    Melacak status pembayaran registrasi wisuda, kebenaran biodata orang tua wali, serta sinkronisasi alamat pengiriman logistik toga.
+                    Melacak status pembayaran registrasi wisuda, kebenaran biodata orang tua wali, serta sinkronisasi alamat pengiriman atribut wisuda.
                   </p>
                 </div>
               </div>
