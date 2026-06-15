@@ -764,6 +764,8 @@ export default function App() {
                 onUpdateYudisium={handleUpdateYudisiumApp}
                 onUpdateStudents={handleUpdateStudentsList}
                 onUpdateWisuda={handleUpdateWisudaApp}
+                onUpdateAdminUsers={handleUpdateAdminUsers}
+                currentAdminUsername={currentAdmin.username}
               />
             )}
 
@@ -773,6 +775,8 @@ export default function App() {
                 onUpdateStudents={handleUpdateStudentsList}
                 onUpdateYudisium={handleUpdateYudisiumApp}
                 onUpdateWisuda={handleUpdateWisudaApp}
+                onUpdateAdminUsers={handleUpdateAdminUsers}
+                currentAdminUsername={currentAdmin.username}
               />
             )}
 
