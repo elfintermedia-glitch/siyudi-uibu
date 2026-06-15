@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   GraduationCap, UserCheck, Shield, HelpCircle, LogOut, CheckCircle, 
-  Database, UserCheck2, Landmark, HelpCircle as HelpIcon, ChevronRight,
-  Eye, EyeOff
+  Database, UserCheck2, Landmark, HelpCircle as HelpIcon, ChevronRight
 } from 'lucide-react';
 import { StudentAcademic, YudisiumRegistration, WisudaRegistration, SystemState, DocumentUpload, AdminUser } from './types';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './utils/dummyData';
@@ -590,24 +589,26 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD <span className="text-rose-500">*</span></label>
-                        <div className="relative" dir="ltr">
+                        <input
+                          id="input-password-student"
+                          type={showStudentPassword ? "text" : "password"}
+                          required
+                          value={studentPasswordInput}
+                          onChange={(e) => setStudentPasswordInput(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                        />
+                        <div className="flex items-center gap-1.5 mt-1 px-0.5">
                           <input
-                            id="input-password-student"
-                            type={showStudentPassword ? "text" : "password"}
-                            required
-                            value={studentPasswordInput}
-                            onChange={(e) => setStudentPasswordInput(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full pl-3 pr-10 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                            id="toggle-student-pass"
+                            type="checkbox"
+                            checked={showStudentPassword}
+                            onChange={() => setShowStudentPassword(!showStudentPassword)}
+                            className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowStudentPassword(!showStudentPassword)}
-                            className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
-                            title={showStudentPassword ? "Sembunyikan Password" : "Tampilkan Password"}
-                          >
-                            {showStudentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                          </button>
+                          <label htmlFor="toggle-student-pass" className="text-[11px] text-gray-500 font-medium select-none cursor-pointer">
+                            Tampilkan Password
+                          </label>
                         </div>
                       </div>
 
@@ -636,24 +637,26 @@ export default function App() {
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD <span className="text-rose-500">*</span></label>
-                        <div className="relative" dir="ltr">
+                        <input
+                          id="input-password-admin"
+                          type={showAdminPassword ? "text" : "password"}
+                          required
+                          value={adminPassword}
+                          onChange={(e) => setAdminPassword(e.target.value)}
+                          placeholder="admin"
+                          className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white text-gray-900"
+                        />
+                        <div className="flex items-center gap-1.5 mt-1 px-0.5">
                           <input
-                            id="input-password-admin"
-                            type={showAdminPassword ? "text" : "password"}
-                            required
-                            value={adminPassword}
-                            onChange={(e) => setAdminPassword(e.target.value)}
-                            placeholder="admin"
-                            className="w-full pl-3 pr-10 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white text-gray-900"
+                            id="toggle-admin-pass"
+                            type="checkbox"
+                            checked={showAdminPassword}
+                            onChange={() => setShowAdminPassword(!showAdminPassword)}
+                            className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowAdminPassword(!showAdminPassword)}
-                            className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
-                            title={showAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
-                          >
-                            {showAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                          </button>
+                          <label htmlFor="toggle-admin-pass" className="text-[11px] text-gray-550 font-medium select-none cursor-pointer">
+                            Tampilkan Password
+                          </label>
                         </div>
                       </div>
 
@@ -839,45 +842,49 @@ export default function App() {
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
-                          <div className="relative" dir="ltr">
-                            <input 
-                              type={showNewAdminPassword ? "text" : "password"}
-                              required
-                              value={newAdminPassword}
-                              onChange={(e) => setNewAdminPassword(e.target.value)}
-                              placeholder="Masukkan password baru"
-                              className="w-full pl-3 pr-10 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          <input 
+                            type={showNewAdminPassword ? "text" : "password"}
+                            required
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="Masukkan password baru"
+                            className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          />
+                          <div className="flex items-center gap-1.5 mt-1 px-0.5">
+                            <input
+                              id="toggle-new-admin-pass"
+                              type="checkbox"
+                              checked={showNewAdminPassword}
+                              onChange={() => setShowNewAdminPassword(!showNewAdminPassword)}
+                              className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewAdminPassword(!showNewAdminPassword)}
-                              className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
-                              title={showNewAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
-                            >
-                              {showNewAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                            </button>
+                            <label htmlFor="toggle-new-admin-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
+                              Tampilkan Password
+                            </label>
                           </div>
                         </div>
 
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
-                          <div className="relative" dir="ltr">
-                            <input 
-                              type={showConfirmAdminPassword ? "text" : "password"}
-                              required
-                              value={confirmAdminPassword}
-                              onChange={(e) => setConfirmAdminPassword(e.target.value)}
-                              placeholder="Ulangi password baru"
-                              className="w-full pl-3 pr-10 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          <input 
+                            type={showConfirmAdminPassword ? "text" : "password"}
+                            required
+                            value={confirmAdminPassword}
+                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                            placeholder="Ulangi password baru"
+                            className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
+                          />
+                          <div className="flex items-center gap-1.5 mt-1 px-0.5">
+                            <input
+                              id="toggle-confirm-admin-pass"
+                              type="checkbox"
+                              checked={showConfirmAdminPassword}
+                              onChange={() => setShowConfirmAdminPassword(!showConfirmAdminPassword)}
+                              className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmAdminPassword(!showConfirmAdminPassword)}
-                              className="absolute right-2.5 left-auto top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-0 p-1 cursor-pointer flex items-center justify-center bg-transparent border-none z-10"
-                              title={showConfirmAdminPassword ? "Sembunyikan Password" : "Tampilkan Password"}
-                            >
-                              {showConfirmAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                            </button>
+                            <label htmlFor="toggle-confirm-admin-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
+                              Tampilkan Password
+                            </label>
                           </div>
                         </div>
 
