@@ -1132,10 +1132,10 @@ export default function FinancePanel({
             )}
 
             {/* Split Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pb-6 items-start">
               
               {/* Form Column - Left */}
-              <div className="lg:col-span-10 xl:col-span-5 bg-white p-5 border border-slate-200 rounded-2xl shadow-sm text-left relative h-fit">
+              <div className="md:col-span-5 bg-white p-5 border border-slate-200 rounded-2xl shadow-sm text-left relative h-fit">
                 {editingAdminUser && (
                   <div className="absolute top-4 right-4 bg-amber-50 border border-amber-200 text-amber-800 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Mode Edit Akun
@@ -1225,7 +1225,7 @@ export default function FinancePanel({
               </div>
 
               {/* Accounts List Column - Right */}
-              <div className="lg:col-span-12 xl:col-span-7 bg-white p-5 border border-slate-200 rounded-2xl shadow-sm text-left h-fit">
+              <div className="md:col-span-7 bg-white p-5 border border-slate-200 rounded-2xl shadow-sm text-left h-fit">
                 <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
                   <span>Daftar Staf Keuangan Aktif ({financeAdmins.length})</span>
                   <span className="text-[10px] text-slate-450 lowercase">divisi keuangan saja</span>
