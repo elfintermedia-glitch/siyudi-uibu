@@ -87,6 +87,38 @@ export default function SuperAdminPanel({
   const [deployLogs, setDeployLogs] = useState<string[]>([]);
   const consoleBottomRef = useRef<HTMLDivElement | null>(null);
 
+  const [commits, setCommits] = useState<any[]>([]);
+  const [isLoadingCommits, setIsLoadingCommits] = useState(false);
+
+  const fetchRealCommits = async () => {
+    setIsLoadingCommits(true);
+    try {
+      const response = await fetch('/api/git-commits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ repo: gitHubRepo, branch: gitBranch }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.commits)) {
+          setCommits(data.commits);
+        } else if (Array.isArray(data.commits)) {
+          setCommits(data.commits);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load real commits:', err);
+    } finally {
+      setIsLoadingCommits(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealCommits();
+  }, [gitHubRepo, gitBranch]);
+
   const handleCheckUpdate = async () => {
     setIsCheckingUpdate(true);
     setUpdateChecked(false);
@@ -116,6 +148,7 @@ export default function SuperAdminPanel({
           setCurrentVersion('v1.5.0-rolling');
           setSuccessMsg(`Kondisi sistem sudah berada di commit terbaru (${data.localSha || 'main'}).`);
         }
+        fetchRealCommits();
       } else {
         // Fallback
         setHasNewVersion(true);
@@ -767,36 +800,55 @@ export default function SuperAdminPanel({
               </div>
             </div>
 
-            {/* STATIC COMMIT FOOTPRINT */}
+            {/* REAL-TIME COMMIT FOOTPRINT */}
             <div className="border border-slate-150 rounded-xl p-4 text-left space-y-2.5">
               <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-slate-400" /> Riwayat Commit Repositori ("{gitBranch}")
               </span>
               <div className="divide-y divide-slate-100 text-[11px] font-semibold text-slate-705">
-                <div className="py-2 first:pt-0 space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded text-[10px] font-bold">7fc1b52</span>
-                    <span className="text-[9px] text-slate-400">Terbaru (10 mnt lalu)</span>
+                {isLoadingCommits ? (
+                  <div className="py-8 text-center text-slate-400 space-y-1.5 font-bold uppercase tracking-wider text-[10px]">
+                    <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent mx-auto rounded-full animate-spin"></div>
+                    <p className="mt-1">Memuat Riwayat Commit...</p>
                   </div>
-                  <p className="text-slate-800 line-clamp-1 font-bold">feat: sinkronisasi status wisuda kelulusan & perbaikan NIK 16 digit</p>
-                  <p className="text-[9.5px] text-slate-400 font-bold">Oleh @developer-ibo</p>
-                </div>
-                <div className="py-2 space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded text-[10px] font-bold">8fa2c3e</span>
-                    <span className="text-[9px] text-slate-400">2 jam lalu</span>
+                ) : commits.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 text-[10px]">
+                    Tidak ada riwayat commit yang ditemukan.
                   </div>
-                  <p className="text-slate-600 line-clamp-1">fix: force only digit-entry logic on NIK field to prevent alpha input</p>
-                  <p className="text-[9.5px] text-slate-400">Oleh @developer-ibo</p>
-                </div>
-                <div className="py-2 space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded text-[10px] font-bold">d62b50c</span>
-                    <span className="text-[9px] text-slate-400">Kemarin</span>
-                  </div>
-                  <p className="text-slate-600 line-clamp-1">refactor: adjust status text to "Status: Disetujui" in graduation overview</p>
-                  <p className="text-[9.5px] text-slate-400">Oleh @developer-ibo</p>
-                </div>
+                ) : (
+                  commits.map((c, idx) => {
+                    let displayTime = '';
+                    try {
+                      const d = new Date(c.date);
+                      displayTime = d.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                    } catch (_) {
+                      displayTime = c.date || 'Baru-baru ini';
+                    }
+
+                    return (
+                      <div key={c.hash || idx} className="py-2.5 first:pt-0 space-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded text-[10px] font-bold select-all">
+                            {c.shortHash || (c.hash ? c.hash.substring(0, 7) : 'Unknown')}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-medium">{displayTime}</span>
+                        </div>
+                        <p className="text-slate-800 line-clamp-1 font-bold leading-snug">
+                          {c.message}
+                        </p>
+                        <p className="text-[9.5px] text-slate-400 font-medium">
+                          Oleh <span className="font-semibold text-slate-500">@{c.author || 'system'}</span>
+                        </p>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>

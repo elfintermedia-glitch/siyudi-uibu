@@ -442,6 +442,74 @@ async function startServer() {
     }
   });
 
+  // Get real git commit history
+  app.post('/api/git-commits', async (req, res) => {
+    const { repo, branch } = req.body;
+    const targetBranch = branch || 'main';
+    const targetRepo = repo || 'elfintermedia-glitch/siyudi-uibu';
+    
+    try {
+      // 1. Try local git log first
+      const { stdout } = await execPromise(`git log -n 10 --pretty=format:"%H|%h|%an|%cI|%s"`);
+      const lines = stdout.trim().split('\n').filter(Boolean);
+      const commits = lines.map(line => {
+        const [hash, shortHash, author, date, message] = line.split('|');
+        return {
+          hash,
+          shortHash,
+          author,
+          date,
+          message
+        };
+      });
+      if (commits.length > 0) {
+        return res.json({ success: true, commits, source: 'local' });
+      }
+    } catch (err: any) {
+      console.warn('Local git log failed, attempting GitHub API fallback:', err.message);
+    }
+
+    // 2. Fallback to fetching commits from GitHub API
+    try {
+      const url = `https://api.github.com/repos/${targetRepo}/commits?sha=${targetBranch}&per_page=10`;
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) siyudi-uibu-portal'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const commits = data.map((item: any) => ({
+            hash: item.sha,
+            shortHash: item.sha.substring(0, 7),
+            author: item.commit.author.name,
+            date: item.commit.author.date,
+            message: item.commit.message
+          }));
+          return res.json({ success: true, commits, source: 'github_api' });
+        }
+      }
+      throw new Error(`GitHub API returned status ${response.status}`);
+    } catch (apiErr: any) {
+      console.error('GitHub API fallback failed too:', apiErr.message);
+      // Ultimate fallback: high-fidelity realistic simulated list with actual details or mock warning
+      return res.json({
+        success: false,
+        error: apiErr.message,
+        commits: [
+          {
+            hash: '7fc1b52bc5d6e245a4437510388cd2924cac55b0',
+            shortHash: '7fc1b52',
+            author: 'System Local fallback',
+            date: new Date().toISOString(),
+            message: 'Koneksi repositori tidak tersedia dalam mode sandbox / non-git'
+          }
+        ]
+      });
+    }
+  });
+
   // Pull code from GitHub and re-build
   app.post('/api/git-pull', async (req, res) => {
     const { repo, branch } = req.body;
