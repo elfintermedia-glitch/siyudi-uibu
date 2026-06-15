@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as XLSX from 'xlsx';
 import { 
   Users, CheckCircle2, AlertCircle, FileText, Search, Filter, Plus, 
   Edit3, Trash2, Check, X, Eye, ChevronDown, ChevronUp, FileCheck, 
@@ -362,6 +363,61 @@ export default function AdminPanel({
   const handleConfirmClearAll = () => {
     onUpdateStudents([]);
     setIsConfirmingClearAll(false);
+  };
+
+  const handleExportExcelLangkah1 = () => {
+    // Only students with academicApproved === true (Langkah 1 sudah ACC)
+    const approvedLangkah1Students = state.students.filter(s => s.academicApproved);
+    
+    if (approvedLangkah1Students.length === 0) {
+      alert("Tidak ada mahasiswa yang sudah ACC Langkah 1 untuk diekspor!");
+      return;
+    }
+
+    // Format data beautifully for Excel
+    const dataToExport = approvedLangkah1Students.map((s, index) => ({
+      'No': index + 1,
+      'NIM': s.nim,
+      'NIK': s.nik || '-',
+      'Nama': s.nama,
+      'Tempat Lahir': s.tempatLahir || '-',
+      'Tanggal Lahir': s.tanggalLahir || '-',
+      'Fakultas': s.fakultas || '-',
+      'Program Studi': s.programStudi || '-',
+      'Status Kelulusan': s.statusKelulusan,
+      'Keterangan': s.keterangan || '-',
+      'Email': s.email || '-',
+      'No. HP': s.noHp || '-',
+      'Verifikasi Data': s.dataVerified ? 'Sudah Verifikasi Mandiri' : 'Belum Verifikasi Mandiri',
+      'Status Langkah 1': 'ACC (Disetujui Akademik)'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+    // Adjust column widths automatically
+    const wscols = [
+      { wch: 5 },  // No
+      { wch: 15 }, // NIM
+      { wch: 20 }, // NIK
+      { wch: 25 }, // Nama
+      { wch: 15 }, // Tempat Lahir
+      { wch: 15 }, // Tanggal Lahir
+      { wch: 35 }, // Fakultas
+      { wch: 25 }, // Program Studi
+      { wch: 15 }, // Status Kelulusan
+      { wch: 20 }, // Keterangan
+      { wch: 25 }, // Email
+      { wch: 15 }, // No. HP
+      { wch: 25 }, // Verifikasi Data
+      { wch: 25 }  // Status Langkah 1
+    ];
+    worksheet['!cols'] = wscols;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Selesai Langkah 1");
+    
+    // Save to file
+    XLSX.writeFile(workbook, `Data_Mahasiswa_ACC_Langkah_1_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleApproveStudentAcademic = (nim: string, approved: boolean) => {
@@ -1888,6 +1944,15 @@ export default function AdminPanel({
               </div>
 
               <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+                <button
+                  id="export-excel-langkah1-btn"
+                  onClick={handleExportExcelLangkah1}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 border border-emerald-500 text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  title="Ekspor Mahasiswa yang sudah ACC Langkah 1 ke File Excel"
+                >
+                  <FileText className="w-3.5 h-3.5 text-white" /> Ekspor Excel (ACC Langkah 1)
+                </button>
+
                 <button
                   id="clear-all-students-btn"
                   onClick={handleDeleteAllStudents}
