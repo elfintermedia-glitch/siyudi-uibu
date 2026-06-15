@@ -1945,24 +1945,6 @@ export default function AdminPanel({
 
               <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
                 <button
-                  id="export-excel-langkah1-btn"
-                  onClick={handleExportExcelLangkah1}
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 border border-emerald-500 text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-                  title="Ekspor Mahasiswa yang sudah ACC Langkah 1 ke File Excel"
-                >
-                  <FileText className="w-3.5 h-3.5 text-white" /> Ekspor Excel (ACC Langkah 1)
-                </button>
-
-                <button
-                  id="clear-all-students-btn"
-                  onClick={handleDeleteAllStudents}
-                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 text-rose-600 hover:text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-                  title="Hapus dan Kosongkan Seluruh Database Akademik"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Kosongkan database akademik
-                </button>
-
-                <button
                   id="add-student-btn"
                   onClick={() => {
                     setIsAddingStudent(true);
@@ -2321,6 +2303,28 @@ export default function AdminPanel({
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-4 gap-4 pb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  id="export-excel-langkah1-btn"
+                  onClick={handleExportExcelLangkah1}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 border border-emerald-500 text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer text-left"
+                  title="Ekspor Mahasiswa yang sudah ACC Langkah 1 ke File Excel"
+                >
+                  <FileText className="w-3.5 h-3.5 text-white" /> Ekspor Excel (ACC Langkah 1)
+                </button>
+
+                <button
+                  id="clear-all-students-btn"
+                  onClick={handleDeleteAllStudents}
+                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 text-rose-600 hover:text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer text-left"
+                  title="Hapus dan Kosongkan Seluruh Database Akademik"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Kosongkan database akademik
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-between items-center text-[11px] text-slate-400">
