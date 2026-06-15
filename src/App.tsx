@@ -574,14 +574,14 @@ export default function App() {
                   {loginTab === 'student' ? (
                     <form onSubmit={handleStudentLoginSubmit} className="space-y-3.5">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">NIM <span className="text-rose-500">*</span></label>
+                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">USERNAME <span className="text-rose-500">*</span></label>
                         <input
                           id="input-nim-login"
                           type="text"
                           required
                           value={studentNimInput}
                           onChange={(e) => setStudentNimInput(e.target.value)}
-                          placeholder="Masukkan NIM (contoh: 120140085)"
+                          placeholder="Masukkan Username / NIM (contoh: 120140085)"
                           className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
                         />
                       </div>
