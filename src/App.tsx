@@ -179,7 +179,7 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = (reason?: string) => {
     setActiveRole('guest');
     setCurrentStudent(null);
     setCurrentAdmin(null);
@@ -187,7 +187,7 @@ export default function App() {
     setStudentPasswordInput('');
     setAdminUsername('');
     setAdminPassword('');
-    setLoginError(null);
+    setLoginError(reason || null);
     localStorage.removeItem('siyudi_active_role');
     localStorage.removeItem('siyudi_student_nim_input');
     localStorage.removeItem('siyudi_student_password_input');
@@ -196,6 +196,40 @@ export default function App() {
     localStorage.removeItem('siyudi_current_student');
     localStorage.removeItem('siyudi_current_admin');
   };
+
+  // Auto Logout after 1 minute (60 seconds) of inactivity
+  useEffect(() => {
+    if (activeRole === 'guest') return;
+
+    let timeoutId: any;
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleLogout('Sesi Anda telah berakhir karena tidak ada aktivitas selama 1 menit.');
+      }, 60000);
+    };
+
+    // Initialize timer
+    resetTimer();
+
+    // Listen for common user interaction events
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    const handleActivity = () => {
+      resetTimer();
+    };
+
+    events.forEach(event => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      events.forEach(event => {
+        window.removeEventListener(event, handleActivity);
+      });
+    };
+  }, [activeRole]);
 
   // State update handlers passed down to Admin or Student panel
   const handleUpdateStudentsList = (updatedStudentsList: StudentAcademic[]) => {
