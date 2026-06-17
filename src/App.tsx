@@ -11,6 +11,31 @@ import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
 import FinancePanel from './components/FinancePanel';
 
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.warn('localStorage is not accessible:', e);
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.warn('localStorage is not accessible:', e);
+    }
+  },
+  removeItem: (key: string): void => {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.warn('localStorage is not accessible:', e);
+    }
+  }
+};
+
 export default function App() {
   // 1. Initial State Load from Database with local fallbacks
   const [state, setState] = useState<SystemState>({
@@ -32,7 +57,7 @@ export default function App() {
           setState(data);
           
           // Hydrate and update student record with the latest state from backend/DB if active
-          const cachedStudent = localStorage.getItem('siyudi_current_student');
+          const cachedStudent = safeLocalStorage.getItem('siyudi_current_student');
           if (cachedStudent) {
             try {
               const parsed = JSON.parse(cachedStudent);
@@ -51,15 +76,15 @@ export default function App() {
 
   // Auth States with Local Cache Initializers
   const [activeRole, setActiveRole] = useState<'guest' | 'student' | 'admin'>(() => {
-    return (localStorage.getItem('siyudi_active_role') as 'guest' | 'student' | 'admin') || 'guest';
+    return (safeLocalStorage.getItem('siyudi_active_role') as 'guest' | 'student' | 'admin') || 'guest';
   });
-  const [studentNimInput, setStudentNimInput] = useState(() => localStorage.getItem('siyudi_student_nim_input') || '');
-  const [studentPasswordInput, setStudentPasswordInput] = useState(() => localStorage.getItem('siyudi_student_password_input') || '');
-  const [adminUsername, setAdminUsername] = useState(() => localStorage.getItem('siyudi_admin_username') || '');
-  const [adminPassword, setAdminPassword] = useState(() => localStorage.getItem('siyudi_admin_password') || '');
+  const [studentNimInput, setStudentNimInput] = useState(() => safeLocalStorage.getItem('siyudi_student_nim_input') || '');
+  const [studentPasswordInput, setStudentPasswordInput] = useState(() => safeLocalStorage.getItem('siyudi_student_password_input') || '');
+  const [adminUsername, setAdminUsername] = useState(() => safeLocalStorage.getItem('siyudi_admin_username') || '');
+  const [adminPassword, setAdminPassword] = useState(() => safeLocalStorage.getItem('siyudi_admin_password') || '');
   
   const [currentStudent, setCurrentStudent] = useState<StudentAcademic | null>(() => {
-    const cached = localStorage.getItem('siyudi_current_student');
+    const cached = safeLocalStorage.getItem('siyudi_current_student');
     if (cached) {
       try {
         return JSON.parse(cached);
@@ -68,7 +93,7 @@ export default function App() {
     return null;
   });
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(() => {
-    const cached = localStorage.getItem('siyudi_current_admin');
+    const cached = safeLocalStorage.getItem('siyudi_current_admin');
     if (cached) {
       try {
         return JSON.parse(cached);
@@ -76,28 +101,37 @@ export default function App() {
     }
     return null;
   });
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(() => {
+    try {
+      const reason = sessionStorage.getItem('siyudi_logout_reason');
+      if (reason) {
+        sessionStorage.removeItem('siyudi_logout_reason');
+        return reason;
+      }
+    } catch (_) {}
+    return null;
+  });
   const [showStudentPassword, setShowStudentPassword] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   // Sync state changes to localStorage
   useEffect(() => {
-    localStorage.setItem('siyudi_active_role', activeRole);
-    localStorage.setItem('siyudi_student_nim_input', studentNimInput);
-    localStorage.setItem('siyudi_student_password_input', studentPasswordInput);
-    localStorage.setItem('siyudi_admin_username', adminUsername);
-    localStorage.setItem('siyudi_admin_password', adminPassword);
+    safeLocalStorage.setItem('siyudi_active_role', activeRole);
+    safeLocalStorage.setItem('siyudi_student_nim_input', studentNimInput);
+    safeLocalStorage.setItem('siyudi_student_password_input', studentPasswordInput);
+    safeLocalStorage.setItem('siyudi_admin_username', adminUsername);
+    safeLocalStorage.setItem('siyudi_admin_password', adminPassword);
     
     if (currentStudent) {
-      localStorage.setItem('siyudi_current_student', JSON.stringify(currentStudent));
+      safeLocalStorage.setItem('siyudi_current_student', JSON.stringify(currentStudent));
     } else {
-      localStorage.removeItem('siyudi_current_student');
+      safeLocalStorage.removeItem('siyudi_current_student');
     }
     
     if (currentAdmin) {
-      localStorage.setItem('siyudi_current_admin', JSON.stringify(currentAdmin));
+      safeLocalStorage.setItem('siyudi_current_admin', JSON.stringify(currentAdmin));
     } else {
-      localStorage.removeItem('siyudi_current_admin');
+      safeLocalStorage.removeItem('siyudi_current_admin');
     }
   }, [activeRole, studentNimInput, studentPasswordInput, adminUsername, adminPassword, currentStudent, currentAdmin]);
   
@@ -188,13 +222,25 @@ export default function App() {
     setAdminUsername('');
     setAdminPassword('');
     setLoginError(reason || null);
-    localStorage.removeItem('siyudi_active_role');
-    localStorage.removeItem('siyudi_student_nim_input');
-    localStorage.removeItem('siyudi_student_password_input');
-    localStorage.removeItem('siyudi_admin_username');
-    localStorage.removeItem('siyudi_admin_password');
-    localStorage.removeItem('siyudi_current_student');
-    localStorage.removeItem('siyudi_current_admin');
+    
+    safeLocalStorage.removeItem('siyudi_active_role');
+    safeLocalStorage.removeItem('siyudi_student_nim_input');
+    safeLocalStorage.removeItem('siyudi_student_password_input');
+    safeLocalStorage.removeItem('siyudi_admin_username');
+    safeLocalStorage.removeItem('siyudi_admin_password');
+    safeLocalStorage.removeItem('siyudi_current_student');
+    safeLocalStorage.removeItem('siyudi_current_admin');
+
+    if (reason) {
+      try {
+        sessionStorage.setItem('siyudi_logout_reason', reason);
+      } catch (_) {}
+    }
+
+    // Hard redirect to clear out any React state/memory caches and ensure a perfect login screen presentation
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 50);
   };
 
   // Auto Logout after 1 minute (60 seconds) of inactivity

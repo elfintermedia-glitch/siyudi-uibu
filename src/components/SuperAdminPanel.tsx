@@ -77,7 +77,11 @@ export default function SuperAdminPanel({
   const [gitHubRepo, setGitHubRepo] = useState('elfintermedia-glitch/siyudi-uibu');
   const [gitBranch, setGitBranch] = useState('main');
   const [gitToken, setGitToken] = useState(() => {
-    return localStorage.getItem('siyudi_git_token') || '';
+    try {
+      return localStorage.getItem('siyudi_git_token') || '';
+    } catch (_) {
+      return '';
+    }
   });
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateChecked, setUpdateChecked] = useState(false);
@@ -91,7 +95,9 @@ export default function SuperAdminPanel({
   const consoleBottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('siyudi_git_token', gitToken);
+    try {
+      localStorage.setItem('siyudi_git_token', gitToken);
+    } catch (_) {}
   }, [gitToken]);
 
   const [commits, setCommits] = useState<any[]>([]);
