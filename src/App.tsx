@@ -213,7 +213,8 @@ export default function App() {
     }
   };
 
-  const handleLogout = (reason?: string) => {
+  const handleLogout = (reason?: any) => {
+    const finalReason = typeof reason === 'string' ? reason : null;
     setActiveRole('guest');
     setCurrentStudent(null);
     setCurrentAdmin(null);
@@ -221,7 +222,7 @@ export default function App() {
     setStudentPasswordInput('');
     setAdminUsername('');
     setAdminPassword('');
-    setLoginError(reason || null);
+    setLoginError(finalReason);
     
     safeLocalStorage.removeItem('siyudi_active_role');
     safeLocalStorage.removeItem('siyudi_student_nim_input');
@@ -231,9 +232,9 @@ export default function App() {
     safeLocalStorage.removeItem('siyudi_current_student');
     safeLocalStorage.removeItem('siyudi_current_admin');
 
-    if (reason) {
+    if (finalReason) {
       try {
-        sessionStorage.setItem('siyudi_logout_reason', reason);
+        sessionStorage.setItem('siyudi_logout_reason', finalReason);
       } catch (_) {}
     }
 
