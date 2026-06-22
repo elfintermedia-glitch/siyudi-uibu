@@ -79,10 +79,8 @@ export default function App() {
   const [activeRole, setActiveRole] = useState<'guest' | 'student' | 'admin'>(() => {
     return (safeLocalStorage.getItem('siyudi_active_role') as 'guest' | 'student' | 'admin') || 'guest';
   });
-  const [studentNimInput, setStudentNimInput] = useState(() => safeLocalStorage.getItem('siyudi_student_nim_input') || '');
-  const [studentPasswordInput, setStudentPasswordInput] = useState(() => safeLocalStorage.getItem('siyudi_student_password_input') || '');
-  const [adminUsername, setAdminUsername] = useState(() => safeLocalStorage.getItem('siyudi_admin_username') || '');
-  const [adminPassword, setAdminPassword] = useState(() => safeLocalStorage.getItem('siyudi_admin_password') || '');
+  const [loginUsername, setLoginUsername] = useState(() => safeLocalStorage.getItem('siheppiee_login_username') || '');
+  const [loginPassword, setLoginPassword] = useState(() => safeLocalStorage.getItem('siheppiee_login_password') || '');
   
   const [currentStudent, setCurrentStudent] = useState<StudentAcademic | null>(() => {
     const cached = safeLocalStorage.getItem('siyudi_current_student');
@@ -112,16 +110,13 @@ export default function App() {
     } catch (_) {}
     return null;
   });
-  const [showStudentPassword, setShowStudentPassword] = useState(false);
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Sync state changes to localStorage
   useEffect(() => {
     safeLocalStorage.setItem('siyudi_active_role', activeRole);
-    safeLocalStorage.setItem('siyudi_student_nim_input', studentNimInput);
-    safeLocalStorage.setItem('siyudi_student_password_input', studentPasswordInput);
-    safeLocalStorage.setItem('siyudi_admin_username', adminUsername);
-    safeLocalStorage.setItem('siyudi_admin_password', adminPassword);
+    safeLocalStorage.setItem('siheppiee_login_username', loginUsername);
+    safeLocalStorage.setItem('siheppiee_login_password', loginPassword);
     
     if (currentStudent) {
       safeLocalStorage.setItem('siyudi_current_student', JSON.stringify(currentStudent));
@@ -134,7 +129,7 @@ export default function App() {
     } else {
       safeLocalStorage.removeItem('siyudi_current_admin');
     }
-  }, [activeRole, studentNimInput, studentPasswordInput, adminUsername, adminPassword, currentStudent, currentAdmin]);
+  }, [activeRole, loginUsername, loginPassword, currentStudent, currentAdmin]);
   
   // Admin password change states
   const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
@@ -143,9 +138,6 @@ export default function App() {
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
   const [adminPasswordSuccess, setAdminPasswordSuccess] = useState<string | null>(null);
   const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
-  
-  // Tab within the login container
-  const [loginTab, setLoginTab] = useState<'student' | 'admin'>('student');
 
   // Helper quick diagnostic presets log in
   const handleQuickLogin = (nim: string) => {
@@ -157,20 +149,33 @@ export default function App() {
       }
       setCurrentStudent(found);
       setActiveRole('student');
-      setStudentNimInput(found.nim);
-      setStudentPasswordInput(found.password || 'kebudiutamaan');
+      setLoginUsername(found.nim);
+      setLoginPassword(found.password || 'kebudiutamaan');
       setLoginError(null);
     }
   };
 
-  const handleStudentLoginSubmit = (e: React.FormEvent) => {
+  const handleUnifiedLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentNimInput.trim()) {
-      setLoginError('NIM wajib diisi untuk masuk!');
+    if (!loginUsername.trim()) {
+      setLoginError('Username wajib diisi untuk masuk!');
       return;
     }
-    if (!studentPasswordInput.trim()) {
+    if (!loginPassword.trim()) {
       setLoginError('Password wajib diisi!');
+      return;
+    }
+
+    const usernameInput = loginUsername.trim();
+    const passwordInput = loginPassword.trim();
+    
+    const admins = state.adminUsers || INITIAL_ADMIN_USERS;
+    const adminFound = admins.find(u => u.username.toLowerCase() === usernameInput.toLowerCase() && u.password === passwordInput);
+
+    if (adminFound) {
+      setActiveRole('admin');
+      setCurrentAdmin(adminFound);
+      setLoginError(null);
       return;
     }
 
@@ -178,12 +183,20 @@ export default function App() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        nim: studentNimInput.trim(),
-        password: studentPasswordInput.trim()
+        nim: usernameInput,
+        password: passwordInput
       })
     })
       .then(async res => {
-        const data = await res.json();
+        let data;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+           data = await res.json();
+        } else {
+           const text = await res.text();
+           throw new Error(res.ok ? 'Format respons tidak valid.' : 'Server sedang sibuk, silakan coba beberapa saat lagi.');
+        }
+        
         if (!res.ok) {
           throw new Error(data.error || 'Autentikasi gagal.');
         }
@@ -197,25 +210,8 @@ export default function App() {
         }
       })
       .catch(err => {
-        setLoginError(err.message || 'Terjadi kesalahan saat masuk.');
+        setLoginError(err.message || 'Username atau password salah.');
       });
-  };
-
-  const handleAdminLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const usernameInput = adminUsername.trim().toLowerCase();
-    const passwordInput = adminPassword.trim();
-    
-    const admins = state.adminUsers || INITIAL_ADMIN_USERS;
-    const found = admins.find(u => u.username === usernameInput && u.password === passwordInput);
-
-    if (found) {
-      setActiveRole('admin');
-      setCurrentAdmin(found);
-      setLoginError(null);
-    } else {
-      setLoginError('Username atau password admin salah!');
-    }
   };
 
   const handleLogout = (reason?: any) => {
@@ -223,17 +219,13 @@ export default function App() {
     setActiveRole('guest');
     setCurrentStudent(null);
     setCurrentAdmin(null);
-    setStudentNimInput('');
-    setStudentPasswordInput('');
-    setAdminUsername('');
-    setAdminPassword('');
+    setLoginUsername('');
+    setLoginPassword('');
     setLoginError(finalReason);
     
     safeLocalStorage.removeItem('siyudi_active_role');
-    safeLocalStorage.removeItem('siyudi_student_nim_input');
-    safeLocalStorage.removeItem('siyudi_student_password_input');
-    safeLocalStorage.removeItem('siyudi_admin_username');
-    safeLocalStorage.removeItem('siyudi_admin_password');
+    safeLocalStorage.removeItem('siheppiee_login_username');
+    safeLocalStorage.removeItem('siheppiee_login_password');
     safeLocalStorage.removeItem('siyudi_current_student');
     safeLocalStorage.removeItem('siyudi_current_admin');
 
@@ -617,39 +609,17 @@ export default function App() {
               </p>
             </motion.div>
  
-            {/* DUAL LOGIN FORMS */}
-            <div className="max-w-md mx-auto w-full">
+            {/* UNIFIED LOGIN FORM */}
+            <div className="max-w-md mx-auto w-full mt-4">
               
               {/* Form Card */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
-                <div className="flex bg-gray-50 border-b border-gray-200 p-1">
-                  <button
-                    id="tab-login-student"
-                    onClick={() => { setLoginTab('student'); setLoginError(null); }}
-                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      loginTab === 'student' 
-                        ? 'bg-white text-indigo-700 shadow-sm border border-gray-200/50' 
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <UserCheck2 className="w-4 h-4 text-indigo-600" />
-                    Mahasiswa
-                  </button>
-                  <button
-                    id="tab-login-admin"
-                    onClick={() => { setLoginTab('admin'); setLoginError(null); }}
-                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      loginTab === 'admin' 
-                        ? 'bg-white text-indigo-700 shadow-sm border border-gray-200/50' 
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <Shield className="w-4 h-4 text-gray-500" />
-                    Admin
-                  </button>
-                </div>
-
                 <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-6 text-indigo-700 justify-center pb-2 border-b border-gray-100">
+                    <UserCheck2 className="w-5 h-5 flex-shrink-0" />
+                    <h3 className="text-[13px] font-bold uppercase tracking-wider">Silahkan Masuk</h3>
+                  </div>
+
                   {loginError && (
                     <div className="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold rounded-lg flex items-start gap-2">
                       <div className="w-2 h-2 rounded-full bg-rose-500 mt-1 shrink-0 animate-pulse" />
@@ -657,103 +627,53 @@ export default function App() {
                     </div>
                   )}
 
-                  {loginTab === 'student' ? (
-                    <form onSubmit={handleStudentLoginSubmit} className="space-y-3.5">
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">USERNAME <span className="text-rose-500">*</span></label>
-                        <input
-                          id="input-nim-login"
-                          type="text"
-                          required
-                          value={studentNimInput}
-                          onChange={(e) => setStudentNimInput(e.target.value)}
-                          placeholder="Masukkan Username / NIM (contoh: 120140085)"
-                          className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
-                        />
-                      </div>
+                  <form onSubmit={handleUnifiedLoginSubmit} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Username atau NIM <span className="text-rose-500">*</span></label>
+                      <input
+                        id="input-unified-login-username"
+                        type="text"
+                        required
+                        value={loginUsername}
+                        onChange={(e) => setLoginUsername(e.target.value)}
+                        placeholder="Contoh: 120140085 atau admin"
+                        className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                      />
+                    </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">PASSWORD <span className="text-rose-500">*</span></label>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">Password <span className="text-rose-500">*</span></label>
+                      <input
+                        id="input-unified-login-password"
+                        type={showLoginPassword ? "text" : "password"}
+                        required
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                      />
+                      <div className="flex items-center gap-1.5 mt-2 px-0.5">
                         <input
-                          id="input-password-student"
-                          type={showStudentPassword ? "text" : "password"}
-                          required
-                          value={studentPasswordInput}
-                          onChange={(e) => setStudentPasswordInput(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
+                          id="toggle-unified-pass"
+                          type="checkbox"
+                          checked={showLoginPassword}
+                          onChange={() => setShowLoginPassword(!showLoginPassword)}
+                          className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
-                        <div className="flex items-center gap-1.5 mt-1 px-0.5">
-                          <input
-                            id="toggle-student-pass"
-                            type="checkbox"
-                            checked={showStudentPassword}
-                            onChange={() => setShowStudentPassword(!showStudentPassword)}
-                            className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                          />
-                          <label htmlFor="toggle-student-pass" className="text-[11px] text-gray-500 font-medium select-none cursor-pointer">
-                            Tampilkan Password
-                          </label>
-                        </div>
+                        <label htmlFor="toggle-unified-pass" className="text-[11px] text-gray-500 font-medium select-none cursor-pointer">
+                          Tampilkan Password
+                        </label>
                       </div>
+                    </div>
 
-                      <button
-                        id="submit-student-login"
-                        type="submit"
-                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-805 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        Masuk Ke Akun Mahasiswa
-                      </button>
-                    </form>
-                  ) : (
-                    <form onSubmit={handleAdminLoginSubmit} className="space-y-3.5 font-semibold">
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Username <span className="text-rose-500">*</span></label>
-                        <input
-                          id="input-username-admin"
-                          type="text"
-                          required
-                          value={adminUsername}
-                          onChange={(e) => setAdminUsername(e.target.value)}
-                          placeholder="admin"
-                          className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">PASSWORD <span className="text-rose-500">*</span></label>
-                        <input
-                          id="input-password-admin"
-                          type={showAdminPassword ? "text" : "password"}
-                          required
-                          value={adminPassword}
-                          onChange={(e) => setAdminPassword(e.target.value)}
-                          placeholder="admin"
-                          className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white text-gray-900"
-                        />
-                        <div className="flex items-center gap-1.5 mt-1 px-0.5">
-                          <input
-                            id="toggle-admin-pass"
-                            type="checkbox"
-                            checked={showAdminPassword}
-                            onChange={() => setShowAdminPassword(!showAdminPassword)}
-                            className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                          />
-                          <label htmlFor="toggle-admin-pass" className="text-[11px] text-gray-550 font-medium select-none cursor-pointer">
-                            Tampilkan Password
-                          </label>
-                        </div>
-                      </div>
-
-                      <button
-                        id="submit-admin-login"
-                        type="submit"
-                        className="w-full py-2 bg-gray-800 hover:bg-gray-950 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors shadow-sm cursor-pointer"
-                      >
-                        Masuk Sebagai Staff Biro
-                      </button>
-                    </form>
-                  )}
+                    <button
+                      id="submit-unified-login"
+                      type="submit"
+                      className="w-full py-2.5 mt-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-805 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      Masuk Ke Sistem
+                    </button>
+                  </form>
                 </div>
               </div>
 
