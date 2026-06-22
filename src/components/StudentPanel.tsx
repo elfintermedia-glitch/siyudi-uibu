@@ -1463,7 +1463,7 @@ export default function StudentPanel({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-                Langkah 1: Tinjau & Verifikasi Data Akademik
+                Langkah 1: Verifikasi Biodata Mahasiswa
               </h3>
               <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                 Sebelum Anda mendaftarkan Yudisium, Anda diwajibkan untuk memeriksa, melengkapi, dan menyetujui kebenaran seluruh data akademik Anda di bawah ini. Kesalahan data pada bagian ini akan berakibat pada salah cetak dokumen Ijazah & Transkrip Nilai Anda.
