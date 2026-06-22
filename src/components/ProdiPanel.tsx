@@ -17,10 +17,7 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
   const [selectedProdi, setSelectedProdi] = useState('Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
   
-  // Modal State for editing student kelulusan
-  const [editingStudent, setEditingStudent] = useState<StudentAcademic | null>(null);
-  const [editStatus, setEditStatus] = useState<'Lulus' | 'Belum Lulus'>('Belum Lulus');
-  const [editKeterangan, setEditKeterangan] = useState('');
+
   
   // Detail Student View Modal
   const [viewingStudent, setViewingStudent] = useState<StudentAcademic | null>(null);
@@ -46,32 +43,7 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
   const pendingGradCount = totalStudents - graduatedCount;
   const graduationRate = totalStudents > 0 ? Math.round((graduatedCount / totalStudents) * 100) : 0;
 
-  // Handle open editor
-  const handleOpenEdit = (student: StudentAcademic) => {
-    setEditingStudent(student);
-    setEditStatus(student.statusKelulusan);
-    setEditKeterangan(student.keterangan || '');
-  };
 
-  // Save graduation changes
-  const handleSaveGraduation = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingStudent) return;
-
-    const updated = state.students.map(s => {
-      if (s.nim === editingStudent.nim) {
-        return {
-          ...s,
-          statusKelulusan: editStatus,
-          keterangan: editKeterangan,
-        };
-      }
-      return s;
-    });
-
-    onUpdateStudents(updated);
-    setEditingStudent(null);
-  };
 
   return (
     <div className="space-y-6 select-none font-sans">
@@ -251,14 +223,13 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
                 <th className="py-4 px-6">Identitas Mahasiswa</th>
                 <th className="py-4 px-4">Program Studi / Fakultas</th>
                 <th className="py-4 px-4 text-center">Status Kelulusan</th>
-                <th className="py-4 px-4">Catatan / Keterangan</th>
                 <th className="py-4 px-6 text-right">Opsi Tindakan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 px-6 text-center text-slate-400 font-sans">
+                  <td colSpan={4} className="py-12 px-6 text-center text-slate-400 font-sans">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <AlertCircle className="w-10 h-10 text-slate-350" />
                       <p className="text-sm font-bold text-slate-500">Tidak ada data mahasiswa ditemukan</p>
@@ -302,13 +273,6 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
                         </span>
                       </td>
 
-                      {/* Keterangan */}
-                      <td className="py-4 px-4 max-w-xs truncate">
-                        <p className="text-xs text-slate-500 italic">
-                          {student.keterangan || <span className="text-slate-300">Harap lengkapi catatan kelulusan...</span>}
-                        </p>
-                      </td>
-
                       {/* Action buttons */}
                       <td className="py-4 px-6 text-right space-x-1.5">
                         <button
@@ -319,10 +283,23 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
                           👁️ Detail
                         </button>
                         <button
-                          onClick={() => handleOpenEdit(student)}
-                          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-lg border border-indigo-100 transition-all cursor-pointer"
+                          onClick={() => {
+                            const newStatus: 'Lulus' | 'Belum Lulus' = student.statusKelulusan === 'Belum Lulus' ? 'Lulus' : 'Belum Lulus';
+                            const updated = state.students.map(s => {
+                              if (s.nim === student.nim) {
+                                return { ...s, statusKelulusan: newStatus };
+                              }
+                              return s;
+                            });
+                            onUpdateStudents(updated);
+                          }}
+                          className={`px-3 py-1.5 font-bold text-xs rounded-lg border transition-all cursor-pointer ${
+                            student.statusKelulusan === 'Lulus'
+                              ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-100'
+                              : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-100'
+                          }`}
                         >
-                          ✏️ Set Kelulusan
+                          {student.statusKelulusan === 'Lulus' ? '❌ Batal Kelulusan' : '✅ Set Kelulusan'}
                         </button>
                       </td>
                     </tr>
@@ -334,137 +311,7 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
         </div>
       </div>
 
-      {/* 5. MODAL: EDIT GRADUATION STATUS */}
-      {editingStudent && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-150 max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200">
-            
-            {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-indigo-50/40">
-              <div className="flex items-center gap-2">
-                <span className="p-2 bg-indigo-100 text-indigo-700 rounded-xl">
-                  <GraduationCap className="w-5 h-5" />
-                </span>
-                <div>
-                  <h3 className="font-extrabold text-slate-800 text-base uppercase tracking-tight">Set Status Kelulusan</h3>
-                  <p className="text-xs text-slate-400">Pembaruan data mahasiswa di database akademik</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setEditingStudent(null)}
-                className="w-8 h-8 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-500 flex items-center justify-center font-bold"
-              >
-                ✕
-              </button>
-            </div>
 
-            {/* Modal Form */}
-            <form onSubmit={handleSaveGraduation} className="p-6 space-y-4">
-              
-              {/* Target Student Identity */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-150 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-650 text-white flex items-center justify-center font-black">
-                  {editingStudent.nama.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-800 leading-tight">{editingStudent.nama}</h4>
-                  <span className="text-xs font-mono text-indigo-600 block leading-tight">NIM: {editingStudent.nim}</span>
-                  <span className="text-[10px] text-slate-400 block leading-tight">{editingStudent.programStudi}</span>
-                </div>
-              </div>
-
-              {/* Status Radio Buttons */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Ubah Status Kelulusan <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  
-                  {/* Option: Lulus */}
-                  <label className={`cursor-pointer group flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
-                    editStatus === 'Lulus' 
-                      ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-400/50' 
-                      : 'border-slate-200 hover:border-slate-350 hover:bg-slate-50'
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="gradStatus" 
-                      value="Lulus"
-                      checked={editStatus === 'Lulus'}
-                      onChange={() => setEditStatus('Lulus')}
-                      className="sr-only"
-                    />
-                    <CheckCircle className={`w-6 h-6 mb-2 ${editStatus === 'Lulus' ? 'text-emerald-600' : 'text-slate-400'}`} />
-                    <span className="font-bold text-sm tracking-tight text-slate-800">Lulus</span>
-                    <span className="text-[10px] text-slate-400 text-center mt-0.5 mt-auto leading-none">Izinkan akses login & Yudisium</span>
-                  </label>
-
-                  {/* Option: Belum Lulus */}
-                  <label className={`cursor-pointer group flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
-                    editStatus === 'Belum Lulus' 
-                      ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400/50' 
-                      : 'border-slate-200 hover:border-slate-350 hover:bg-slate-50'
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="gradStatus" 
-                      value="Belum Lulus"
-                      checked={editStatus === 'Belum Lulus'}
-                      onChange={() => setEditStatus('Belum Lulus')}
-                      className="sr-only"
-                    />
-                    <Clock className={`w-6 h-6 mb-2 ${editStatus === 'Belum Lulus' ? 'text-amber-600' : 'text-slate-400'}`} />
-                    <span className="font-bold text-sm tracking-tight text-slate-800">Belum Lulus</span>
-                    <span className="text-[10px] text-slate-400 text-center mt-0.5 mt-auto leading-none">Tangguhkan akses login</span>
-                  </label>
-
-                </div>
-              </div>
-
-              {/* Keterangan / Note */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Keterangan / Alasan Kelulusan
-                </label>
-                <textarea
-                  value={editKeterangan}
-                  onChange={(e) => setEditKeterangan(e.target.value)}
-                  placeholder={editStatus === 'Lulus' 
-                    ? 'Contoh: Sudah menyelesaikan revisi ujian skripsi & bebas tunggakan spp.' 
-                    : 'Contoh: Belum menyelesaikan revisi skripsi bab 1 - 5.'
-                  }
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800 placeholder-slate-400 font-sans"
-                />
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  {editStatus === 'Lulus' 
-                    ? 'Catatan di atas akan ditampilkan sebagai keterangan di beranda portal mahasiswa setelah mereka lolos audit.'
-                    : 'Catatan akan disimpan sebagai evaluasi mengapa status kelulusan belum terpenuhi.'
-                  }
-                </p>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setEditingStudent(null)}
-                  className="px-4 py-2 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded-xl border border-transparent transition-all"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm border border-indigo-500 transition-all flex items-center gap-1.5"
-                >
-                  💾 Simpan Status Baru
-                </button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* 6. MODAL: DETAILED PROFILE VIEW */}
       {viewingStudent && (

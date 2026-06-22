@@ -746,12 +746,12 @@ export default function App() {
                 <button
                   id="admin-change-password-btn"
                   onClick={() => {
-                    setNewAdminPassword('');
-                    setConfirmAdminPassword('');
-                    setAdminPasswordError(null);
-                    setAdminPasswordSuccess(null);
-                    setShowNewAdminPassword(false);
-                    setIsChangingAdminPassword(true);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setPasswordError(null);
+                    setPasswordSuccess(null);
+                    setShowNewPassword(false);
+                    setIsChangingPassword(true);
                   }}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm border border-indigo-500 cursor-pointer flex items-center gap-1.5 transition-colors"
                 >
