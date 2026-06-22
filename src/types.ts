@@ -61,6 +61,7 @@ export interface AdminUser {
   username: string;
   password?: string;
   role: 'superadmin' | 'akademik' | 'keuangan' | 'prodi';
+  prodi?: string;
 }
 
 export interface SystemState {

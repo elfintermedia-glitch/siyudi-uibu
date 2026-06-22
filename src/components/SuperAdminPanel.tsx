@@ -5,16 +5,18 @@ import {
   Github, GitBranch, RefreshCw, Terminal, Settings, Play, Check, Server, Clock, ArrowDown,
   Database, Download
 } from 'lucide-react';
-import { AdminUser } from '../types';
+import { AdminUser, StudentAcademic } from '../types';
 
 interface SuperAdminPanelProps {
   adminUsers: AdminUser[];
+  students: StudentAcademic[];
   currentAdminUsername: string;
   onUpdateAdminUsers: (updated: AdminUser[]) => void;
 }
 
 export default function SuperAdminPanel({ 
   adminUsers, 
+  students,
   currentAdminUsername, 
   onUpdateAdminUsers 
 }: SuperAdminPanelProps) {
@@ -23,6 +25,7 @@ export default function SuperAdminPanel({
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>('akademik');
+  const [newProdi, setNewProdi] = useState('S1 Teknik Informatika');
   
   // Edit user modal state
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -30,6 +33,7 @@ export default function SuperAdminPanel({
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editRole, setEditRole] = useState<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>('akademik');
+  const [editProdi, setEditProdi] = useState('');
 
   // Custom alert & confirm states (replaces iframe-blocked confirm/alert)
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
@@ -293,11 +297,12 @@ export default function SuperAdminPanel({
       nama: checkName,
       username: checkUsername,
       password: checkPassword,
-      role: newRole
+      role: newRole,
+      ...(newRole === 'prodi' && { prodi: newProdi })
     };
 
     onUpdateAdminUsers([...adminUsers, newUser]);
-    setSuccessMsg(`Berhasil menambahkan ${checkName} sebagai Admin ${newRole === 'superadmin' ? 'Super' : newRole === 'akademik' ? 'Akademik' : 'Keuangan'}.`);
+    setSuccessMsg(`Berhasil menambahkan ${checkName} sebagai Admin ${newRole === 'superadmin' ? 'Super' : newRole === 'akademik' ? 'Akademik' : newRole === 'prodi' ? 'Program Studi' : 'Keuangan'}.`);
     
     // Clear form
     setNewName('');
@@ -313,6 +318,7 @@ export default function SuperAdminPanel({
     setEditUsername(user.username);
     setEditPassword(user.password || '');
     setEditRole(user.role);
+    setEditProdi(user.prodi || '');
     setErrorMsg(null);
     setSuccessMsg(null);
   };
@@ -344,7 +350,8 @@ export default function SuperAdminPanel({
           nama: checkName,
           username: checkUsername,
           password: checkPassword,
-          role: editRole
+          role: editRole,
+          ...(editRole === 'prodi' && { prodi: editProdi })
         };
       }
       return u;
@@ -546,6 +553,30 @@ export default function SuperAdminPanel({
                 </button>
               </div>
             </div>
+
+            {newRole === 'prodi' && (
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Pilih Program Studi <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={newProdi}
+                  onChange={(e) => setNewProdi(e.target.value)}
+                  className="w-full text-xs font-semibold p-2.5 border border-slate-250 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-inner"
+                >
+                  {Array.from(new Set(students.map(s => s.programStudi).filter(Boolean))).map(prodi => (
+                    <option key={prodi} value={prodi}>{prodi}</option>
+                  ))}
+                  <option value="S1 Kedokteran">S1 Kedokteran</option>
+                  <option value="S1 Keperawatan">S1 Keperawatan</option>
+                  <option value="S1 Kebidanan">S1 Kebidanan</option>
+                  <option value="S1 Farmasi">S1 Farmasi</option>
+                  <option value="S1 Fisioterapi">S1 Fisioterapi</option>
+                  <option value="S1 Administrasi Rumah Sakit">S1 Administrasi Rumah Sakit</option>
+                  <option value="S1 Kesehatan Masyarakat">S1 Kesehatan Masyarakat</option>
+                </select>
+              </div>
+            )}
 
             <div className="pt-2">
               <button
@@ -1207,6 +1238,30 @@ export default function SuperAdminPanel({
                   </button>
                 </div>
               </div>
+
+              {editRole === 'prodi' && (
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Pilih Program Studi <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={editProdi}
+                    onChange={(e) => setEditProdi(e.target.value)}
+                    className="w-full text-xs font-semibold p-2.5 border border-slate-250 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-inner"
+                  >
+                    {Array.from(new Set(students.map(s => s.programStudi).filter(Boolean))).map(prodi => (
+                      <option key={prodi} value={prodi}>{prodi}</option>
+                    ))}
+                    <option value="S1 Kedokteran">S1 Kedokteran</option>
+                    <option value="S1 Keperawatan">S1 Keperawatan</option>
+                    <option value="S1 Kebidanan">S1 Kebidanan</option>
+                    <option value="S1 Farmasi">S1 Farmasi</option>
+                    <option value="S1 Fisioterapi">S1 Fisioterapi</option>
+                    <option value="S1 Administrasi Rumah Sakit">S1 Administrasi Rumah Sakit</option>
+                    <option value="S1 Kesehatan Masyarakat">S1 Kesehatan Masyarakat</option>
+                  </select>
+                </div>
+              )}
 
               <div className="bg-slate-50 p-4 -mx-5 -mb-5 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button

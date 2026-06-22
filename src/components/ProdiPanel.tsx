@@ -10,11 +10,12 @@ interface ProdiPanelProps {
   state: SystemState;
   onUpdateStudents: (updatedStudents: StudentAcademic[]) => void;
   currentAdminUsername: string;
+  currentAdminProdi?: string;
 }
 
-export default function ProdiPanel({ state, onUpdateStudents, currentAdminUsername }: ProdiPanelProps) {
+export default function ProdiPanel({ state, onUpdateStudents, currentAdminUsername, currentAdminProdi }: ProdiPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProdi, setSelectedProdi] = useState('Semua');
+  const [selectedProdi, setSelectedProdi] = useState(currentAdminProdi || 'Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
   
 
@@ -22,11 +23,12 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
   // Detail Student View Modal
   const [viewingStudent, setViewingStudent] = useState<StudentAcademic | null>(null);
 
-  // Dynamic filter lists
-  const availableProdiList = Array.from(new Set(state.students.map(s => s.programStudi).filter(Boolean)));
-
   // Filter students
-  const filteredStudents = state.students.filter(s => {
+  const visibleStudents = currentAdminProdi ? state.students.filter(s => s.programStudi === currentAdminProdi) : state.students;
+
+  const availableProdiList = Array.from(new Set(visibleStudents.map(s => s.programStudi).filter(Boolean)));
+
+  const filteredStudents = visibleStudents.filter(s => {
     const matchesSearch = 
       s.nama.toLowerCase().includes(searchTerm.toLowerCase()) || 
       s.nim.toLowerCase().includes(searchTerm.toLowerCase());
@@ -38,8 +40,8 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
   });
 
   // Calculate statistics
-  const totalStudents = state.students.length;
-  const graduatedCount = state.students.filter(s => s.statusKelulusan === 'Lulus').length;
+  const totalStudents = visibleStudents.length;
+  const graduatedCount = visibleStudents.filter(s => s.statusKelulusan === 'Lulus').length;
   const pendingGradCount = totalStudents - graduatedCount;
   const graduationRate = totalStudents > 0 ? Math.round((graduatedCount / totalStudents) * 100) : 0;
 
@@ -170,9 +172,13 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
             <select
               value={selectedProdi}
               onChange={(e) => setSelectedProdi(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800 transition-all"
+              disabled={!!currentAdminProdi}
+              className={`w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800 transition-all ${currentAdminProdi ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              <option value="Semua">Semua Program Studi</option>
+              {!currentAdminProdi && <option value="Semua">Semua Program Studi</option>}
+              {currentAdminProdi && !availableProdiList.includes(currentAdminProdi) && (
+                <option value={currentAdminProdi}>{currentAdminProdi}</option>
+              )}
               {availableProdiList.map(prodi => (
                 <option key={prodi} value={prodi}>{prodi}</option>
               ))}

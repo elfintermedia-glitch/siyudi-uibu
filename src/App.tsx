@@ -770,6 +770,7 @@ export default function App() {
             {currentAdmin.role === 'superadmin' && (
               <SuperAdminPanel 
                 adminUsers={state.adminUsers || INITIAL_ADMIN_USERS}
+                students={state.students}
                 currentAdminUsername={currentAdmin.username}
                 onUpdateAdminUsers={handleUpdateAdminUsers}
               />
@@ -802,6 +803,7 @@ export default function App() {
                 state={state}
                 onUpdateStudents={handleUpdateStudentsList}
                 currentAdminUsername={currentAdmin.username}
+                currentAdminProdi={currentAdmin.prodi}
               />
             )}
 
