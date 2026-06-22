@@ -215,6 +215,7 @@ const memoryDb = {
       username: adm.username,
       password: adm.password,
       role: adm.role,
+      prodi: adm.prodi || null,
     };
     if (idx !== -1) {
       memoryStore.adminUsers[idx] = cleanAdmin;
@@ -268,10 +269,23 @@ async function initializeTables() {
         \`username\` VARCHAR(255) NOT NULL,
         \`password\` VARCHAR(255) NOT NULL,
         \`role\` VARCHAR(50) NOT NULL,
+        \`prodi\` VARCHAR(255) NULL,
         PRIMARY KEY (\`id\`),
         UNIQUE KEY \`admin_users_username_unique\` (\`username\`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    // Migrate existing table to add prodi if not present
+    try {
+      await pool.query(`ALTER TABLE \`admin_users\` ADD COLUMN \`prodi\` VARCHAR(255) NULL`);
+      console.log('Successfully added prodi column to existing "admin_users" table!');
+    } catch (e: any) {
+      // Column probably already exists
+    }
+
+    try {
+      await pool.query(`UPDATE \`admin_users\` SET \`prodi\` = 'Pendidikan Matematika' WHERE \`username\` = 'prodi' AND \`prodi\` IS NULL`);
+    } catch(e: any) {}
 
     // 3. yudisium_registrations Table
     await pool.query(`
@@ -335,6 +349,7 @@ async function seedDatabaseIfEmpty() {
           username: admin.username,
           password: admin.password || 'admin',
           role: admin.role,
+          prodi: admin.prodi || null,
         });
       }
 
@@ -1409,12 +1424,14 @@ async function startServer() {
             username: adm.username,
             password: adm.password,
             role: adm.role,
+            prodi: adm.prodi || null,
           })
           .onDuplicateKeyUpdate({
             set: {
               nama: adm.nama,
               password: adm.password,
               role: adm.role,
+              prodi: adm.prodi || null,
             },
            });
       } else {

@@ -195,6 +195,7 @@ export const INITIAL_ADMIN_USERS: AdminUser[] = [
     nama: 'Prof. Dr. Sri Wahyuni (Kaprodi)',
     username: 'prodi',
     password: 'prodi',
-    role: 'prodi'
+    role: 'prodi',
+    prodi: 'Pendidikan Matematika'
   }
 ];

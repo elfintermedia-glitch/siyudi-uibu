@@ -803,7 +803,7 @@ export default function App() {
                 state={state}
                 onUpdateStudents={handleUpdateStudentsList}
                 currentAdminUsername={currentAdmin.username}
-                currentAdminProdi={currentAdmin.prodi}
+                currentAdminProdi={currentAdmin.prodi || state.adminUsers?.find(u => u.username === currentAdmin.username)?.prodi}
               />
             )}
 
