@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+@keyframes float-balloon {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(15deg); opacity: 0; }
+}
+
+.balloon {
+  position: absolute;
+  bottom: -50px;
+  animation: float-balloon 8s ease-in infinite;
+  animation-fill-mode: forwards;
+}
+
+@keyframes firework {
+  0% { transform: scale(0); opacity: 1; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.firework::before, .firework::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px dotted gold;
+  animation: firework 2s ease-out infinite;
+}
+
+.firework::after {
+  animation-delay: 0.5s;
+  border: 4px dashed yellow;
+}

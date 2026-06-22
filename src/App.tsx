@@ -68,6 +68,18 @@ export default function App() {
               }
             } catch (_) {}
           }
+
+          // Hydrate and update admin record with the latest state from backend/DB if active
+          const cachedAdmin = safeLocalStorage.getItem('siyudi_current_admin');
+          if (cachedAdmin) {
+            try {
+              const parsed = JSON.parse(cachedAdmin);
+              const refreshed = data.adminUsers?.find((a: any) => a.username.toLowerCase() === parsed.username.toLowerCase());
+              if (refreshed) {
+                setCurrentAdmin(refreshed);
+              }
+            } catch (_) {}
+          }
         }
       })
       .catch(e => {
@@ -803,7 +815,7 @@ export default function App() {
                 state={state}
                 onUpdateStudents={handleUpdateStudentsList}
                 currentAdminUsername={currentAdmin.username}
-                currentAdminProdi={currentAdmin.prodi || state.adminUsers?.find(u => u.username === currentAdmin.username)?.prodi}
+                currentAdminProdi={currentAdmin.prodi || state.adminUsers?.find(u => u.username.toLowerCase() === currentAdmin.username.toLowerCase())?.prodi}
               />
             )}
 

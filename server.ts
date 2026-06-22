@@ -323,7 +323,7 @@ async function initializeTables() {
 
     console.log('Database tables verified/created successfully!');
   } catch (err: any) {
-    console.error('Failed to initialize database tables:', err.message);
+    console.log('Failed to initialize database tables, will fallback to memory... (' + err.message + ')');
     throw err;
   }
 }
@@ -415,9 +415,9 @@ async function seedDatabaseIfEmpty() {
     }
   } catch (err: any) {
     isDatabaseAvailable = false;
-    console.warn('--- DATABASE CONNECTION TO REAL MYSQL FAILED ---');
-    console.warn('Reason:', err.message);
-    console.warn('>>> Falling back to high-fidelity In-Memory Database for preview sandbox. <<<');
+    console.log('--- DATABASE CONNECTION TO REAL MYSQL FAILED ---');
+    console.log('Reason:', err.message);
+    console.log('>>> Falling back to high-fidelity In-Memory Database for preview sandbox. <<<');
   }
 }
 

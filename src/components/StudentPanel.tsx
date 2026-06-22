@@ -39,6 +39,15 @@ export default function StudentPanel({
     return 3;
   });
 
+  const [showCelebrationPopup, setShowCelebrationPopup] = useState(() => {
+    return localStorage.getItem(`saw_congrats_${student.nim}`) !== 'true' && student.statusKelulusan === 'Lulus';
+  });
+
+  const handleCloseCelebration = () => {
+    localStorage.setItem(`saw_congrats_${student.nim}`, 'true');
+    setShowCelebrationPopup(false);
+  };
+
   useEffect(() => {
     if (student.academicApproved) {
       if (yudisium?.status !== 'disetujui') {
@@ -1355,6 +1364,62 @@ export default function StudentPanel({
 
   return (
     <div className="space-y-6">
+      {showCelebrationPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-hidden">
+          {/* Balloons */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="balloon text-6xl" style={{ left: '10%', animationDelay: '0s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '30%', animationDelay: '2s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '50%', animationDelay: '1s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '70%', animationDelay: '3s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '90%', animationDelay: '0.5s' }}>🎈</div>
+            <div className="balloon text-5xl" style={{ left: '20%', animationDelay: '4s' }}>✨</div>
+            <div className="balloon text-5xl" style={{ left: '80%', animationDelay: '2.5s' }}>🎊</div>
+          </div>
+
+          {/* Fireworks */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="firework w-32 h-32 absolute top-[20%] left-[20%]"></div>
+            <div className="firework w-40 h-40 absolute top-[30%] right-[20%]" style={{ animationDelay: '1s' }}></div>
+            <div className="firework w-24 h-24 absolute top-[50%] left-[40%]" style={{ animationDelay: '0.5s' }}></div>
+            <div className="firework w-32 h-32 absolute bottom-[20%] left-[10%]" style={{ animationDelay: '1.5s' }}></div>
+            <div className="firework w-36 h-36 absolute bottom-[30%] right-[10%]" style={{ animationDelay: '0.8s' }}></div>
+          </div>
+
+          <div
+            className="relative bg-gradient-to-br from-amber-400 via-yellow-500 to-yellow-600 rounded-3xl p-8 max-w-xl w-full mx-4 text-center shadow-2xl border-4 border-yellow-300 transform scale-100 flex flex-col items-center z-10"
+          >
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 shadow-xl backdrop-blur-sm">
+              <GraduationCap className="w-12 h-12 text-white" />
+            </div>
+
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-md tracking-wider">
+              CONGRATULATIONS
+            </h2>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-6 drop-shadow-sm uppercase">
+              {student.nama}
+            </h3>
+
+            <div className="bg-white/20 rounded-2xl p-6 mb-8 w-full backdrop-blur-sm border border-white/40 shadow-inner">
+              <p className="text-xl md:text-2xl font-bold text-white drop-shadow-md">
+                Dinyatakan
+              </p>
+              <p className="text-2xl md:text-3xl font-black text-slate-900 drop-shadow-sm mt-2">
+                LULUS TANPA UJIAN AKHIR
+              </p>
+            </div>
+
+            <button
+              onClick={handleCloseCelebration}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2"
+            >
+              Klik disini Selanjutnya untuk Verifikasi Data
+              <CheckCircle2 className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Upper Status Notifications */}
       {successMsg && (
         <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl relative flex items-start gap-3">
