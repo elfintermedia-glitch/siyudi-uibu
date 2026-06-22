@@ -2473,7 +2473,7 @@ export default function StudentPanel({
                   onClick={previewStep1PDF}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
                 >
-                  <span>👁️</span> Pratinjau PDF (Tab Baru)
+                  <span>👁️</span> Download PDF
                 </button>
               </div>
               <button
@@ -2672,7 +2672,7 @@ export default function StudentPanel({
                   onClick={previewStep2PDF}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
                 >
-                  <span>👁️</span> Pratinjau PDF (Tab Baru)
+                  <span>👁️</span> Download PDF
                 </button>
               </div>
               <button
@@ -2871,7 +2871,7 @@ export default function StudentPanel({
                   onClick={previewStep3PDF}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
                 >
-                  <span>👁️</span> Pratinjau PDF (Tab Baru)
+                  <span>👁️</span> Download PDF
                 </button>
               </div>
               <button
