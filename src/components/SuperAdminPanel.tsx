@@ -73,6 +73,37 @@ export default function SuperAdminPanel({
     }
   };
 
+  // Schema Migration States
+  const [isUpdatingSchema, setIsUpdatingSchema] = useState(false);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+  const [schemaSuccess, setSchemaSuccess] = useState<string | null>(null);
+
+  const handleUpdateSchema = async () => {
+    setIsUpdatingSchema(true);
+    setSchemaError(null);
+    setSchemaSuccess(null);
+    try {
+      const response = await fetch('/api/update-schema', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `Gagal memperbarui struktur database (Status: ${response.status})`);
+      }
+      
+      setSchemaSuccess(data.message || 'Struktur skema database MySQL berhasil diperbarui secara otomatis!');
+      setTimeout(() => setSchemaSuccess(null), 10000);
+    } catch (err: any) {
+      console.error(err);
+      setSchemaError(err.message || 'Terjadi kesalahan saat memperbarui database schema.');
+    } finally {
+      setIsUpdatingSchema(false);
+    }
+  };
+
   // GitHub Update States
   const [gitHubRepo, setGitHubRepo] = useState('elfintermedia-glitch/siyudi-uibu');
   const [gitBranch, setGitBranch] = useState('main');
@@ -668,6 +699,20 @@ export default function SuperAdminPanel({
           </div>
         )}
 
+        {schemaError && (
+          <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[11px] font-semibold flex items-center gap-2 animate-fade-in font-sans">
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{schemaError}</span>
+          </div>
+        )}
+
+        {schemaSuccess && (
+          <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-800 text-[11px] font-semibold flex items-center gap-2 animate-fade-in font-sans">
+            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{schemaSuccess}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-8 space-y-3">
             <p className="text-xs text-slate-550 leading-relaxed font-semibold font-sans">
@@ -676,7 +721,7 @@ export default function SuperAdminPanel({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] font-semibold text-slate-500 font-sans">
               <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 space-y-1">
-                <p className="font-bold text-slate-700">Tabel yang Diikutsertakan:</p>
+                <p className="font-bold text-slate-700">Tabel & Skema yang Dipelihara:</p>
                 <ul className="list-disc list-inside space-y-0.5 text-slate-500">
                   <li><code className="font-mono text-[10px] text-slate-700 font-bold bg-white px-1 border rounded">students</code> (Identitas & Kelulusan)</li>
                   <li><code className="font-mono text-[10px] text-slate-700 font-bold bg-white px-1 border rounded">yudisium_registrations</code> (Data Yudisium)</li>
@@ -696,36 +741,72 @@ export default function SuperAdminPanel({
             </div>
           </div>
 
-          <div className="lg:col-span-4 flex flex-col justify-center items-center p-4 bg-slate-50 rounded-2xl border border-slate-150 space-y-3 font-sans">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
-              <Database className="w-8 h-8 animate-pulse text-indigo-600" />
+          <div className="lg:col-span-4 flex flex-col gap-4 font-sans">
+            {/* Backup & Export Module */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-150 space-y-3 flex flex-col items-center">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
+                <Database className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-bold text-slate-800">Unduh Database Sekarang</p>
+                <p className="text-[10px] text-slate-400 font-medium">Cadangkan sistem dalam 1-klik</p>
+              </div>
+              <button
+                type="button"
+                disabled={isExporting}
+                onClick={handleExportSQL}
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all text-white shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                  isExporting
+                    ? 'bg-indigo-400 cursor-not-allowed shadow-none'
+                    : 'bg-indigo-600 hover:bg-indigo-750 active:bg-indigo-805 shadow-indigo-100 hover:shadow shadow-sm'
+                }`}
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                    Mengekspor...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5" />
+                    Ekspor Database (.SQL)
+                  </>
+                )}
+              </button>
             </div>
-            <div className="text-center">
-              <p className="text-xs font-bold text-slate-800">Unduh Database Sekarang</p>
-              <p className="text-[10px] text-slate-400 font-medium">Cadangkan sistem dalam 1-klik</p>
+
+            {/* Auto Schema Update Module */}
+            <div className="p-4 bg-emerald-50/40 rounded-2xl border border-emerald-150 space-y-3 flex flex-col items-center">
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
+                <RefreshCw className={`w-6 h-6 text-emerald-600 ${isUpdatingSchema ? 'animate-spin' : ''}`} />
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-bold text-emerald-950">Update Struktur Database</p>
+                <p className="text-[10px] text-emerald-600/80 font-medium">Sinkronisasi skema tabel MySQL otomatis</p>
+              </div>
+              <button
+                type="button"
+                disabled={isUpdatingSchema}
+                onClick={handleUpdateSchema}
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all text-white shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                  isUpdatingSchema
+                    ? 'bg-emerald-400 cursor-not-allowed shadow-none'
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-emerald-100 hover:shadow shadow-sm'
+                }`}
+              >
+                {isUpdatingSchema ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                    Singkronisasi...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Update Struktur MySQL
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              disabled={isExporting}
-              onClick={handleExportSQL}
-              className={`w-full py-3 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all text-white shadow-md flex items-center justify-center gap-2 cursor-pointer ${
-                isExporting
-                  ? 'bg-indigo-400 cursor-not-allowed shadow-none'
-                  : 'bg-indigo-600 hover:bg-indigo-750 active:bg-indigo-805 shadow-indigo-100 hover:shadow shadow-sm'
-              }`}
-            >
-              {isExporting ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                  Mengekspor...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Ekspor Database (.SQL)
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>

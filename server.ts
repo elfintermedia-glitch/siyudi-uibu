@@ -893,6 +893,116 @@ async function startServer() {
     }
   });
 
+  // Update database schema automatically
+  app.post('/api/update-schema', async (req, res) => {
+    try {
+      if (isDatabaseAvailable) {
+        // First make sure standard tables exist
+        await initializeTables();
+
+        // Retrieve existing columns for all tables in current database schema
+        const [rows]: any = await pool.query(`
+          SELECT TABLE_NAME, COLUMN_NAME 
+          FROM information_schema.COLUMNS 
+          WHERE TABLE_SCHEMA = DATABASE()
+        `);
+
+        // Map existing columns: key is table, value is Set of column names
+        const existingColumns: Record<string, Set<string>> = {};
+        rows.forEach((row: any) => {
+          const table = row.TABLE_NAME.toLowerCase();
+          const col = row.COLUMN_NAME.toLowerCase();
+          if (!existingColumns[table]) {
+            existingColumns[table] = new Set<string>();
+          }
+          existingColumns[table].add(col);
+        });
+
+        const expectedColumns: Record<string, Record<string, string>> = {
+          students: {
+            nim: "VARCHAR(50) NOT NULL",
+            nik: "VARCHAR(50) NOT NULL",
+            nama: "VARCHAR(255) NOT NULL",
+            tempat_lahir: "VARCHAR(255) NOT NULL",
+            tanggal_lahir: "VARCHAR(50) NOT NULL",
+            fakultas: "VARCHAR(255) NOT NULL",
+            program_studi: "VARCHAR(255) NOT NULL",
+            status_kelulusan: "VARCHAR(55) NOT NULL",
+            keterangan: "TEXT NULL",
+            email: "VARCHAR(255) NULL",
+            no_hp: "VARCHAR(50) NULL",
+            password: "VARCHAR(255) NOT NULL DEFAULT 'kebudiutamaan'",
+            data_verified: "BOOLEAN DEFAULT FALSE",
+            academic_approved: "BOOLEAN DEFAULT FALSE",
+            academic_rejected: "BOOLEAN DEFAULT FALSE",
+            academic_rejection_reason: "TEXT NULL",
+            ktp_doc: "JSON NULL",
+            ijazah_sma_doc: "JSON NULL",
+          },
+          admin_users: {
+            id: "VARCHAR(255) NOT NULL",
+            nama: "VARCHAR(255) NOT NULL",
+            username: "VARCHAR(255) NOT NULL",
+            password: "VARCHAR(255) NOT NULL",
+            role: "VARCHAR(50) NOT NULL",
+          },
+          yudisium_registrations: {
+            nim: "VARCHAR(50) NOT NULL",
+            judul_skripsi: "TEXT NOT NULL",
+            pembimbing1: "VARCHAR(255) NOT NULL",
+            pembimbing2: "VARCHAR(255) NOT NULL",
+            tanggal_lulus: "VARCHAR(50) NOT NULL",
+            registered_at: "VARCHAR(100) NOT NULL",
+            status: "VARCHAR(50) NOT NULL",
+            rejection_reason: "TEXT NULL",
+            documents: "JSON NULL",
+          },
+          wisuda_registrations: {
+            nim: "VARCHAR(50) NOT NULL",
+            ukuran_toga: "VARCHAR(10) NOT NULL",
+            nama_ayah: "VARCHAR(255) NOT NULL",
+            nama_ibu: "VARCHAR(255) NOT NULL",
+            no_hp_ortu: "VARCHAR(50) NOT NULL",
+            alamat_pengiriman: "TEXT NOT NULL",
+            registered_at: "VARCHAR(100) NOT NULL",
+            status: "VARCHAR(50) NOT NULL",
+            rejection_reason: "TEXT NULL",
+          }
+        };
+
+        const addedColumns: string[] = [];
+
+        for (const [tableName, cols] of Object.entries(expectedColumns)) {
+          const currentColsSet = existingColumns[tableName.toLowerCase()] || new Set<string>();
+          for (const [colName, colDef] of Object.entries(cols)) {
+            if (!currentColsSet.has(colName.toLowerCase())) {
+              console.log(`Adding missing column ${colName} to table ${tableName}...`);
+              await pool.query(`ALTER TABLE \`${tableName}\` ADD COLUMN \`${colName}\` ${colDef}`);
+              addedColumns.push(`${tableName}.${colName}`);
+            }
+          }
+        }
+
+        res.json({
+          status: 'success',
+          mode: 'mysql',
+          message: addedColumns.length > 0 
+            ? `Berhasil memperbarui struktur database. Kolom baru yang ditambahkan: ${addedColumns.join(', ')}` 
+            : 'Struktur database sudah mutakhir dengan schema saat ini. Tidak ada kolom baru yang perlu ditambahkan.'
+        });
+      } else {
+        res.json({
+          status: 'success',
+          mode: 'memory',
+          message: 'Mode memori lokal aktif. Struktur data simulasi berhasil diperbarui otomatis.'
+        });
+      }
+    } catch (err: any) {
+      console.error('Error updating MySQL schema:', err);
+      res.status(500).json({ error: 'Gagal memperbarui struktur database MySQL.', details: err.message });
+    }
+  });
+
   function escapeString(val: any): string {
     if (val === null || val === undefined) return 'NULL';
     const escaped = String(val).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
