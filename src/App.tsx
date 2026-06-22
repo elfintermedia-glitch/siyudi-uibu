@@ -131,13 +131,13 @@ export default function App() {
     }
   }, [activeRole, loginUsername, loginPassword, currentStudent, currentAdmin]);
   
-  // Admin password change states
-  const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
-  const [newAdminPassword, setNewAdminPassword] = useState('');
-  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
-  const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
-  const [adminPasswordSuccess, setAdminPasswordSuccess] = useState<string | null>(null);
-  const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
+  // User password change states
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Helper quick diagnostic presets log in
   const handleQuickLogin = (nim: string) => {
@@ -560,13 +560,20 @@ export default function App() {
                     Sistem Akses: {activeRole === 'admin' ? (currentAdmin?.role === 'superadmin' ? 'Super Admin' : currentAdmin?.role === 'keuangan' ? 'Admin Keuangan' : currentAdmin?.role === 'prodi' ? 'Program Studi' : 'Admin Akademik') : 'Mahasiswa'}
                   </span>
                   
-                  {activeRole === 'student' && currentStudent && (
-                    <span className="text-[11px] font-bold text-indigo-900 font-mono">
-                      NIM {currentStudent.nim}
-                    </span>
-                  )}
-
                   <div className="w-px h-3 bg-indigo-200" />
+                  
+                  <button
+                    onClick={() => {
+                      setNewPassword('');
+                      setConfirmPassword('');
+                      setPasswordError(null);
+                      setShowNewPassword(false);
+                      setIsChangingPassword(true);
+                    }}
+                    className="text-amber-600 hover:text-amber-700 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    🔒 Ubah Password
+                  </button>
                   
                   <button
                     id="role-indicator-logout"
@@ -798,8 +805,8 @@ export default function App() {
               />
             )}
 
-            {/* ADMIN PASSWORD CHANGE MODAL */}
-            {isChangingAdminPassword && (
+            {/* PASSWORD CHANGE MODAL */}
+            {isChangingPassword && (
               <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
                 <div className="bg-white rounded-2xl shadow-xl border border-slate-150 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                   <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
@@ -807,10 +814,10 @@ export default function App() {
                       <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg">
                         <span className="text-sm font-bold">🔑</span>
                       </span>
-                      <h3 className="font-bold text-sm uppercase tracking-wider">Ubah Password Staff</h3>
+                      <h3 className="font-bold text-sm uppercase tracking-wider">Ubah Password {activeRole === 'student' ? 'Mahasiswa' : 'Staff'}</h3>
                     </div>
                     <button 
-                      onClick={() => setIsChangingAdminPassword(false)}
+                      onClick={() => setIsChangingPassword(false)}
                       className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                       ✕
@@ -819,43 +826,47 @@ export default function App() {
                   
                   <form onSubmit={(e) => {
                     e.preventDefault();
-                    if (!newAdminPassword) {
-                      setAdminPasswordError("Password baru wajib diisi!");
+                    if (!newPassword) {
+                      setPasswordError("Password baru wajib diisi!");
                       return;
                     }
-                    if (newAdminPassword !== confirmAdminPassword) {
-                      setAdminPasswordError("Konfirmasi password tidak cocok!");
+                    if (newPassword !== confirmPassword) {
+                      setPasswordError("Konfirmasi password tidak cocok!");
                       return;
                     }
-                    setAdminPasswordError(null);
+                    setPasswordError(null);
                     
-                    // Update admin profile logic
-                    const updatedAdmin = { ...currentAdmin, password: newAdminPassword };
-                    const updatedUsersList = (state.adminUsers || []).map(u => u.username === currentAdmin.username ? updatedAdmin : u);
+                    if (activeRole === 'student' && currentStudent) {
+                      const updatedStudent = { ...currentStudent, password: newPassword };
+                      handleUpdateStudentProfile(updatedStudent);
+                      setCurrentStudent(updatedStudent);
+                    } else if (activeRole === 'admin' && currentAdmin) {
+                      const updatedAdmin = { ...currentAdmin, password: newPassword };
+                      const updatedUsersList = (state.adminUsers || []).map(u => u.username === currentAdmin.username ? updatedAdmin : u);
+                      handleUpdateAdminUsers(updatedUsersList);
+                      setCurrentAdmin(updatedAdmin);
+                    }
                     
-                    handleUpdateAdminUsers(updatedUsersList);
-                    setCurrentAdmin(updatedAdmin);
-                    
-                    setAdminPasswordSuccess("Password staff sukses diubah!");
+                    setPasswordSuccess("Password sukses diubah!");
                     setTimeout(() => {
-                      setIsChangingAdminPassword(false);
-                      setAdminPasswordSuccess(null);
+                      setIsChangingPassword(false);
+                      setPasswordSuccess(null);
                     }, 1500);
                   }} className="p-5 space-y-4">
                     
-                    {adminPasswordSuccess ? (
+                    {passwordSuccess ? (
                       <div className="p-4 bg-emerald-50 border border-emerald-150 text-emerald-800 text-xs font-bold rounded-xl text-center space-y-2 py-8">
                         <div className="text-2xl">✓</div>
-                        <p>{adminPasswordSuccess}</p>
+                        <p>{passwordSuccess}</p>
                       </div>
                     ) : (
                       <>
                         <div className="space-y-1 text-left">
-                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Username Staff</label>
+                          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Username / NIM</label>
                           <input 
                             type="text"
                             disabled
-                            value={currentAdmin.username}
+                            value={(activeRole === 'student' && currentStudent) ? currentStudent.nim : ((activeRole === 'admin' && currentAdmin) ? currentAdmin.username : '')}
                             className="w-full p-2.5 text-xs font-bold border border-slate-200 bg-slate-100 text-slate-500 rounded-lg focus:outline-none cursor-not-allowed font-mono"
                           />
                         </div>
@@ -863,10 +874,10 @@ export default function App() {
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span className="text-rose-500">*</span></label>
                           <input 
-                            type={showNewAdminPassword ? "text" : "password"}
+                            type={showNewPassword ? "text" : "password"}
                             required
-                            value={newAdminPassword}
-                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Masukkan password baru"
                             className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
                           />
@@ -875,10 +886,10 @@ export default function App() {
                         <div className="space-y-1 text-left">
                           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Konfirmasi Password Baru <span className="text-rose-500">*</span></label>
                           <input 
-                            type={showNewAdminPassword ? "text" : "password"}
+                            type={showNewPassword ? "text" : "password"}
                             required
-                            value={confirmAdminPassword}
-                            onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Ulangi password baru"
                             className="w-full px-3 p-2.5 text-xs font-semibold border border-slate-200 bg-white focus:border-indigo-500 focus:outline-none rounded-lg text-slate-800"
                           />
@@ -886,8 +897,8 @@ export default function App() {
                             <input
                               id="toggle-new-admin-pass"
                               type="checkbox"
-                              checked={showNewAdminPassword}
-                              onChange={() => setShowNewAdminPassword(!showNewAdminPassword)}
+                              checked={showNewPassword}
+                              onChange={() => setShowNewPassword(!showNewPassword)}
                               className="h-3.5 w-3.5 rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
                             <label htmlFor="toggle-new-admin-pass" className="text-[11px] text-slate-500 font-medium select-none cursor-pointer">
@@ -896,16 +907,16 @@ export default function App() {
                           </div>
                         </div>
 
-                        {adminPasswordError && (
+                        {passwordError && (
                           <div className="p-3 bg-rose-50 border border-rose-100 text-rose-800 text-[11px] font-semibold rounded-lg text-left">
-                            ⚠️ {adminPasswordError}
+                            ⚠️ {passwordError}
                           </div>
                         )}
 
                         <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                           <button
                             type="button"
-                            onClick={() => setIsChangingAdminPassword(false)}
+                            onClick={() => setIsChangingPassword(false)}
                             className="px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-xs font-bold rounded-lg border border-slate-200 cursor-pointer"
                           >
                             Batal
