@@ -18,7 +18,11 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
   const [selectedProdi, setSelectedProdi] = useState(currentAdminProdi || 'Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
   
-
+  React.useEffect(() => {
+    if (currentAdminProdi) {
+      setSelectedProdi(currentAdminProdi);
+    }
+  }, [currentAdminProdi]);
   
   // Detail Student View Modal
   const [viewingStudent, setViewingStudent] = useState<StudentAcademic | null>(null);

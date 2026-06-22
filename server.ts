@@ -284,7 +284,7 @@ async function initializeTables() {
     }
 
     try {
-      await pool.query(`UPDATE \`admin_users\` SET \`prodi\` = 'Pendidikan Matematika' WHERE \`username\` = 'prodi' AND \`prodi\` IS NULL`);
+      await pool.query(`UPDATE \`admin_users\` SET \`prodi\` = 'Pendidikan Matematika' WHERE \`username\` = 'prodi'`);
     } catch(e: any) {}
 
     // 3. yudisium_registrations Table
@@ -1060,6 +1060,11 @@ async function startServer() {
         allAdmins = memoryDb.getAdmins();
       }
 
+      const parsedAdmins = allAdmins.map((a: any) => ({
+        ...a,
+        prodi: a.prodi || (a.username === 'prodi' ? 'Pendidikan Matematika' : null)
+      }));
+
       // Safe parse JSON fields from database
       const parsedStudents = allStudents.map((s: any) => ({
         ...s,
@@ -1086,7 +1091,7 @@ async function startServer() {
         students: parsedStudents,
         yudisiumApps,
         wisudaApps,
-        adminUsers: allAdmins,
+        adminUsers: parsedAdmins,
       });
     } catch (err: any) {
       console.error('Error fetching state:', err);
