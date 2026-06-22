@@ -6,6 +6,7 @@ import {
   Database, Download
 } from 'lucide-react';
 import { AdminUser, StudentAcademic } from '../types';
+import { ALLOWED_PROGRAM_STUDI } from './ExcelImporter';
 
 interface SuperAdminPanelProps {
   adminUsers: AdminUser[];
@@ -25,7 +26,7 @@ export default function SuperAdminPanel({
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>('akademik');
-  const [newProdi, setNewProdi] = useState('S1 Teknik Informatika');
+  const [newProdi, setNewProdi] = useState(ALLOWED_PROGRAM_STUDI[0]);
   
   // Edit user modal state
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -564,16 +565,9 @@ export default function SuperAdminPanel({
                   onChange={(e) => setNewProdi(e.target.value)}
                   className="w-full text-xs font-semibold p-2.5 border border-slate-250 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-inner"
                 >
-                  {Array.from(new Set(students.map(s => s.programStudi).filter(Boolean))).map(prodi => (
-                    <option key={prodi} value={prodi}>{prodi}</option>
-                  ))}
-                  <option value="S1 Kedokteran">S1 Kedokteran</option>
-                  <option value="S1 Keperawatan">S1 Keperawatan</option>
-                  <option value="S1 Kebidanan">S1 Kebidanan</option>
-                  <option value="S1 Farmasi">S1 Farmasi</option>
-                  <option value="S1 Fisioterapi">S1 Fisioterapi</option>
-                  <option value="S1 Administrasi Rumah Sakit">S1 Administrasi Rumah Sakit</option>
-                  <option value="S1 Kesehatan Masyarakat">S1 Kesehatan Masyarakat</option>
+                    {ALLOWED_PROGRAM_STUDI.map(prodi => (
+                      <option key={prodi} value={prodi}>{prodi}</option>
+                    ))}
                 </select>
               </div>
             )}
@@ -1249,16 +1243,9 @@ export default function SuperAdminPanel({
                     onChange={(e) => setEditProdi(e.target.value)}
                     className="w-full text-xs font-semibold p-2.5 border border-slate-250 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-inner"
                   >
-                    {Array.from(new Set(students.map(s => s.programStudi).filter(Boolean))).map(prodi => (
+                    {ALLOWED_PROGRAM_STUDI.map(prodi => (
                       <option key={prodi} value={prodi}>{prodi}</option>
                     ))}
-                    <option value="S1 Kedokteran">S1 Kedokteran</option>
-                    <option value="S1 Keperawatan">S1 Keperawatan</option>
-                    <option value="S1 Kebidanan">S1 Kebidanan</option>
-                    <option value="S1 Farmasi">S1 Farmasi</option>
-                    <option value="S1 Fisioterapi">S1 Fisioterapi</option>
-                    <option value="S1 Administrasi Rumah Sakit">S1 Administrasi Rumah Sakit</option>
-                    <option value="S1 Kesehatan Masyarakat">S1 Kesehatan Masyarakat</option>
                   </select>
                 </div>
               )}
