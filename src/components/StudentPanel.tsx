@@ -1980,7 +1980,7 @@ export default function StudentPanel({
                     <div>
                       <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                         <CheckCircle className="w-4.5 h-4.5 text-emerald-600" />
-                        Langkah 1: Tinjauan Berkas Data Akademik
+                        Langkah 1: Verifikasi Biodata Mahasiswa
                       </h3>
                       <p className="text-[11px] text-gray-500 mt-1">
                         Data akademik Anda telah divalidasi dan dikunci secara resmi untuk mencatatkan kelayakan wisuda.
