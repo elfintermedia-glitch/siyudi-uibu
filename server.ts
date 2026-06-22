@@ -1196,6 +1196,10 @@ async function startServer() {
         return res.status(404).json({ error: `NIM "${nim}" tidak terdaftar di database akademik! Hubungi Program Studi/Fakultas anda.` });
       }
 
+      if (studentRecord.statusKelulusan === 'Belum Lulus') {
+        return res.status(403).json({ error: 'Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi admin akademik untuk pengkinian data kelulusan Anda!' });
+      }
+
       // Default password fallback: 'kebudiutamaan'
       const expectedPassword = studentRecord.password || 'kebudiutamaan';
       if (password.trim() !== expectedPassword.trim()) {

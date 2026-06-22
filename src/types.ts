@@ -60,7 +60,7 @@ export interface AdminUser {
   nama: string;
   username: string;
   password?: string;
-  role: 'superadmin' | 'akademik' | 'keuangan';
+  role: 'superadmin' | 'akademik' | 'keuangan' | 'prodi';
 }
 
 export interface SystemState {

@@ -50,5 +50,5 @@ export const adminUsers = mysqlTable('admin_users', {
   nama: varchar('nama', { length: 255 }).notNull(),
   username: varchar('username', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
-  role: varchar('role', { length: 50 }).$type<'superadmin' | 'akademik' | 'keuangan'>().notNull(),
+  role: varchar('role', { length: 50 }).$type<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>().notNull(),
 });

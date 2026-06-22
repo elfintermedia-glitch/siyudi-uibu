@@ -10,6 +10,7 @@ import StudentPanel from './components/StudentPanel';
 import AdminPanel from './components/AdminPanel';
 import SuperAdminPanel from './components/SuperAdminPanel';
 import FinancePanel from './components/FinancePanel';
+import ProdiPanel from './components/ProdiPanel';
 
 const safeLocalStorage = {
   getItem: (key: string): string | null => {
@@ -150,6 +151,10 @@ export default function App() {
   const handleQuickLogin = (nim: string) => {
     const found = state.students.find(s => s.nim === nim);
     if (found) {
+      if (found.statusKelulusan === 'Belum Lulus') {
+        setLoginError('Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi admin akademik untuk pengkinian data kelulusan Anda!');
+        return;
+      }
       setCurrentStudent(found);
       setActiveRole('student');
       setStudentNimInput(found.nim);
@@ -244,7 +249,7 @@ export default function App() {
     }, 50);
   };
 
-  // Auto Logout after 1 minute (60 seconds) of inactivity
+  // Auto Logout after 5 minutes (300 seconds) of inactivity
   useEffect(() => {
     if (activeRole === 'guest') return;
 
@@ -253,8 +258,8 @@ export default function App() {
     const resetTimer = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        handleLogout('Sesi Anda telah berakhir karena tidak ada aktivitas selama 1 menit.');
-      }, 60000);
+        handleLogout('Sesi Anda telah berakhir karena tidak ada aktivitas selama 5 menit.');
+      }, 300000);
     };
 
     // Initialize timer
@@ -549,7 +554,7 @@ export default function App() {
               <img src="/favicon.svg" alt="Universitas Insan Budi Utomo" className="w-8 h-8 object-contain shrink-0" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="text-sm font-bold text-gray-800 tracking-tight flex items-center gap-1.5">
-                  SIYUDI <span className="text-gray-400 font-normal">| Portal Yudisium & Wisuda Universitas Insan Budi Utomo Malang</span>
+                  SiHeppiee <span className="text-gray-400 font-normal">| Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan Universitas Insan Budi Utomo Malang</span>
                 </h1>
               </div>
             </div>
@@ -560,7 +565,7 @@ export default function App() {
                 {activeRole !== 'guest' ? (
                 <div className="flex items-center gap-2.5 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-lg">
                   <span className="text-[10px] uppercase font-bold text-indigo-700">
-                    Sistem Akses: {activeRole === 'admin' ? (currentAdmin?.role === 'superadmin' ? 'Super Admin' : currentAdmin?.role === 'keuangan' ? 'Admin Keuangan' : 'Admin Akademik') : 'Mahasiswa'}
+                    Sistem Akses: {activeRole === 'admin' ? (currentAdmin?.role === 'superadmin' ? 'Super Admin' : currentAdmin?.role === 'keuangan' ? 'Admin Keuangan' : currentAdmin?.role === 'prodi' ? 'Program Studi' : 'Admin Akademik') : 'Mahasiswa'}
                   </span>
                   
                   {activeRole === 'student' && currentStudent && (
@@ -792,6 +797,8 @@ export default function App() {
                     <span>Dashboard Keamanan & Manajemen Pengguna Admin</span>
                   ) : currentAdmin.role === 'keuangan' ? (
                     <span>Dashboard Pembayaran & Validasi Keuangan Mahasiswa</span>
+                  ) : currentAdmin.role === 'prodi' ? (
+                    <span>Dashboard Penilaian Kelayakan & Status Kelulusan Kaprodi</span>
                   ) : (
                     <span>Dashboard Kemahasiswaan & Administrasi Wisuda</span>
                   )}
@@ -801,6 +808,8 @@ export default function App() {
                     <span>Gunakan panel ini untuk memantau, menambah, mendelegasikan, atau menghapus kredensial gerbang masuk staff administrasi kampus.</span>
                   ) : currentAdmin.role === 'keuangan' ? (
                     <span>Gunakan panel ini untuk memantau bukti lunas SPP, memeriksa berkas BebasSPP mahasiswa, mendelegasikan catatan perbaikan, atau menyetujui kriteria keuangan.</span>
+                  ) : currentAdmin.role === 'prodi' ? (
+                    <span>Gunakan panel ini untuk memantau kelayakan akademik, memeriksa persyaratan kelulusan SKS, serta menyetujui atau menangguhkan kelulusan mahasiswa prodi secara mandiri.</span>
                   ) : (
                     <span>Gunakan panel ini untuk mengelola list mahasiswa akademik, memvalidasi berkas Yudisium masuk, dan melacak logistik ukuran Toga Wisuda.</span>
                   )}
@@ -826,7 +835,7 @@ export default function App() {
                   onClick={handleLogout}
                   className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-slate-700/80 cursor-pointer"
                 >
-                  Keluar Panel {currentAdmin.role === 'superadmin' ? 'Superadmin' : currentAdmin.role === 'keuangan' ? 'Keuangan' : 'Akademik'}
+                  Keluar Panel {currentAdmin.role === 'superadmin' ? 'Superadmin' : currentAdmin.role === 'keuangan' ? 'Keuangan' : currentAdmin.role === 'prodi' ? 'Prodi' : 'Akademik'}
                 </button>
               </div>
             </div>
@@ -857,6 +866,14 @@ export default function App() {
                 onUpdateYudisium={handleUpdateYudisiumApp}
                 onUpdateWisuda={handleUpdateWisudaApp}
                 onUpdateAdminUsers={handleUpdateAdminUsers}
+                currentAdminUsername={currentAdmin.username}
+              />
+            )}
+
+            {currentAdmin.role === 'prodi' && (
+              <ProdiPanel 
+                state={state}
+                onUpdateStudents={handleUpdateStudentsList}
                 currentAdminUsername={currentAdmin.username}
               />
             )}

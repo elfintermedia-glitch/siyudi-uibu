@@ -296,7 +296,7 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SIYUDI Universitas Insan Budi Utomo Malang sebagai bukti verifikasi kelayakan pencetakan ijazah mahasiswa.';
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SiHeppiee Universitas Insan Budi Utomo Malang sebagai bukti verifikasi kelayakan pencetakan ijazah mahasiswa.';
       const splitText = doc.splitTextToSize(disclaimerText, width - 40);
       doc.text(splitText, 20, disclaimerY);
 
@@ -523,7 +523,7 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SIYUDI Universitas Insan Budi Utomo Malang sebagai bukti kelayakan bebas tunjangan keuangan bagi mahasiswa.';
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SiHeppiee Universitas Insan Budi Utomo Malang sebagai bukti kelayakan bebas tunjangan keuangan bagi mahasiswa.';
       const splitText = doc.splitTextToSize(disclaimerText, width - 40);
       doc.text(splitText, 20, disclaimerY);
 
@@ -739,7 +739,7 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SIYUDI Universitas Insan Budi Utomo Malang sebagai bukti pendaftaran & verifikasi kelayakan mengikuti wisuda.';
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SiHeppiee Universitas Insan Budi Utomo Malang sebagai bukti pendaftaran & verifikasi kelayakan mengikuti wisuda.';
       const splitText = doc.splitTextToSize(disclaimerText, width - 40);
       doc.text(splitText, 20, disclaimerY);
 
@@ -943,7 +943,7 @@ export default function StudentPanel({
       doc.setFontSize(9.5);
       doc.setTextColor(71, 85, 105);
       
-      const stmtText = 'Berdasarkan data audit log sistem informasi registrasi SIYUDI, mahasiswa tersebut di atas dinyatakan BEBAS DARI SEGALA TANGGUNGAN ADMINISTRASI AKADEMIK DAN KEUANGAN. Dokumen ini sah dan diterbitkan secara digital oleh Universitas Insan Budi Utomo Malang.';
+      const stmtText = 'Berdasarkan data audit log sistem informasi evaluasi pendidikan SiHeppiee, mahasiswa tersebut di atas dinyatakan BEBAS DARI SEGALA TANGGUNGAN ADMINISTRASI AKADEMIK DAN KEUANGAN. Dokumen ini sah dan diterbitkan secara digital oleh Universitas Insan Budi Utomo Malang.';
       const splitText = doc.splitTextToSize(stmtText, width - 40);
       doc.text(splitText, 20, stmtY);
 
@@ -2646,7 +2646,7 @@ export default function StudentPanel({
               <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                 <div className="text-[10px] text-slate-500 font-medium text-center sm:text-left space-y-1">
                   <p>Dicetak secara digital oleh:</p>
-                  <strong className="text-slate-800 font-bold block">Sistem SIYUDI BAAK</strong>
+                  <strong className="text-slate-800 font-bold block">Sistem SiHeppiee BAAK</strong>
                   <p className="font-mono text-[9px] text-slate-400">Waktu: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
 
@@ -2851,7 +2851,7 @@ export default function StudentPanel({
               <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                 <div className="text-[10px] text-slate-500 font-medium text-center sm:text-left space-y-1">
                   <p>Dicetak secara digital oleh:</p>
-                  <strong className="text-slate-800 font-bold block">Sistem SIYUDI BAUK</strong>
+                  <strong className="text-slate-800 font-bold block">Sistem SiHeppiee BAUK</strong>
                   <p className="font-mono text-[9px] text-slate-400">Waktu: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
 
@@ -3050,7 +3050,7 @@ export default function StudentPanel({
               <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                 <div className="text-[10px] text-slate-500 font-medium text-center sm:text-left space-y-1">
                   <p>Dicetak secara digital oleh:</p>
-                  <strong className="text-slate-800 font-bold block">Sistem SIYUDI BAUK</strong>
+                  <strong className="text-slate-800 font-bold block">Sistem SiHeppiee BAUK</strong>
                   <p className="font-mono text-[9px] text-slate-400">Waktu: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
 
@@ -3083,7 +3083,7 @@ export default function StudentPanel({
 
               {/* Informational Warning */}
               <p className="text-[9.5px] italic text-slate-400 leading-normal text-center bg-slate-50 p-2.5 rounded-lg border border-slate-150">
-                Pendaftaran & kelayakan atribut wisuda ini diotentikasi secara digital oleh sistem SIYUDI BAUK Universitas Insan Budi Utomo Malang.
+                Pendaftaran & kelayakan atribut wisuda ini diotentikasi secara digital oleh sistem SiHeppiee BAUK Universitas Insan Budi Utomo Malang.
               </p>
 
             </div>

@@ -22,14 +22,14 @@ export default function SuperAdminPanel({
   const [newName, setNewName] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<'superadmin' | 'akademik' | 'keuangan'>('akademik');
+  const [newRole, setNewRole] = useState<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>('akademik');
   
   // Edit user modal state
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editName, setEditName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
-  const [editRole, setEditRole] = useState<'superadmin' | 'akademik' | 'keuangan'>('akademik');
+  const [editRole, setEditRole] = useState<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>('akademik');
 
   // Custom alert & confirm states (replaces iframe-blocked confirm/alert)
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
@@ -468,7 +468,7 @@ export default function SuperAdminPanel({
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 Kewenangan / Role Akses
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setNewRole('akademik')}
@@ -490,6 +490,17 @@ export default function SuperAdminPanel({
                   }`}
                 >
                   Keuangan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewRole('prodi')}
+                  className={`py-2 px-1 text-[10px] font-extrabold uppercase rounded-lg border transition-colors cursor-pointer ${
+                    newRole === 'prodi'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-250 shadow-sm'
+                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  Prodi
                 </button>
                 <button
                   type="button"
@@ -548,6 +559,8 @@ export default function SuperAdminPanel({
                     roleBadge = "bg-indigo-50 text-indigo-700 border-indigo-150";
                   } else if (u.role === 'keuangan') {
                     roleBadge = "bg-amber-50 text-amber-800 border-amber-150";
+                  } else if (u.role === 'prodi') {
+                    roleBadge = "bg-emerald-50 text-emerald-800 border-emerald-150";
                   }
 
                   return (
@@ -569,7 +582,7 @@ export default function SuperAdminPanel({
                       </td>
                       <td className="p-3">
                         <span className={`inline-block px-2 py-0.5 rounded font-extrabold text-[9px] uppercase tracking-wider border ${roleBadge}`}>
-                          {u.role === 'superadmin' ? 'Superadmin' : u.role === 'akademik' ? 'Akademik' : 'Keuangan'}
+                          {u.role === 'superadmin' ? 'Superadmin' : u.role === 'akademik' ? 'Akademik' : u.role === 'keuangan' ? 'Keuangan' : u.role === 'prodi' ? 'Prodi' : 'Staff'}
                         </span>
                       </td>
                       <td className="p-3 text-center">
@@ -1066,7 +1079,7 @@ export default function SuperAdminPanel({
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   Kewenangan / Role Akses
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setEditRole('akademik')}
@@ -1088,6 +1101,17 @@ export default function SuperAdminPanel({
                     }`}
                   >
                     Keuangan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditRole('prodi')}
+                    className={`py-2 px-1 text-[10px] font-extrabold uppercase rounded-lg border transition-colors cursor-pointer ${
+                      editRole === 'prodi'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-250 shadow-sm'
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    Prodi
                   </button>
                   <button
                     type="button"
