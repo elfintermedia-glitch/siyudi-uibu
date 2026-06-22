@@ -152,7 +152,7 @@ export default function App() {
     const found = state.students.find(s => s.nim === nim);
     if (found) {
       if (found.statusKelulusan === 'Belum Lulus') {
-        setLoginError('Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi admin akademik untuk pengkinian data kelulusan Anda!');
+        setLoginError('Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi prodi untuk menyelesaikan seminar hasil');
         return;
       }
       setCurrentStudent(found);

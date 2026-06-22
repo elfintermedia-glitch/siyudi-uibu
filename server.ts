@@ -1197,7 +1197,7 @@ async function startServer() {
       }
 
       if (studentRecord.statusKelulusan === 'Belum Lulus') {
-        return res.status(403).json({ error: 'Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi admin akademik untuk pengkinian data kelulusan Anda!' });
+        return res.status(403).json({ error: 'Maaf, Anda belum bisa login karena status Anda masih "Belum Lulus" di basis data akademik. Silakan hubungi prodi untuk menyelesaikan seminar hasil' });
       }
 
       // Default password fallback: 'kebudiutamaan'
