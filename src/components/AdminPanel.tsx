@@ -2180,10 +2180,10 @@ export default function AdminPanel({
             </div>
 
             {/* Student Table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-150">
+            <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-xl border border-slate-150 relative">
               <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
                     <th className="p-3">NIM / NIK & Mahasiswa</th>
                     <th className="p-3">Program Studi & Fakultas</th>
                     <th className="p-3">Kelayakan Akademik</th>
@@ -2593,9 +2593,9 @@ export default function AdminPanel({
                     <p className="text-xs font-semibold">Belum ada staf akademik tambahan yang terdaftar.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto font-sans">
+                  <div className="overflow-x-auto overflow-y-auto max-h-[350px] font-sans relative">
                     <table className="w-full text-xs">
-                      <thead>
+                      <thead className="sticky top-0 z-10 bg-white shadow-sm">
                         <tr className="border-b border-slate-100 text-slate-400 font-bold">
                           <th className="py-2.5 font-bold uppercase tracking-wider text-left pl-2">Nama Lengkap</th>
                           <th className="py-2.5 font-bold uppercase tracking-wider text-left">Username</th>
