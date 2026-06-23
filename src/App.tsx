@@ -558,6 +558,109 @@ export default function App() {
     }
   };
 
+  if (activeRole === 'guest') {
+    return (
+      <div className="min-h-screen relative flex items-center justify-center font-sans overflow-hidden bg-gradient-to-br from-[#00C9d1] to-[#0e0082]">
+        {/* Ambient abstract background blobs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#00C9d1] rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#0e0082] rounded-full mix-blend-multiply filter blur-[100px] opacity-40"></div>
+        
+        <div className="relative z-10 w-full max-w-sm px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl flex flex-col items-center"
+          >
+            <motion.img 
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
+              src="/logo-ubu.png" 
+              alt="Universitas Insan Budi Utomo" 
+              className="w-24 h-auto mb-6 drop-shadow-xl" 
+            />
+            
+            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-1 drop-shadow-md text-center">
+              SIHEPPIEE
+            </h2>
+            <p className="text-[11px] border-b border-white/20 pb-6 text-white/80 max-w-[250px] text-center leading-relaxed mb-6 font-medium">
+              Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan
+            </p>
+
+            <div className="w-full">
+              {loginError && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-5 p-3 bg-rose-500/20 border border-rose-500/50 text-white text-xs font-semibold rounded-xl flex items-start gap-2 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                  <div className="w-2 h-2 rounded-full bg-rose-400 mt-1 shrink-0 animate-pulse shadow-[0_0_8px_rgba(251,113,133,0.8)]" />
+                  <p>{loginError}</p>
+                </motion.div>
+              )}
+
+              <form onSubmit={handleUnifiedLoginSubmit} className="space-y-4">
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-white/90 uppercase tracking-widest pl-1">Username atau NIM</label>
+                  <input
+                    id="input-unified-login-username"
+                    type="text"
+                    required
+                    value={loginUsername}
+                    onChange={(e) => setLoginUsername(e.target.value)}
+                    placeholder="Contoh: 120140085 atau admin"
+                    className="w-full px-4 py-3 text-sm font-medium border border-white/30 rounded-2xl focus:border-white focus:ring-2 focus:ring-white/50 focus:outline-none bg-white/10 text-white placeholder-white/40 backdrop-blur-md transition-all shadow-inner"
+                  />
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold text-white/90 uppercase tracking-widest pl-1">Password</label>
+                  <input
+                    id="input-unified-login-password"
+                    type={showLoginPassword ? "text" : "password"}
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 text-sm font-medium border border-white/30 rounded-2xl focus:border-white focus:ring-2 focus:ring-white/50 focus:outline-none bg-white/10 text-white placeholder-white/40 backdrop-blur-md transition-all shadow-inner"
+                  />
+                  <div className="flex items-center gap-2 mt-2 px-1 justify-start">
+                    <input
+                      id="toggle-unified-pass"
+                      type="checkbox"
+                      checked={showLoginPassword}
+                      onChange={() => setShowLoginPassword(!showLoginPassword)}
+                      className="h-4 w-4 rounded border-white/30 bg-white/20 text-[#00C9d1] focus:ring-[#00C9d1] cursor-pointer transition-colors"
+                    />
+                    <label htmlFor="toggle-unified-pass" className="text-[11px] text-white/80 font-medium select-none cursor-pointer">
+                      Tampilkan Password
+                    </label>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    id="submit-unified-login"
+                    type="submit"
+                    className="w-full py-3.5 bg-white text-[#0957AC] hover:bg-[#f8fafc] hover:text-[#0e0082] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,0,0,0.15)] cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    Masuk
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <div className="mt-8 text-center opacity-60">
+              <p className="text-[9px] text-white font-medium tracking-wide">
+                © {new Date().getFullYear()} Universitas Insan Budi Utomo
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col font-sans text-gray-800">
       
@@ -624,95 +727,6 @@ export default function App() {
       {/* 2. MAIN APPLICATION LANDING CONTAINER */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* VIEW A: GUEST ENTRY PORTAL (LOGIN PANEL) */}
-        {activeRole === 'guest' && (
-          <div className="max-w-4xl mx-auto space-y-8">
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="text-center md:py-4 SpaceY1.5 space-y-2"
-            >
-              <h2 className="text-3xl font-extrabold text-slate-850 tracking-tight font-sans">
-                SIHEPPIEE
-              </h2>
-              <p className="text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-                Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan
-              </p>
-            </motion.div>
- 
-            {/* UNIFIED LOGIN FORM */}
-            <div className="max-w-md mx-auto w-full mt-4">
-              
-              {/* Form Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-6 text-indigo-700 justify-center pb-2 border-b border-gray-100">
-                    <UserCheck2 className="w-5 h-5 flex-shrink-0" />
-                    <h3 className="text-[13px] font-bold uppercase tracking-wider">LOGIN</h3>
-                  </div>
-
-                  {loginError && (
-                    <div className="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold rounded-lg flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-rose-500 mt-1 shrink-0 animate-pulse" />
-                      <p>{loginError}</p>
-                    </div>
-                  )}
-
-                  <form onSubmit={handleUnifiedLoginSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Username atau NIM <span className="text-rose-500">*</span></label>
-                      <input
-                        id="input-unified-login-username"
-                        type="text"
-                        required
-                        value={loginUsername}
-                        onChange={(e) => setLoginUsername(e.target.value)}
-                        placeholder="Contoh: 120140085 atau admin"
-                        className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">Password <span className="text-rose-500">*</span></label>
-                      <input
-                        id="input-unified-login-password"
-                        type={showLoginPassword ? "text" : "password"}
-                        required
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-900"
-                      />
-                      <div className="flex items-center gap-1.5 mt-2 px-0.5">
-                        <input
-                          id="toggle-unified-pass"
-                          type="checkbox"
-                          checked={showLoginPassword}
-                          onChange={() => setShowLoginPassword(!showLoginPassword)}
-                          className="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                        <label htmlFor="toggle-unified-pass" className="text-[11px] text-gray-500 font-medium select-none cursor-pointer">
-                          Tampilkan Password
-                        </label>
-                      </div>
-                    </div>
-
-                    <button
-                      id="submit-unified-login"
-                      type="submit"
-                      className="w-full py-2.5 mt-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-805 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      Masuk Ke Sistem
-                    </button>
-                  </form>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
         {/* VIEW B: LOGGED-IN MAHASISWA PANEL */}
         {activeRole === 'student' && currentStudent && (
           <motion.div 
