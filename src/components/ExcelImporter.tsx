@@ -21,7 +21,8 @@ export const ALLOWED_PROGRAM_STUDI = [
 export const ALLOWED_FAKULTAS = [
   'Fakultas Eksakta dan Keolahragaan (FEK)',
   'Fakultas Sosial dan Humaniora (FSH)',
-  'Fakultas Sains dan Teknologi (FST)'
+  'Fakultas Sains dan Teknologi (FST)',
+  'Sekolah Pasca Sarjana'
 ];
 
 interface ExcelImporterProps {
@@ -219,6 +220,8 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           computedFakultas = 'Fakultas Sosial dan Humaniora (FSH)';
         } else if (lowerFak.includes('sains') || lowerFak.includes('teknologi') || lowerFak.includes('fst') || lowerFak.includes('ipa') || lowerFak.includes('komputer')) {
           computedFakultas = 'Fakultas Sains dan Teknologi (FST)';
+        } else if (lowerFak.includes('pasca sarjana') || lowerFak.includes('pascasarjana') || lowerFak.includes('sps') || lowerFak.includes('magister')) {
+          computedFakultas = 'Sekolah Pasca Sarjana';
         } else {
           if (!ALLOWED_FAKULTAS.includes(computedFakultas)) {
             computedFakultas = 'Fakultas Eksakta dan Keolahragaan (FEK)';

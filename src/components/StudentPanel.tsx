@@ -1008,7 +1008,7 @@ export default function StudentPanel({
   const [editNama, setEditNama] = useState(student.nama || '');
   const [editTempatLahir, setEditTempatLahir] = useState(student.tempatLahir || '');
   const [editTanggalLahir, setEditTanggalLahir] = useState(student.tanggalLahir || '');
-  const [editFakultas, setEditFakultas] = useState(student.fakultas || 'Fakultas Keguruan dan Ilmu Pendidikan');
+  const [editFakultas, setEditFakultas] = useState(student.fakultas || 'Fakultas Sosial dan Humaniora (FSH)');
   const [editProdi, setEditProdi] = useState(student.programStudi || 'Pendidikan Matematika');
   const [editEmail, setEditEmail] = useState(student.email || '');
   const [editNoHp, setEditNoHp] = useState(student.noHp || '');
@@ -1025,7 +1025,7 @@ export default function StudentPanel({
     setEditNama(student.nama || '');
     setEditTempatLahir(student.tempatLahir || '');
     setEditTanggalLahir(student.tanggalLahir || '');
-    setEditFakultas(student.fakultas || 'Fakultas Keguruan dan Ilmu Pendidikan');
+    setEditFakultas(student.fakultas || 'Fakultas Sosial dan Humaniora (FSH)');
     setEditProdi(student.programStudi || 'Pendidikan Matematika');
     setEditEmail(student.email || '');
     setEditNoHp(student.noHp || '');
@@ -1105,9 +1105,10 @@ export default function StudentPanel({
     setEditProdi(val);
     const isTeknik = val.startsWith('Teknik');
     const isMagister = val.startsWith('Magister');
-    let computedFakultas = 'Fakultas Keguruan dan Ilmu Pendidikan';
-    if (isTeknik) computedFakultas = 'Fakultas Teknik';
-    else if (isMagister) computedFakultas = 'Pascasarjana';
+    let computedFakultas = 'Fakultas Sosial dan Humaniora (FSH)';
+    if (val.includes('Matematika') || val.includes('Biologi') || val.includes('Jasmani')) computedFakultas = 'Fakultas Eksakta dan Keolahragaan (FEK)';
+    else if (isTeknik) computedFakultas = 'Fakultas Sains dan Teknologi (FST)';
+    else if (isMagister) computedFakultas = 'Sekolah Pasca Sarjana';
     setEditFakultas(computedFakultas);
   };
 
