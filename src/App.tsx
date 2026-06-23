@@ -558,7 +558,7 @@ export default function App() {
               <img src="/favicon.svg" alt="Universitas Insan Budi Utomo" className="w-8 h-8 object-contain shrink-0" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="text-sm font-bold text-gray-800 tracking-tight flex items-center gap-1.5">
-                  SiHeppiee <span className="text-gray-400 font-normal">| Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan Universitas Insan Budi Utomo Malang</span>
+                  SiHeppiee <span className="text-gray-400 font-normal">| UNIVERSITAS INSAN BUDI UTOMO MALANG</span>
                 </h1>
               </div>
             </div>
@@ -623,7 +623,7 @@ export default function App() {
               <h2 className="text-3xl font-extrabold text-slate-850 tracking-tight font-sans">
                 SIHEPPIEE
               </h2>
-              <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+              <p className="text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
                 Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan
               </p>
             </motion.div>
