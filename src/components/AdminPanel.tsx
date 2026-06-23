@@ -172,10 +172,12 @@ export default function AdminPanel({
 
   // 1. Excel Importer adapter
   const handleExcelImport = (newStudents: StudentAcademic[]) => {
-    // Merge new students, avoiding duplicate NIMs (preferring uploaded files)
+    // Merge new students, skipping import for duplicate NIMs
     const existingMap = new Map(state.students.map(s => [s.nim, s]));
     newStudents.forEach(stu => {
-      existingMap.set(stu.nim, stu);
+      if (!existingMap.has(stu.nim)) {
+        existingMap.set(stu.nim, stu);
+      }
     });
     onUpdateStudents(Array.from(existingMap.values()));
   };
