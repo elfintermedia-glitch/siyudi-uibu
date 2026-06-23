@@ -1364,86 +1364,68 @@ export default function StudentPanel({
 
   return (
     <div className="space-y-6">
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes float-balloon-panel {
-          0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(-100vh) rotate(15deg); opacity: 0; }
-        }
-        .balloon-panel {
-          position: absolute;
-          bottom: -50px;
-          animation: float-balloon-panel 8s ease-in infinite;
-          animation-fill-mode: forwards;
-        }
-        @keyframes firework-panel {
-          0% { transform: scale(0); opacity: 1; }
-          50% { opacity: 1; }
-          100% { transform: scale(1.5); opacity: 0; }
-        }
-        .firework-panel::before, .firework-panel::after {
-          content: '';
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          border: 4px dotted gold;
-          animation: firework-panel 2s ease-out infinite;
-        }
-        .firework-panel::after {
-          animation-delay: 0.5s;
-          border: 4px dashed yellow;
-        }
-      `}} />
       {showCelebrationPopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden">
           {/* Balloons */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="balloon-panel text-6xl" style={{ left: '5%', animationDelay: '0s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '15%', animationDelay: '2.5s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '25%', animationDelay: '1.2s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '35%', animationDelay: '3s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '45%', animationDelay: '0.8s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '55%', animationDelay: '4s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '65%', animationDelay: '1.5s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '75%', animationDelay: '3.2s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '85%', animationDelay: '0.5s' }}>🎈</div>
-            <div className="balloon-panel text-6xl" style={{ left: '95%', animationDelay: '2.8s' }}>🎈</div>
-            <div className="balloon-panel text-5xl" style={{ left: '20%', animationDelay: '4.5s' }}>✨</div>
-            <div className="balloon-panel text-5xl" style={{ left: '40%', animationDelay: '1s' }}>🎊</div>
-            <div className="balloon-panel text-5xl" style={{ left: '60%', animationDelay: '3.5s' }}>✨</div>
-            <div className="balloon-panel text-5xl" style={{ left: '80%', animationDelay: '2.1s' }}>🎊</div>
+            <div className="balloon text-6xl" style={{ left: '5%', animationDelay: '0s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '15%', animationDelay: '2.5s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '25%', animationDelay: '1.2s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '35%', animationDelay: '3s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '45%', animationDelay: '0.8s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '55%', animationDelay: '4s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '65%', animationDelay: '1.5s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '75%', animationDelay: '3.2s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '85%', animationDelay: '0.5s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '95%', animationDelay: '2.8s' }}>🎈</div>
+            <div className="balloon text-5xl" style={{ left: '20%', animationDelay: '4.5s' }}>✨</div>
+            <div className="balloon text-5xl" style={{ left: '40%', animationDelay: '1s' }}>🎊</div>
+            <div className="balloon text-5xl" style={{ left: '60%', animationDelay: '3.5s' }}>✨</div>
+            <div className="balloon text-5xl" style={{ left: '80%', animationDelay: '2.1s' }}>🎊</div>
+            <div className="balloon text-6xl" style={{ left: '10%', animationDelay: '1.8s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '50%', animationDelay: '2.1s' }}>🎈</div>
+            <div className="balloon text-6xl" style={{ left: '90%', animationDelay: '4.2s' }}>🎈</div>
           </div>
 
           {/* Fireworks */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="firework-panel w-32 h-32 absolute top-[20%] left-[10%]"></div>
-            <div className="firework-panel w-40 h-40 absolute top-[15%] right-[20%]" style={{ animationDelay: '1.2s' }}></div>
-            <div className="firework-panel w-24 h-24 absolute top-[40%] left-[30%]" style={{ animationDelay: '0.6s' }}></div>
-            <div className="firework-panel w-32 h-32 absolute bottom-[20%] left-[25%]" style={{ animationDelay: '1.8s' }}></div>
-            <div className="firework-panel w-36 h-36 absolute bottom-[30%] right-[15%]" style={{ animationDelay: '0.4s' }}></div>
-            <div className="firework-panel w-28 h-28 absolute top-[10%] left-[40%]" style={{ animationDelay: '2s' }}></div>
-            <div className="firework-panel w-44 h-44 absolute top-[50%] right-[30%]" style={{ animationDelay: '1s' }}></div>
-            <div className="firework-panel w-20 h-20 absolute bottom-[10%] right-[40%]" style={{ animationDelay: '2.5s' }}></div>
-            <div className="firework-panel w-36 h-36 absolute top-[60%] left-[15%]" style={{ animationDelay: '0.8s' }}></div>
+            <div className="firework w-32 h-32 absolute top-[20%] left-[10%]"></div>
+            <div className="firework w-40 h-40 absolute top-[15%] right-[20%]" style={{ animationDelay: '1.2s' }}></div>
+            <div className="firework w-24 h-24 absolute top-[40%] left-[30%]" style={{ animationDelay: '0.6s' }}></div>
+            <div className="firework w-32 h-32 absolute bottom-[20%] left-[25%]" style={{ animationDelay: '1.8s' }}></div>
+            <div className="firework w-36 h-36 absolute bottom-[30%] right-[15%]" style={{ animationDelay: '0.4s' }}></div>
+            <div className="firework w-28 h-28 absolute top-[10%] left-[40%]" style={{ animationDelay: '2s' }}></div>
+            <div className="firework w-44 h-44 absolute top-[50%] right-[30%]" style={{ animationDelay: '1s' }}></div>
+            <div className="firework w-20 h-20 absolute bottom-[10%] right-[40%]" style={{ animationDelay: '2.5s' }}></div>
+            <div className="firework w-36 h-36 absolute top-[60%] left-[15%]" style={{ animationDelay: '0.8s' }}></div>
+            <div className="firework w-48 h-48 absolute top-[25%] left-[60%]" style={{ animationDelay: '1.5s' }}></div>
+            <div className="firework w-24 h-24 absolute bottom-[40%] right-[10%]" style={{ animationDelay: '0.2s' }}></div>
           </div>
 
           <div
-            className="relative rounded-3xl p-8 max-w-xl w-full mx-4 text-center shadow-2xl border-4 transform flex flex-col items-center z-10"
+            className="relative rounded-3xl p-8 max-w-2xl w-full mx-4 text-center shadow-[0_0_50px_rgba(250,204,21,0.4)] border-4 transform flex flex-col items-center z-10 bg-yellow-400"
             style={{ 
-              background: 'linear-gradient(135deg, #FCD34D 0%, #EAB308 50%, #CA8A04 100%)',
+              backgroundImage: 'linear-gradient(135deg, #FCD34D 0%, #EAB308 30%, #CA8A04 70%, #A16207 100%)',
               borderColor: '#FEF08A'
             }}
           >
-            <div className="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center mb-6 shadow-xl backdrop-blur-md">
-              <GraduationCap className="w-12 h-12 text-white" />
+            {/* Logo placeholder */}
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 mb-6 shadow-xl w-[280px] md:w-[320px] flex items-center justify-center">
+              <img 
+                src="/logo-ubu.png" 
+                alt="Logo Universitas Insan Budi Utomo" 
+                className="w-full h-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<span class="text-sm text-slate-500 font-medium">Unggah logo-ubu.png ke folder public</span>';
+                }}
+              />
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-lg tracking-wider">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-lg tracking-wider" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
               CONGRATULATIONS
             </h2>
-            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-6 drop-shadow-sm uppercase">
+            <h3 className="text-2xl md:text-3xl font-extra-bold text-slate-900 mb-6 uppercase">
               {student.nama}
             </h3>
 
@@ -1451,17 +1433,17 @@ export default function StudentPanel({
               <p className="text-xl md:text-2xl font-bold text-white drop-shadow-md">
                 Dinyatakan
               </p>
-              <p className="text-2xl md:text-3xl font-black text-slate-900 drop-shadow-sm mt-2">
+              <p className="text-3xl md:text-4xl font-black text-slate-900 drop-shadow-sm mt-3 uppercase tracking-tight">
                 LULUS TANPA UJIAN AKHIR
               </p>
             </div>
 
             <button
               onClick={handleCloseCelebration}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-xl transform transition hover:scale-105 flex items-center gap-2 border-2 border-emerald-400"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-[0_10px_20px_rgba(5,150,105,0.4)] transform transition hover:scale-105 flex items-center justify-center gap-3 w-full md:w-auto border-2 border-emerald-300"
             >
               Klik disini Selanjutnya untuk Verifikasi Data
-              <CheckCircle2 className="w-6 h-6" />
+              <CheckCircle2 className="w-7 h-7" />
             </button>
           </div>
         </div>
