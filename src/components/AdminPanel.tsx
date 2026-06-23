@@ -2593,7 +2593,7 @@ export default function AdminPanel({
                     <p className="text-xs font-semibold">Belum ada staf akademik tambahan yang terdaftar.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-auto max-h-[350px] font-sans relative">
+                  <div className="overflow-x-auto overflow-y-auto max-h-[260px] font-sans relative">
                     <table className="w-full text-xs">
                       <thead className="sticky top-0 z-10 bg-white shadow-sm">
                         <tr className="border-b border-slate-100 text-slate-400 font-bold">
