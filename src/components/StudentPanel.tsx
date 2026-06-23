@@ -1412,11 +1412,14 @@ export default function StudentPanel({
             </h3>
 
             <div className="bg-white/30 rounded-2xl p-6 mb-8 w-full backdrop-blur-md border border-white/50 shadow-inner">
-              <p className="text-xl md:text-2xl font-bold text-white drop-shadow-md">
+              <p className="text-xl md:text-2xl font-bold text-white drop-shadow-md mb-2">
                 Dinyatakan
               </p>
-              <p className="text-3xl md:text-4xl font-black text-slate-900 drop-shadow-sm mt-3 uppercase tracking-tight">
-                LULUS TANPA UJIAN AKHIR
+              <p className="text-6xl md:text-7xl font-black text-slate-900 drop-shadow-sm uppercase tracking-tighter leading-none mb-3">
+                LULUS
+              </p>
+              <p className="text-lg md:text-xl font-bold text-slate-800 uppercase tracking-widest bg-yellow-300/80 px-4 py-1 rounded-full border border-yellow-400/50 inline-block">
+                TANPA UJIAN AKHIR
               </p>
             </div>
 
