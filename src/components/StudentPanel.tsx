@@ -1403,10 +1403,14 @@ export default function StudentPanel({
           </div>
 
           <div
-            className="relative rounded-3xl p-8 max-w-2xl w-full mx-4 text-center shadow-[0_0_50px_rgba(250,204,21,0.4)] border-4 transform flex flex-col items-center z-10 bg-yellow-400"
+            className="relative rounded-3xl p-8 max-w-2xl w-full mx-4 text-center transform flex flex-col items-center z-10 overflow-hidden"
             style={{ 
-              backgroundImage: 'linear-gradient(135deg, #FCD34D 0%, #EAB308 30%, #CA8A04 70%, #A16207 100%)',
-              borderColor: '#FEF08A'
+              backgroundColor: '#c94b02',
+              backgroundImage: 'linear-gradient(135deg, #c94b02 0%, #eab308 100%)',
+              borderColor: '#fde047',
+              borderWidth: '4px',
+              borderStyle: 'solid',
+              boxShadow: '0 0 60px rgba(250, 204, 21, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3)'
             }}
           >
             {/* Logo placeholder */}
