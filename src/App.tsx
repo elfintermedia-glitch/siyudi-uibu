@@ -621,10 +621,10 @@ export default function App() {
               className="text-center md:py-4 SpaceY1.5 space-y-2"
             >
               <h2 className="text-3xl font-extrabold text-slate-850 tracking-tight font-sans">
-                Registrasi Yudisium & Pelulusan Sarjana
+                SIHEPPIEE
               </h2>
               <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
-                Silakan masuk menggunakan USERNAME untuk melengkapi berkas ijazah atau mendaftar yudisium. Bagian Administrasi silakan pilih Admin.
+                Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan
               </p>
             </motion.div>
  
@@ -636,7 +636,7 @@ export default function App() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-6 text-indigo-700 justify-center pb-2 border-b border-gray-100">
                     <UserCheck2 className="w-5 h-5 flex-shrink-0" />
-                    <h3 className="text-[13px] font-bold uppercase tracking-wider">Silahkan Masuk</h3>
+                    <h3 className="text-[13px] font-bold uppercase tracking-wider">LOGIN</h3>
                   </div>
 
                   {loginError && (
