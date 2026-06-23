@@ -1440,9 +1440,9 @@ export default function StudentPanel({
 
             <button
               onClick={handleCloseCelebration}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-[0_10px_20px_rgba(5,150,105,0.4)] transform transition hover:scale-105 flex items-center justify-center gap-3 w-full md:w-auto border-2 border-emerald-300"
+              className="bg-[#00C9d1] hover:bg-[#00b5bc] text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-[0_10px_20px_rgba(0,201,209,0.4)] transform transition hover:scale-105 flex items-center justify-center gap-3 w-full md:w-auto border-2 border-[#00C9d1]/80"
             >
-              Klik disini Selanjutnya untuk Verifikasi Data
+              Klik Untuk Verifikasi Data
               <CheckCircle2 className="w-7 h-7" />
             </button>
           </div>
