@@ -570,7 +570,7 @@ export default function App() {
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl flex flex-col items-center"
+            className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center border border-white/40"
           >
             <motion.img 
               initial={{ scale: 0.8 }}
@@ -578,27 +578,27 @@ export default function App() {
               transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
               src="/logo-ubu.png" 
               alt="Universitas Insan Budi Utomo" 
-              className="w-24 h-auto mb-6 drop-shadow-xl" 
+              className="w-56 h-auto mb-4 drop-shadow" 
             />
             
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-1 drop-shadow-md text-center">
+            <h2 className="text-3xl font-extrabold text-[#0e0082] tracking-tight mb-1 text-center">
               SIHEPPIEE
             </h2>
-            <p className="text-[11px] border-b border-white/20 pb-6 text-white/80 max-w-[250px] text-center leading-relaxed mb-6 font-medium">
+            <p className="text-[11px] border-b border-gray-200 pb-6 text-gray-600 max-w-[250px] text-center leading-relaxed mb-6 font-medium">
               Sistem Informasi Hasil Evaluasi Penyelesaian Pendidikan
             </p>
 
             <div className="w-full">
               {loginError && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-5 p-3 bg-rose-500/20 border border-rose-500/50 text-white text-xs font-semibold rounded-xl flex items-start gap-2 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                  <div className="w-2 h-2 rounded-full bg-rose-400 mt-1 shrink-0 animate-pulse shadow-[0_0_8px_rgba(251,113,133,0.8)]" />
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-5 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl flex items-start gap-2 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-rose-500 mt-1 shrink-0 animate-pulse" />
                   <p>{loginError}</p>
                 </motion.div>
               )}
 
               <form onSubmit={handleUnifiedLoginSubmit} className="space-y-4">
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-white/90 uppercase tracking-widest pl-1">Username atau NIM</label>
+                  <label className="text-[10px] font-bold text-[#0e0082] uppercase tracking-widest pl-1">Username atau NIM</label>
                   <input
                     id="input-unified-login-username"
                     type="text"
@@ -606,12 +606,12 @@ export default function App() {
                     value={loginUsername}
                     onChange={(e) => setLoginUsername(e.target.value)}
                     placeholder="Contoh: 120140085 atau admin"
-                    className="w-full px-4 py-3 text-sm font-medium border border-white/30 rounded-2xl focus:border-white focus:ring-2 focus:ring-white/50 focus:outline-none bg-white/10 text-white placeholder-white/40 backdrop-blur-md transition-all shadow-inner"
+                    className="w-full px-4 py-3 text-sm font-medium border border-gray-200 rounded-2xl focus:border-[#00C9d1] focus:ring-2 focus:ring-[#00C9d1]/30 focus:outline-none bg-gray-50 text-gray-900 placeholder-gray-400 transition-all shadow-inner"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-bold text-white/90 uppercase tracking-widest pl-1">Password</label>
+                  <label className="text-[10px] font-bold text-[#0e0082] uppercase tracking-widest pl-1">Password</label>
                   <input
                     id="input-unified-login-password"
                     type={showLoginPassword ? "text" : "password"}
@@ -619,7 +619,7 @@ export default function App() {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3 text-sm font-medium border border-white/30 rounded-2xl focus:border-white focus:ring-2 focus:ring-white/50 focus:outline-none bg-white/10 text-white placeholder-white/40 backdrop-blur-md transition-all shadow-inner"
+                    className="w-full px-4 py-3 text-sm font-medium border border-gray-200 rounded-2xl focus:border-[#00C9d1] focus:ring-2 focus:ring-[#00C9d1]/30 focus:outline-none bg-gray-50 text-gray-900 placeholder-gray-400 transition-all shadow-inner"
                   />
                   <div className="flex items-center gap-2 mt-2 px-1 justify-start">
                     <input
@@ -627,9 +627,9 @@ export default function App() {
                       type="checkbox"
                       checked={showLoginPassword}
                       onChange={() => setShowLoginPassword(!showLoginPassword)}
-                      className="h-4 w-4 rounded border-white/30 bg-white/20 text-[#00C9d1] focus:ring-[#00C9d1] cursor-pointer transition-colors"
+                      className="h-4 w-4 rounded border-gray-300 bg-white text-[#00C9d1] focus:ring-[#00C9d1] cursor-pointer transition-colors"
                     />
-                    <label htmlFor="toggle-unified-pass" className="text-[11px] text-white/80 font-medium select-none cursor-pointer">
+                    <label htmlFor="toggle-unified-pass" className="text-[11px] text-gray-600 font-medium select-none cursor-pointer">
                       Tampilkan Password
                     </label>
                   </div>
@@ -639,7 +639,7 @@ export default function App() {
                   <button
                     id="submit-unified-login"
                     type="submit"
-                    className="w-full py-3.5 bg-white text-[#0957AC] hover:bg-[#f8fafc] hover:text-[#0e0082] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,0,0,0.15)] cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#0e0082] to-[#0957AC] hover:from-[#110196] hover:to-[#0a6ac9] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
                   >
                     Masuk
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -650,8 +650,8 @@ export default function App() {
               </form>
             </div>
             
-            <div className="mt-8 text-center opacity-60">
-              <p className="text-[9px] text-white font-medium tracking-wide">
+            <div className="mt-8 text-center opacity-70">
+              <p className="text-[9px] text-gray-400 font-medium tracking-wide">
                 © {new Date().getFullYear()} Universitas Insan Budi Utomo
               </p>
             </div>
