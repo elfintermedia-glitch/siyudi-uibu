@@ -83,17 +83,17 @@ export default function StudentPanel({
     });
   };
 
-  const getLogoBase64 = (): Promise<string> => {
+  const getLogoUbuBase64 = (): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 300;
+        canvas.width = img.width;
+        canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0, 300, 300);
+          ctx.drawImage(img, 0, 0, img.width, img.height);
           resolve(canvas.toDataURL('image/png'));
         } else {
           resolve('');
@@ -102,73 +102,43 @@ export default function StudentPanel({
       img.onerror = () => {
         resolve('');
       };
-      img.src = '/favicon.svg';
+      img.src = '/logo-ubu.png';
     });
   };
 
-  const drawHeaderKOP = (doc: any, logoBase64: string, primaryColor: number[]) => {
-    // Left Logo
-    if (logoBase64) {
+  const drawHeaderKOP = (doc: any, logoUbuBase64: string, primaryColor: number[]) => {
+    if (logoUbuBase64) {
       try {
-        doc.addImage(logoBase64, 'PNG', 15, 12, 25, 25);
+        // Calculate aspect ratio. Original is probably wide.
+        // Let's assume we want it centered. width around 120, height proportional or centered.
+        // Let's use image width/height if we had it, but since we don't know the exact ratio here easily in jsPDF without passing it,
+        // we can pass dimensions or just use a fixed rectangle that fits the wide logo.
+        // A typical wide logo might be say 180x60.
+        // But jsPDF addImage does magic if we just pass coordinates. Actually it's better to pass explicitly.
+        // Let's just center a wide logo. Width ~ 120, Height ~ 40
+        doc.addImage(logoUbuBase64, 'PNG', 45, 12, 120, 30);
       } catch (e) {
-        console.error('Error adding logo to PDF:', e);
+        console.error('Error adding logo-ubu to PDF:', e);
       }
     } else {
       doc.setDrawColor(200, 200, 200);
-      doc.rect(15, 12, 25, 25);
+      doc.rect(45, 12, 120, 30);
     }
-
-    // Center text - Serif (times) style like the logo
-    doc.setTextColor(30, 41, 59);
-    
-    doc.setFont('times', 'bold');
-    doc.setFontSize(11);
-    doc.text('Universitas Insan', 43, 17);
-    
-    doc.setFont('times', 'bold');
-    doc.setFontSize(23);
-    doc.text('Budi Utomo', 43, 25);
-    
-    doc.setFont('times', 'bold');
-    doc.setFontSize(8.5);
-    doc.text('dh. IKIP Budi Utomo dan STTI Turen', 43, 29.5);
-    
-    doc.setFont('times', 'italic');
-    doc.setFontSize(8);
-    doc.text('Where Minds & Hearts Find Harmony', 43, 33.5);
-
-    // Right Column - Akkreditasi box & details
-    doc.setFillColor(0, 0, 0); // Solid black for badge background
-    doc.rect(148, 12.5, 47, 4.5, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('times', 'bold');
-    doc.setFontSize(8);
-    doc.text('T E R A K R E D I T A S I', 171.5, 16, { align: 'center' });
-
-    doc.setTextColor(51, 65, 85);
-    doc.setFont('times', 'normal');
-    doc.setFontSize(7.5);
-    doc.text('Jl. Simpang Arjuno 14 B Malang', 171.5, 21, { align: 'center' });
-    doc.text('Jl. Citandui 46 Malang', 171.5, 24, { align: 'center' });
-    doc.text('(0341) 323214 - 326019, Fax. 335070', 171.5, 27, { align: 'center' });
-    doc.text('uibu.ac.id', 171.5, 30, { align: 'center' });
-    doc.text('info@budiutomomalang.ac.id', 171.5, 33, { align: 'center' });
 
     // Separator double line
     doc.setDrawColor(30, 41, 59);
     doc.setLineWidth(1);
-    doc.line(15, 38, 210 - 15, 38);
+    doc.line(15, 45, 210 - 15, 45);
     
     doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setLineWidth(0.5);
-    doc.line(15, 39.5, 210 - 15, 39.5);
+    doc.line(15, 46.5, 210 - 15, 46.5);
   };
+
 
   const previewStep1PDF = async () => {
     try {
-      const logoBase64 = await getLogoBase64();
+      const logoBase64 = await getLogoUbuBase64();
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -201,12 +171,7 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(5, 150, 105);
-      doc.text('SURAT KETERANGAN VERIFIKASI DATA ALUMNI & CETAK IJAZAH', width / 2, 50, { align: 'center' });
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Nomor Dokumen: BAAK/IBU-VAL1/${student.nim}/${new Date().getFullYear()}`, width / 2, 55, { align: 'center' });
+      doc.text('BUKTI VERIFIKASI BIODATA MAHASISWA', width / 2, 55, { align: 'center' });
 
       // Statement
       doc.setFont('helvetica', 'normal');
@@ -221,7 +186,6 @@ export default function StudentPanel({
       const details = [
         ['Nama Lengkap', `: ${student.nama}`],
         ['NIM', `: ${student.nim}`],
-        ['NIK', `: ${student.nik || '- (Belum Diisi)'}`],
         ['Tempat, Tanggal Lahir', `: ${student.tempatLahir && student.tanggalLahir ? `${student.tempatLahir}, ${student.tanggalLahir}` : '- (Belum Diisi)'}`],
         ['Fakultas', `: ${student.fakultas}`],
         ['Program Studi', `: ${student.programStudi}`],
@@ -244,20 +208,20 @@ export default function StudentPanel({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(30, 41, 59);
-      doc.text('STATUS VERIFIKASI KELAYAKAN DATA', 20, statusStartY);
+      doc.text('STATUS VERIFIKASI DATA', 20, statusStartY);
 
       // Render status box
       const statusText = !student.dataVerified 
         ? 'DRAFT BELUM DIKUNCI' 
         : !student.academicApproved 
           ? 'TERKUNCI & ANTRIAN VERIFIKASI' 
-          : 'SAH & DISETUJUI BAAK (ACC)';
+          : 'DISETUJUI BAAK (ACC)';
           
       const statusDesc = !student.dataVerified
         ? 'Mahasiswa belum menyelesaikan peninjauan berkas. Data di atas masih dapat berubah.'
         : !student.academicApproved
           ? 'Mahasiswa telah mengunci data. Berkas dalam antrean peninjauan oleh verifikator BAAK.'
-          : 'Data kelayakan pencetakan ijazah dinyatakan SAH, VALID, dan SIAP UNTUK DICETAK.';
+          : 'Data telah diverivikasi oleh mahasiswa dan akan dipergunakan untuk pencetakan ijazah';
 
       const boxColor = !student.dataVerified 
         ? [251, 191, 36] // Amber
@@ -300,17 +264,22 @@ export default function StudentPanel({
       doc.text(`1. Kartu Tanda Penduduk (KTP) : [ ${ktpStatus} ]`, 25, docsStartY + 7);
       doc.text(`2. Ijazah SMA / Sederajat            : [ ${ijazahStatus} ]`, 25, docsStartY + 13);
 
-      // Footer disclaimer text
-      const disclaimerY = 195;
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
-      doc.setTextColor(148, 163, 184);
-      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SiHeppiee Universitas Insan Budi Utomo Malang sebagai bukti verifikasi kelayakan pencetakan ijazah mahasiswa.';
-      const splitText = doc.splitTextToSize(disclaimerText, width - 40);
-      doc.text(splitText, 20, disclaimerY);
+      // JADWAL FOTO
+      const jadwalY = 195;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('JADWAL FOTO:', 20, jadwalY);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('Selanjutnya mahasiswa yang bersangkutan diperkenankan mengikuti foto dengan jadwal sebagai berikut:', 20, jadwalY + 5);
+      doc.text('Jumat, tanggal 21 Juli,', 20, jadwalY + 10);
+      doc.text('jam 09.00-11.00', 20, jadwalY + 15);
+      doc.text('Ruang mikro (kampus C)', 20, jadwalY + 20);
 
       // Signatures
-      const sigY = 215;
+      const sigY = 230;
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -343,6 +312,15 @@ export default function StudentPanel({
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
       doc.text('Dr. Nopem Kusumaningtyas, M.Pd', 130, sigY + 30);
+
+      // Footer disclaimer text
+      const disclaimerY = 285;
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      const disclaimerText = 'Lembar ini diterbitkan secara otomatis oleh sistem SiHeppiee Universitas Insan Budi Utomo Malang sebagai bukti verifikasi kelayakan pencetakan ijazah mahasiswa.';
+      const splitText = doc.splitTextToSize(disclaimerText, width - 40);
+      doc.text(splitText, 20, disclaimerY);
 
       // QR Code underneath signatures / at bottom left
       const qrY = sigY;
