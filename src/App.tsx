@@ -235,11 +235,22 @@ export default function App() {
     setLoginPassword('');
     setLoginError(finalReason);
     
-    safeLocalStorage.removeItem('siyudi_active_role');
-    safeLocalStorage.removeItem('siheppiee_login_username');
-    safeLocalStorage.removeItem('siheppiee_login_password');
-    safeLocalStorage.removeItem('siyudi_current_student');
-    safeLocalStorage.removeItem('siyudi_current_admin');
+    // Clear all local storage and session storage
+    if (typeof localStorage !== 'undefined') {
+      localStorage.clear();
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+
+    // Clear caches
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => {
+          caches.delete(name);
+        });
+      });
+    }
 
     if (finalReason) {
       try {
@@ -250,6 +261,8 @@ export default function App() {
     // Hard redirect to clear out any React state/memory caches and ensure a perfect login screen presentation
     setTimeout(() => {
       window.location.href = '/';
+      // Force reload to bypass cache
+      window.location.reload();
     }, 50);
   };
 
