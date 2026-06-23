@@ -594,10 +594,10 @@ export default function SuperAdminPanel({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto max-h-[380px] relative border border-slate-150 rounded-xl">
             <table className="w-full text-xs text-left" id="admin-users-table">
-              <thead>
-                <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200 shadow-sm">
                   <th className="p-3">Staff / Pengguna</th>
                   <th className="p-3">Kredensial</th>
                   <th className="p-3">Kewenangan</th>
