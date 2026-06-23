@@ -297,14 +297,14 @@ export default function AdminPanel({
   // 2. Add / Edit Students
   const handleSaveStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentForm.nim || !studentForm.nik || !studentForm.nama || !studentForm.tempatLahir || !studentForm.tanggalLahir) {
-      alert('NIM, NIK, Nama Lengkap, Tempat Lahir, dan Tanggal Lahir wajib diisi!');
+    if (!studentForm.nim || !studentForm.nama) {
+      alert('NIM dan Nama Lengkap wajib diisi!');
       return;
     }
 
     const payload: StudentAcademic = {
-      password: 'kebudiutamaan',
-      ...studentForm
+      ...studentForm,
+      password: studentForm.password && studentForm.password.trim() !== '' ? studentForm.password : 'kebudiutamaan',
     } as StudentAcademic;
 
     if (isAddingStudent) {
@@ -312,14 +312,14 @@ export default function AdminPanel({
         alert('Mahasiswa dengan NIM tersebut sudah terdaftar di sistem!');
         return;
       }
-      if (state.students.some(s => s.nik === studentForm.nik)) {
+      if (studentForm.nik && studentForm.nik.trim() !== '' && state.students.some(s => s.nik === studentForm.nik)) {
         alert(`Batal menambah: Mahasiswa dengan NIK "${studentForm.nik}" sudah terdaftar di sistem!`);
         return;
       }
       onUpdateStudents([...state.students, payload]);
       setIsAddingStudent(false);
     } else if (editingStudent) {
-      if (state.students.some(s => s.nim !== editingStudent.nim && s.nik === studentForm.nik)) {
+      if (studentForm.nik && studentForm.nik.trim() !== '' && state.students.some(s => s.nim !== editingStudent.nim && s.nik === studentForm.nik)) {
         alert(`Batal mengubah: NIK "${studentForm.nik}" sudah terpakai oleh mahasiswa lain!`);
         return;
       }
@@ -1995,7 +1995,7 @@ export default function AdminPanel({
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>NIK <span className="text-rose-500">*</span></label>
+                    <label>NIK</label>
                     <input
                       id="form-nik"
                       type="text"
@@ -2020,7 +2020,7 @@ export default function AdminPanel({
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>Tempat Lahir <span className="text-rose-500">*</span></label>
+                    <label>Tempat Lahir</label>
                     <input
                       id="form-tempat-lahir"
                       type="text"
@@ -2038,7 +2038,7 @@ export default function AdminPanel({
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>Tanggal Lahir <span className="text-rose-550">*</span></label>
+                    <label>Tanggal Lahir</label>
                     <input
                       id="form-tanggal-lahir"
                       type="date"
@@ -2090,7 +2090,7 @@ export default function AdminPanel({
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label>Password Akun <span className="text-indigo-600 font-bold">*</span></label>
+                    <label>Password Akun</label>
                     <input
                       id="form-password"
                       type="text"

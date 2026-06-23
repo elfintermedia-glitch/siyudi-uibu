@@ -50,17 +50,15 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
     statusKelulusan: '',
     keterangan: '',
     email: '',
-    noHp: ''
+    noHp: '',
+    password: ''
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const requiredFields = [
     { key: 'nim', label: 'NIM (Nomor Induk Mahasiswa)' },
-    { key: 'nik', label: 'NIK (Nomor Induk Kependudukan)' },
     { key: 'nama', label: 'Nama Lengkap' },
-    { key: 'tempatLahir', label: 'Tempat Lahir' },
-    { key: 'tanggalLahir', label: 'Tanggal Lahir (YYYY-MM-DD)' },
     { key: 'fakultas', label: 'Fakultas' },
     { key: 'programStudi', label: 'Program Studi / Jurusan' },
     { key: 'statusKelulusan', label: 'Status Kelulusan (Lulus / Belum Lulus)' }
@@ -156,9 +154,27 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         // Set optional mappings
         const optEmail = fileHeaders.find(h => h.toLowerCase().includes('email') || h.toLowerCase().includes('mail'));
         const optHp = fileHeaders.find(h => h.toLowerCase().includes('hp') || h.toLowerCase().includes('telepon') || h.toLowerCase().includes('phone'));
+        const optNik = fileHeaders.find(h => {
+          const hLower = h.toLowerCase().replace(/[\s_\-.]/g, '');
+          return hLower === 'nik' || hLower.includes('kependudukan') || hLower.includes('identitas');
+        });
+        const optTempatLahir = fileHeaders.find(h => {
+          const hLower = h.toLowerCase().replace(/[\s_\-.]/g, '');
+          return hLower.includes('tempat') || hLower.includes('tmplahir') || hLower.includes('lahir');
+        });
+        const optTanggalLahir = fileHeaders.find(h => {
+          const hLower = h.toLowerCase().replace(/[\s_\-.]/g, '');
+          return hLower.includes('tanggal') || hLower.includes('tgl') || hLower.includes('tgllahir') || hLower.includes('tgl_lah');
+        });
+        const optPassword = fileHeaders.find(h => h.toLowerCase().includes('password') || h.toLowerCase().includes('sandi') || h.toLowerCase().includes('pass'));
+
         autoMappings['keterangan'] = fileHeaders.find(h => h.toLowerCase().includes('keterangan') || h.toLowerCase().includes('notes')) || '';
         autoMappings['email'] = optEmail || '';
         autoMappings['noHp'] = optHp || '';
+        autoMappings['nik'] = optNik || '';
+        autoMappings['tempatLahir'] = optTempatLahir || '';
+        autoMappings['tanggalLahir'] = optTanggalLahir || '';
+        autoMappings['password'] = optPassword || '';
 
         setMappings(autoMappings);
       } catch (err: any) {
@@ -207,9 +223,14 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
         const keterangan = mappings.keterangan ? String(row[mappings.keterangan] || '').trim() : undefined;
         const email = mappings.email ? String(row[mappings.email] || '').trim() : undefined;
         const noHp = mappings.noHp ? String(row[mappings.noHp] || '').trim() : undefined;
+        let password = mappings.password ? String(row[mappings.password] || '').trim() : undefined;
 
-        if (!rawNim || !rawNik || !rawNama || !rawTempatLahir || !rawTanggalLahir) {
-          throw new Error(`Baris ke-${index + 1} tidak memiliki NIM, NIK, Nama Lengkap, Tempat Lahir, atau Tanggal Lahir.`);
+        if (!password) {
+          password = 'kebudiutamaan';
+        }
+
+        if (!rawNim || !rawNama) {
+          throw new Error(`Baris ke-${index + 1} wajib memiliki NIM dan Nama Lengkap.`);
         }
 
         let computedFakultas = rawFakultas || 'Fakultas Eksakta dan Keolahragaan (FEK)';
@@ -240,7 +261,7 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
           keterangan: keterangan || (statusKelulusan === 'Lulus' ? 'Memenuhi syarat kelulusan' : 'Belum memenuhi syarat SKS'),
           email,
           noHp,
-          password: 'kebudiutamaan'
+          password
         };
       });
 
@@ -260,10 +281,10 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
 
   const downloadSampleTemplate = () => {
     const sampleData = [
-      ['NIM', 'NIK', 'NAMA LENGKAP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'FAKULTAS', 'PROGRAM STUDI', 'STATUS KELULUSAN', 'KETERANGAN', 'EMAIL', 'NO HANDPHONE'],
-      ['120140999', '3573011212990001', 'Rian Hidayat', 'Malang', '2004-05-12', 'Fakultas Sains dan Teknologi (FST)', 'Pendidikan Matematika', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'rian.hidayat@univ.ac.id', '085277884422'],
-      ['120140888', '3573011212990002', 'Suryani Atika', 'Surabaya', '2004-08-22', 'Fakultas Sains dan Teknologi (FST)', 'Teknik Mesin', 'Belum Lulus', 'Kurang mata kuliah pilihan', 'suryani@univ.ac.id', '089912345678'],
-      ['120140777', '3573011212990003', 'Farhan Mahendra', 'Blitar', '2003-11-04', 'Fakultas Eksakta dan Keolahragaan (FEK)', 'Pendidikan Bahasa Inggris', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'farhan.m@univ.ac.id', '081242421212']
+      ['NIM', 'NIK', 'NAMA LENGKAP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'FAKULTAS', 'PROGRAM STUDI', 'STATUS KELULUSAN', 'KETERANGAN', 'EMAIL', 'NO HANDPHONE', 'PASSWORD'],
+      ['120140999', '3573011212990001', 'Rian Hidayat', 'Malang', '2004-05-12', 'Fakultas Sains dan Teknologi (FST)', 'Pendidikan Matematika', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'rian.hidayat@univ.ac.id', '085277884422', 'kebudiutamaan'],
+      ['120140888', '3573011212990002', 'Suryani Atika', 'Surabaya', '2004-08-22', 'Fakultas Sains dan Teknologi (FST)', 'Teknik Mesin', 'Belum Lulus', 'Kurang mata kuliah pilihan', 'suryani@univ.ac.id', '089912345678', 'suryani123'],
+      ['120140777', '3573011212990003', 'Farhan Mahendra', 'Blitar', '2003-11-04', 'Fakultas Eksakta dan Keolahragaan (FEK)', 'Pendidikan Bahasa Inggris', 'Lulus', 'Memenuhi syarat kelulusan akademik', 'farhan.m@univ.ac.id', '081242421212', 'kebudiutamaan']
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(sampleData);
@@ -410,39 +431,35 @@ export default function ExcelImporter({ onImport, existingStudentsCount }: Excel
                 </div>
               ))}
               
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                  Email Mahasiswa (Opsional)
-                </label>
-                <select
-                  id="map-select-email"
-                  value={mappings.email}
-                  onChange={(e) => handleMapChange('email', e.target.value)}
-                  className="p-2 border border-slate-200 bg-white rounded-lg text-xs text-slate-600 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                >
-                  <option value="">-- Hubungkan Kolom (Opsional) --</option>
-                  {headers.map((h, i) => (
-                    <option key={i} value={h}>{h}</option>
-                  ))}
-                </select>
+              <div className="flex flex-col gap-1.5 border-t border-slate-200 pt-3 md:col-span-2">
+                <p className="text-xs font-semibold text-slate-500">Kolom Opsional:</p>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                  Nomor HP (Opsional)
-                </label>
-                <select
-                  id="map-select-noHp"
-                  value={mappings.noHp}
-                  onChange={(e) => handleMapChange('noHp', e.target.value)}
-                  className="p-2 border border-slate-200 bg-white rounded-lg text-xs text-slate-600 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                >
-                  <option value="">-- Hubungkan Kolom (Opsional) --</option>
-                  {headers.map((h, i) => (
-                    <option key={i} value={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
+              {[
+                { key: 'nik', label: 'NIK Kependudukan' },
+                { key: 'tempatLahir', label: 'Tempat Lahir' },
+                { key: 'tanggalLahir', label: 'Tanggal Lahir' },
+                { key: 'password', label: 'Password Akun' },
+                { key: 'email', label: 'Email Mahasiswa' },
+                { key: 'noHp', label: 'Nomor HP' }
+              ].map(optField => (
+                <div key={optField.key} className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                    {optField.label} (Opsional)
+                  </label>
+                  <select
+                    id={`map-select-${optField.key}`}
+                    value={mappings[optField.key]}
+                    onChange={(e) => handleMapChange(optField.key, e.target.value)}
+                    className="p-2 border border-slate-200 bg-white rounded-lg text-xs text-slate-600 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  >
+                    <option value="">-- Hubungkan Kolom (Opsional) --</option>
+                    {headers.map((h, i) => (
+                      <option key={i} value={h}>{h}</option>
+                    ))}
+                  </select>
+                </div>
+              ))}
             </div>
           </div>
 
