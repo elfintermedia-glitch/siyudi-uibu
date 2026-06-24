@@ -13,13 +13,15 @@ interface SuperAdminPanelProps {
   students: StudentAcademic[];
   currentAdminUsername: string;
   onUpdateAdminUsers: (updated: AdminUser[]) => void;
+  adminActivityLogs?: any[];
 }
 
 export default function SuperAdminPanel({ 
   adminUsers, 
   students,
   currentAdminUsername, 
-  onUpdateAdminUsers 
+  onUpdateAdminUsers,
+  adminActivityLogs
 }: SuperAdminPanelProps) {
   // New user form state
   const [newName, setNewName] = useState('');
@@ -594,7 +596,7 @@ export default function SuperAdminPanel({
             </div>
           </div>
 
-          <div className="overflow-x-auto overflow-y-auto max-h-[380px] relative border border-slate-150 rounded-xl">
+          <div className="overflow-x-auto overflow-y-auto relative border border-slate-150 rounded-xl" style={{ maxHeight: '320px' }}>
             <table className="w-full text-xs text-left" id="admin-users-table">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200 shadow-sm">
@@ -685,6 +687,75 @@ export default function SuperAdminPanel({
           </div>
         </div>
 
+      </div>
+
+      {/* ======================================================== */}
+      {/*                   LOG AKTIVITAS ADMIN                      */}
+      {/* ======================================================== */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-left space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-widest">
+              Log Aktivitas Pengguna (Non-Superadmin)
+            </h3>
+          </div>
+          <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded-md">
+            Total {adminActivityLogs?.length || 0} Aktivitas
+          </span>
+        </div>
+
+        <div className="overflow-x-auto overflow-y-auto relative border border-slate-150 rounded-xl" style={{ maxHeight: '320px' }}>
+          <table className="w-full text-xs text-left" id="admin-activity-logs-table">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200 shadow-sm">
+                <th className="p-3">Waktu & Tanggal</th>
+                <th className="p-3">Pengguna</th>
+                <th className="p-3">Kewenangan</th>
+                <th className="p-3">Keterangan Aktivitas</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-semibold text-slate-750">
+              {!adminActivityLogs || adminActivityLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-slate-400">
+                    <p className="font-bold text-xs uppercase tracking-widest">Belum ada aktivitas yang terekam.</p>
+                  </td>
+                </tr>
+              ) : (
+                [...adminActivityLogs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((log) => {
+                  let roleBadge = "bg-slate-100 text-slate-600 border-slate-200";
+                  if (log.role === 'akademik') roleBadge = "bg-blue-50 text-blue-700 border-blue-200";
+                  if (log.role === 'prodi') roleBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                  if (log.role === 'keuangan') roleBadge = "bg-amber-50 text-amber-700 border-amber-200";
+
+                  const logDate = new Date(log.createdAt);
+                  
+                  return (
+                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-3 whitespace-nowrap">
+                        <span className="font-mono text-[10px] bg-slate-100 px-2 py-1 border border-slate-200 rounded text-slate-600 font-bold">
+                          {logDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })} - {logDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span className="font-extrabold text-slate-800">{log.username}</span>
+                      </td>
+                      <td className="p-3">
+                        <span className={`text-[9px] uppercase font-extrabold tracking-widest px-2 py-1 rounded-md border ${roleBadge}`}>
+                          {log.role}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-600">
+                        {log.activity}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ======================================================== */}

@@ -88,6 +88,7 @@ interface AdminPanelProps {
   onUpdateWisuda: (nim: string, registration: WisudaRegistration) => void;
   onUpdateAdminUsers?: (adminUsers: AdminUser[]) => void;
   currentAdminUsername?: string;
+  logActivity?: (activity: string) => void;
 }
 
 type ActiveTab = 'stats' | 'sahkan_langkah1' | 'submissions' | 'wisuda_submissions' | 'students' | 'admin_users';
@@ -98,7 +99,8 @@ export default function AdminPanel({
   onUpdateYudisium, 
   onUpdateWisuda,
   onUpdateAdminUsers,
-  currentAdminUsername
+  currentAdminUsername,
+  logActivity
 }: AdminPanelProps) {
   
   const [activeTab, setActiveTab] = useState<ActiveTab>('stats');
@@ -782,10 +784,10 @@ export default function AdminPanel({
               </div>
 
               {/* Data Grid Table */}
-              <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-x-auto overflow-y-auto relative bg-white rounded-xl border border-slate-200 shadow-sm" style={{ maxHeight: '480px' }}>
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/75 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                  <thead className="sticky top-0 z-10 bg-slate-50/90 backdrop-blur-sm">
+                    <tr className="border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Mahasiswa</th>
                       <th className="p-3">Program Studi</th>
@@ -1304,10 +1306,10 @@ export default function AdminPanel({
               </div>
 
               {/* Data Grid Table */}
-              <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-x-auto overflow-y-auto relative bg-white rounded-xl border border-slate-200 shadow-sm" style={{ maxHeight: '480px' }}>
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/75 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                  <thead className="sticky top-0 z-10 bg-slate-50/90 backdrop-blur-sm">
+                    <tr className="border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Mahasiswa</th>
                       <th className="p-3">Program Studi</th>
@@ -1761,10 +1763,10 @@ export default function AdminPanel({
               </div>
 
               {/* Data Grid Table */}
-              <div className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-x-auto overflow-y-auto relative bg-white rounded-xl border border-slate-200 shadow-sm" style={{ maxHeight: '480px' }}>
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/75 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                  <thead className="sticky top-0 z-10 bg-slate-50/90 backdrop-blur-sm">
+                    <tr className="border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Mahasiswa Wisudawan</th>
                       <th className="p-3">Program Studi</th>
@@ -2180,7 +2182,7 @@ export default function AdminPanel({
             </div>
 
             {/* Student Table */}
-            <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-xl border border-slate-150 relative">
+            <div className="overflow-x-auto overflow-y-auto rounded-xl border border-slate-150 relative" style={{ maxHeight: '480px' }}>
               <table className="w-full text-left border-collapse text-xs">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">

@@ -11,9 +11,10 @@ interface ProdiPanelProps {
   onUpdateStudents: (updatedStudents: StudentAcademic[]) => void;
   currentAdminUsername: string;
   currentAdminProdi?: string;
+  logActivity?: (activity: string) => void;
 }
 
-export default function ProdiPanel({ state, onUpdateStudents, currentAdminUsername, currentAdminProdi }: ProdiPanelProps) {
+export default function ProdiPanel({ state, onUpdateStudents, currentAdminUsername, currentAdminProdi, logActivity }: ProdiPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProdi, setSelectedProdi] = useState(currentAdminProdi || 'Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
@@ -226,10 +227,10 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
           ) : null}
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto relative" style={{ maxHeight: '480px' }}>
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-[11px] font-bold uppercase border-b border-slate-150">
+            <thead className="sticky top-0 z-10 bg-slate-50/90 backdrop-blur-sm">
+              <tr className="text-slate-500 text-[11px] font-bold uppercase border-b border-slate-150">
                 <th className="py-4 px-6">Identitas Mahasiswa</th>
                 <th className="py-4 px-4">Program Studi / Fakultas</th>
                 <th className="py-4 px-4 text-center">Status Kelulusan</th>

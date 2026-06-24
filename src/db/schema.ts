@@ -53,3 +53,13 @@ export const adminUsers = mysqlTable('admin_users', {
   role: varchar('role', { length: 50 }).$type<'superadmin' | 'akademik' | 'keuangan' | 'prodi'>().notNull(),
   prodi: varchar('prodi', { length: 255 }),
 });
+
+export const adminActivityLogs = mysqlTable('admin_activity_logs', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  adminId: varchar('admin_id', { length: 50 }).notNull().references(() => adminUsers.id, { onDelete: 'cascade' }),
+  username: varchar('username', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).notNull(),
+  activity: text('activity').notNull(),
+  createdAt: varchar('created_at', { length: 100 }).notNull(),
+});
+

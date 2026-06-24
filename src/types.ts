@@ -69,4 +69,5 @@ export interface SystemState {
   yudisiumApps: Record<string, YudisiumRegistration>; // key is NIM
   wisudaApps: Record<string, WisudaRegistration>; // key is NIM
   adminUsers?: AdminUser[];
+  adminActivityLogs?: any[];
 }

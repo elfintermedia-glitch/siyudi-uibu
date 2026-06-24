@@ -167,6 +167,30 @@ export default function App() {
     }
   };
 
+  const logAdminActivity = async (adminId: string, username: string, role: string, activity: string) => {
+    try {
+      await fetch('/api/admin/log-activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId, username, role, activity })
+      });
+      // Refresh state to show latest logs in SuperAdminPanel
+      const res = await fetch('/api/state');
+      const data = await res.json();
+      if (data && Array.isArray(data.students)) {
+         setState(data);
+      }
+    } catch (e) {
+      console.error('Failed to log admin activity', e);
+    }
+  };
+
+  const handleLogCurrentAdminActivity = (activity: string) => {
+    if (currentAdmin && currentAdmin.role !== 'superadmin') {
+      logAdminActivity(currentAdmin.id, currentAdmin.username, currentAdmin.role, activity);
+    }
+  };
+
   const handleUnifiedLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginUsername.trim()) {
@@ -188,6 +212,10 @@ export default function App() {
       setActiveRole('admin');
       setCurrentAdmin(adminFound);
       setLoginError(null);
+
+      if (adminFound.role !== 'superadmin') {
+         logAdminActivity(adminFound.id, adminFound.username, adminFound.role, 'Login ke dalam portal aplikasi');
+      }
       return;
     }
 
@@ -227,6 +255,10 @@ export default function App() {
   };
 
   const handleLogout = (reason?: any) => {
+    if (currentAdmin && currentAdmin.role !== 'superadmin') {
+      logAdminActivity(currentAdmin.id, currentAdmin.username, currentAdmin.role, 'Logout dari sistem');
+    }
+
     const finalReason = typeof reason === 'string' ? reason : null;
     setActiveRole('guest');
     setCurrentStudent(null);
@@ -812,6 +844,7 @@ export default function App() {
                 students={state.students}
                 currentAdminUsername={currentAdmin.username}
                 onUpdateAdminUsers={handleUpdateAdminUsers}
+                adminActivityLogs={state.adminActivityLogs}
               />
             )}
 
@@ -823,6 +856,7 @@ export default function App() {
                 onUpdateWisuda={handleUpdateWisudaApp}
                 onUpdateAdminUsers={handleUpdateAdminUsers}
                 currentAdminUsername={currentAdmin.username}
+                logActivity={handleLogCurrentAdminActivity}
               />
             )}
 
@@ -834,6 +868,7 @@ export default function App() {
                 onUpdateWisuda={handleUpdateWisudaApp}
                 onUpdateAdminUsers={handleUpdateAdminUsers}
                 currentAdminUsername={currentAdmin.username}
+                logActivity={handleLogCurrentAdminActivity}
               />
             )}
 
@@ -843,6 +878,7 @@ export default function App() {
                 onUpdateStudents={handleUpdateStudentsList}
                 currentAdminUsername={currentAdmin.username}
                 currentAdminProdi={currentAdmin.prodi || state.adminUsers?.find(u => u.username.toLowerCase() === currentAdmin.username.toLowerCase())?.prodi}
+                logActivity={handleLogCurrentAdminActivity}
               />
             )}
 

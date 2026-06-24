@@ -4,7 +4,7 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { notInArray, eq } from 'drizzle-orm';
 import { db, pool } from './src/db/index.ts';
-import { students, yudisiumRegistrations, wisudaRegistrations, adminUsers } from './src/db/schema.ts';
+import { students, yudisiumRegistrations, wisudaRegistrations, adminUsers, adminActivityLogs } from './src/db/schema.ts';
 import { INITIAL_STUDENTS, INITIAL_YUDISIUMS, INITIAL_WISUDAS, INITIAL_ADMIN_USERS } from './src/utils/dummyData.ts';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -45,6 +45,7 @@ const memoryStore = {
   yudisiumRegistrations: [] as any[],
   wisudaRegistrations: [] as any[],
   adminUsers: [] as any[],
+  adminActivityLogs: [] as any[],
 };
 
 function initializeMemoryStore() {
@@ -53,6 +54,7 @@ function initializeMemoryStore() {
   
   memoryStore.yudisiumRegistrations = Object.values(INITIAL_YUDISIUMS).map(y => JSON.parse(JSON.stringify(y)));
   memoryStore.wisudaRegistrations = Object.values(INITIAL_WISUDAS).map(w => JSON.parse(JSON.stringify(w)));
+  memoryStore.adminActivityLogs = [];
 }
 initializeMemoryStore();
 
@@ -61,6 +63,11 @@ const memoryDb = {
   getYudisiums: () => memoryStore.yudisiumRegistrations,
   getWisudas: () => memoryStore.wisudaRegistrations,
   getAdmins: () => memoryStore.adminUsers,
+  getActivityLogs: () => memoryStore.adminActivityLogs,
+
+  addActivityLog: (log: any) => {
+    memoryStore.adminActivityLogs.push(log);
+  },
 
   reset: () => {
     initializeMemoryStore();
@@ -286,6 +293,20 @@ async function initializeTables() {
     try {
       await pool.query(`UPDATE \`admin_users\` SET \`prodi\` = 'Pendidikan Matematika' WHERE \`username\` = 'prodi'`);
     } catch(e: any) {}
+
+    // Create admin_activity_logs table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS \`admin_activity_logs\` (
+        \`id\` VARCHAR(50) NOT NULL,
+        \`admin_id\` VARCHAR(50) NOT NULL,
+        \`username\` VARCHAR(255) NOT NULL,
+        \`role\` VARCHAR(50) NOT NULL,
+        \`activity\` TEXT NOT NULL,
+        \`created_at\` VARCHAR(100) NOT NULL,
+        PRIMARY KEY (\`id\`),
+        CONSTRAINT \`fk_activity_admin\` FOREIGN KEY (\`admin_id\`) REFERENCES \`admin_users\` (\`id\`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
 
     // 3. yudisium_registrations Table
     await pool.query(`
@@ -694,17 +715,19 @@ async function startServer() {
   // Export full MySQL-compatible SQL database dump
   app.get('/api/export-sql', async (req, res) => {
     try {
-      let allStudents, allYudisiums, allWisudas, allAdmins;
+      let allStudents, allYudisiums, allWisudas, allAdmins, allLogs;
       if (isDatabaseAvailable) {
         allStudents = await db.select().from(students);
         allYudisiums = await db.select().from(yudisiumRegistrations);
         allWisudas = await db.select().from(wisudaRegistrations);
         allAdmins = await db.select().from(adminUsers);
+        allLogs = await db.select().from(adminActivityLogs);
       } else {
         allStudents = memoryDb.getStudents();
         allYudisiums = memoryDb.getYudisiums();
         allWisudas = memoryDb.getWisudas();
         allAdmins = memoryDb.getAdmins();
+        allLogs = memoryDb.getActivityLogs();
       }
 
       let sql = `-- ========================================================\n`;
@@ -873,6 +896,37 @@ async function startServer() {
         sql += `\n`;
       }
 
+      // 5. admin_activity_logs Table
+      sql += `-- --------------------------------------------------------\n`;
+      sql += `-- Table structure for table \`admin_activity_logs\`\n`;
+      sql += `-- --------------------------------------------------------\n`;
+      sql += `DROP TABLE IF EXISTS \`admin_activity_logs\`;\n`;
+      sql += `CREATE TABLE \`admin_activity_logs\` (\n`;
+      sql += `  \`id\` VARCHAR(50) NOT NULL,\n`;
+      sql += `  \`admin_id\` VARCHAR(50) NOT NULL,\n`;
+      sql += `  \`username\` VARCHAR(255) NOT NULL,\n`;
+      sql += `  \`role\` VARCHAR(50) NOT NULL,\n`;
+      sql += `  \`activity\` TEXT NOT NULL,\n`;
+      sql += `  \`created_at\` VARCHAR(100) NOT NULL,\n`;
+      sql += `  PRIMARY KEY (\`id\`),\n`;
+      sql += `  CONSTRAINT \`fk_activity_admin\` FOREIGN KEY (\`admin_id\`) REFERENCES \`admin_users\` (\`id\`) ON DELETE CASCADE\n`;
+      sql += `) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n\n`;
+
+      if (allLogs && allLogs.length > 0) {
+        sql += `-- Dumping data for table \`admin_activity_logs\`\n`;
+        allLogs.forEach((l: any) => {
+          const id = escapeString(l.id);
+          const aId = escapeString(l.adminId);
+          const un = escapeString(l.username);
+          const r = escapeString(l.role);
+          const act = escapeString(l.activity);
+          const ca = escapeString(l.createdAt);
+
+          sql += `INSERT INTO \`admin_activity_logs\` (\`id\`, \`admin_id\`, \`username\`, \`role\`, \`activity\`, \`created_at\`) VALUES (${id}, ${aId}, ${un}, ${r}, ${act}, ${ca});\n`;
+        });
+        sql += `\n`;
+      }
+
       sql += `/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;\n`;
       sql += `/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n`;
       sql += `/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n`;
@@ -982,6 +1036,14 @@ async function startServer() {
             registered_at: "VARCHAR(100) NOT NULL",
             status: "VARCHAR(50) NOT NULL",
             rejection_reason: "TEXT NULL",
+          },
+          admin_activity_logs: {
+            id: "VARCHAR(50) NOT NULL",
+            admin_id: "VARCHAR(50) NOT NULL",
+            username: "VARCHAR(255) NOT NULL",
+            role: "VARCHAR(50) NOT NULL",
+            activity: "TEXT NOT NULL",
+            created_at: "VARCHAR(100) NOT NULL",
           }
         };
 
@@ -1047,17 +1109,19 @@ async function startServer() {
   // Get full state of system
   app.get('/api/state', async (req, res) => {
     try {
-      let allStudents, allYudisiums, allWisudas, allAdmins;
+      let allStudents, allYudisiums, allWisudas, allAdmins, allLogs;
       if (isDatabaseAvailable) {
         allStudents = await db.select().from(students);
         allYudisiums = await db.select().from(yudisiumRegistrations);
         allWisudas = await db.select().from(wisudaRegistrations);
         allAdmins = await db.select().from(adminUsers);
+        allLogs = await db.select().from(adminActivityLogs);
       } else {
         allStudents = memoryDb.getStudents();
         allYudisiums = memoryDb.getYudisiums();
         allWisudas = memoryDb.getWisudas();
         allAdmins = memoryDb.getAdmins();
+        allLogs = memoryDb.getActivityLogs();
       }
 
       const parsedAdmins = allAdmins.map((a: any) => ({
@@ -1092,6 +1156,7 @@ async function startServer() {
         yudisiumApps,
         wisudaApps,
         adminUsers: parsedAdmins,
+        adminActivityLogs: allLogs,
       });
     } catch (err: any) {
       console.error('Error fetching state:', err);
@@ -1413,6 +1478,46 @@ async function startServer() {
   });
 
   // Handle admin configurations
+  // Log admin activity
+  app.post('/api/admin/log-activity', async (req, res) => {
+    try {
+      const { id, adminId, username, role, activity, createdAt } = req.body;
+      
+      if (role === 'superadmin') {
+        return res.json({ success: true, ignored: true });
+      }
+
+      if (!adminId || !username || !activity) {
+        return res.status(400).json({ error: 'Missing required fields for activity log.' });
+      }
+
+      if (isDatabaseAvailable) {
+        await db.insert(adminActivityLogs).values({
+          id: id || `log_${Date.now()}`,
+          adminId,
+          username,
+          role,
+          activity,
+          createdAt: createdAt || new Date().toISOString(),
+        });
+      } else {
+        memoryDb.addActivityLog({
+          id: id || `log_${Date.now()}`,
+          adminId,
+          username,
+          role,
+          activity,
+          createdAt: createdAt || new Date().toISOString(),
+        });
+      }
+
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error('Error logging activity:', err);
+      res.status(500).json({ error: 'Failed to log activity.', details: err.message });
+    }
+  });
+
   app.post('/api/admin/users', async (req, res) => {
     try {
       const adm = req.body;

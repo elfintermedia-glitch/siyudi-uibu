@@ -10,6 +10,21 @@ import { ALLOWED_PROGRAM_STUDI } from './ExcelImporter';
 import { INDONESIAN_CITIES } from './AdminPanel';
 import { openFilePreview } from '../utils/filePreview';
 
+const getLogoBase64 = async (): Promise<string | undefined> => {
+  try {
+    const response = await fetch('/logo-ubu.png');
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error('Failed to load logo for PDF', e);
+    return undefined;
+  }
+};
+
 interface StudentPanelProps {
   student: StudentAcademic;
   yudisium: YudisiumRegistration | undefined;
