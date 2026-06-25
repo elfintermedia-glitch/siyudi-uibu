@@ -8,13 +8,13 @@ import { StudentAcademic, SystemState } from '../types';
 
 interface ProdiPanelProps {
   state: SystemState;
-  onUpdateStudents: (updatedStudents: StudentAcademic[]) => void;
+  onUpdateStudentProfile: (updatedStudent: StudentAcademic) => void;
   currentAdminUsername: string;
   currentAdminProdi?: string;
   logActivity?: (activity: string) => void;
 }
 
-export default function ProdiPanel({ state, onUpdateStudents, currentAdminUsername, currentAdminProdi, logActivity }: ProdiPanelProps) {
+export default function ProdiPanel({ state, onUpdateStudentProfile, currentAdminUsername, currentAdminProdi, logActivity }: ProdiPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProdi, setSelectedProdi] = useState(currentAdminProdi || 'Semua');
   const [selectedStatus, setSelectedStatus] = useState('Semua');
@@ -296,13 +296,8 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
                         <button
                           onClick={() => {
                             const newStatus: 'Lulus' | 'Belum Lulus' = student.statusKelulusan === 'Belum Lulus' ? 'Lulus' : 'Belum Lulus';
-                            const updated = state.students.map(s => {
-                              if (s.nim === student.nim) {
-                                return { ...s, statusKelulusan: newStatus };
-                              }
-                              return s;
-                            });
-                            onUpdateStudents(updated);
+                            const updatedStudent = { ...student, statusKelulusan: newStatus };
+                            onUpdateStudentProfile(updatedStudent);
                             logActivity?.(`${newStatus === 'Lulus' ? 'Mengesahkan kelulusan' : 'Membatalkan kelulusan'} mahasiswa: ${student.nim}`);
                           }}
                           className={`px-3 py-1.5 font-bold text-xs rounded-lg border transition-all cursor-pointer ${

@@ -179,17 +179,26 @@ export default function App() {
 
   const logAdminActivity = async (adminId: string, username: string, role: string, activity: string) => {
     try {
+      const newLog = {
+        id: `log_${Date.now()}`,
+        adminId,
+        username,
+        role,
+        activity,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Optimistically add to local state if needed (mainly useful if SuperAdmin is watching live, but they are separate sessions)
+      setState(prev => ({
+        ...prev,
+        adminActivityLogs: [...(prev.adminActivityLogs || []), newLog]
+      }));
+
       await fetch('/api/admin/log-activity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId, username, role, activity })
+        body: JSON.stringify(newLog)
       });
-      // Refresh state to show latest logs in SuperAdminPanel
-      const res = await fetch('/api/state');
-      const data = await res.json();
-      if (data && Array.isArray(data.students)) {
-         setState(data);
-      }
     } catch (e) {
       console.error('Failed to log admin activity', e);
     }
@@ -348,6 +357,8 @@ export default function App() {
 
   // State update handlers passed down to Admin or Student panel
   const handleUpdateStudentsList = (updatedStudentsList: StudentAcademic[]) => {
+    let autoYudisiumsToSync: YudisiumRegistration[] = [];
+
     setState(prev => {
       const remainingNims = new Set(updatedStudentsList.map(s => s.nim));
       
@@ -380,36 +391,37 @@ export default function App() {
               documents: []
             };
             cleanedYudisiumApps[s.nim] = autoYudisium;
-
-            // Sync with backend
-            fetch('/api/yudisium', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(autoYudisium)
-            }).catch(err => {
-              console.error('Auto API sync of yudisium failed:', err);
-            });
+            autoYudisiumsToSync.push(autoYudisium);
           }
         }
       });
 
-      const nextState = {
+      return {
         ...prev,
         students: updatedStudentsList,
         yudisiumApps: cleanedYudisiumApps,
         wisudaApps: cleanedWisudaApps
       };
+    });
 
-      // Background sync to Cloud SQL database
-      fetch('/api/students', {
+    // Run side-effects outside of setState
+    autoYudisiumsToSync.forEach(autoYud => {
+      fetch('/api/yudisium', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ students: updatedStudentsList })
+        body: JSON.stringify(autoYud)
       }).catch(err => {
-        console.error('Database syncing failed:', err);
+        console.error('Auto API sync of yudisium failed:', err);
       });
+    });
 
-      return nextState;
+    // Background sync to Cloud SQL database
+    fetch('/api/students', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ students: updatedStudentsList })
+    }).catch(err => {
+      console.error('Database syncing failed:', err);
     });
     
     // Maintain current logged-in profile if synced
@@ -425,10 +437,48 @@ export default function App() {
   };
 
   const handleUpdateStudentProfile = (updatedStudent: StudentAcademic) => {
-    const updatedList = state.students.map(s => s.nim === updatedStudent.nim ? updatedStudent : s);
-    handleUpdateStudentsList(updatedList);
+    // Determine if yudisium needs to be auto-generated
+    let autoYudisium: YudisiumRegistration | null = null;
+    
+    setState(prev => {
+      const updatedList = prev.students.map(s => s.nim === updatedStudent.nim ? updatedStudent : s);
+      const cleanedYudisiumApps = { ...prev.yudisiumApps };
 
-    // Save individual profile separately for safety
+      if (updatedStudent.academicApproved) {
+        if (!cleanedYudisiumApps[updatedStudent.nim] || cleanedYudisiumApps[updatedStudent.nim].status === 'belum_daftar') {
+          autoYudisium = {
+            nim: updatedStudent.nim,
+            judulSkripsi: '-',
+            pembimbing1: '-',
+            pembimbing2: '-',
+            tanggalLulus: '-',
+            registeredAt: new Date().toISOString().split('T')[0],
+            status: 'diajukan',
+            documents: []
+          };
+          cleanedYudisiumApps[updatedStudent.nim] = autoYudisium;
+        }
+      }
+
+      return {
+        ...prev,
+        students: updatedList,
+        yudisiumApps: cleanedYudisiumApps
+      };
+    });
+
+    // Run side-effects outside of setState
+    if (autoYudisium) {
+      fetch('/api/yudisium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(autoYudisium)
+      }).catch(err => {
+        console.error('Auto API sync of yudisium failed:', err);
+      });
+    }
+
+    // Save individual profile separately for safety and speed
     fetch('/api/students/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -436,6 +486,10 @@ export default function App() {
     }).catch(err => {
       console.error('Database profiling failed:', err);
     });
+
+    if (currentStudent && currentStudent.nim === updatedStudent.nim) {
+      setCurrentStudent(updatedStudent);
+    }
   };
 
   const handleRegisterYudisium = (nim: string, formData: any, docs: DocumentUpload[]) => {
@@ -898,7 +952,7 @@ export default function App() {
             {currentAdmin.role === 'prodi' && (
               <ProdiPanel 
                 state={state}
-                onUpdateStudents={handleUpdateStudentsList}
+                onUpdateStudentProfile={handleUpdateStudentProfile}
                 currentAdminUsername={currentAdmin.username}
                 currentAdminProdi={currentAdmin.prodi || state.adminUsers?.find(u => u.username.toLowerCase() === currentAdmin.username.toLowerCase())?.prodi}
                 logActivity={handleLogCurrentAdminActivity}
