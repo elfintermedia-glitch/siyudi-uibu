@@ -191,7 +191,7 @@ export default function App() {
     }
   };
 
-  const handleUnifiedLoginSubmit = (e: React.FormEvent) => {
+  const handleUnifiedLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginUsername.trim()) {
       setLoginError('Username wajib diisi untuk masuk!');
@@ -214,7 +214,7 @@ export default function App() {
       setLoginError(null);
 
       if (adminFound.role !== 'superadmin') {
-         logAdminActivity(adminFound.id, adminFound.username, adminFound.role, 'Login ke dalam portal aplikasi');
+         await logAdminActivity(adminFound.id, adminFound.username, adminFound.role, 'Login ke dalam portal aplikasi');
       }
       return;
     }
@@ -254,9 +254,9 @@ export default function App() {
       });
   };
 
-  const handleLogout = (reason?: any) => {
+  const handleLogout = async (reason?: any) => {
     if (currentAdmin && currentAdmin.role !== 'superadmin') {
-      logAdminActivity(currentAdmin.id, currentAdmin.username, currentAdmin.role, 'Logout dari sistem');
+      await logAdminActivity(currentAdmin.id, currentAdmin.username, currentAdmin.role, 'Logout dari sistem');
     }
 
     const finalReason = typeof reason === 'string' ? reason : null;
