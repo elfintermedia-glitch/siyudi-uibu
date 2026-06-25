@@ -40,20 +40,29 @@ const safeLocalStorage = {
 export default function App() {
   // 1. Initial State Load from Database with local fallbacks
   const [state, setState] = useState<SystemState>({
-    students: INITIAL_STUDENTS,
-    yudisiumApps: INITIAL_YUDISIUMS,
-    wisudaApps: INITIAL_WISUDAS,
-    adminUsers: INITIAL_ADMIN_USERS
+    students: [],
+    yudisiumApps: {},
+    wisudaApps: {},
+    adminUsers: []
   });
+
+  const [dbConnectionError, setDbConnectionError] = useState<string | null>(null);
 
   // Load state from Cloud SQL database via backend APIs
   useEffect(() => {
     fetch('/api/state')
-      .then(res => {
-        if (!res.ok) throw new Error('Error status: ' + res.status);
+      .then(async res => {
+        if (!res.ok) {
+          if (res.status === 503) {
+            const errData = await res.json().catch(() => null);
+            throw new Error(errData?.error || 'Database connection error');
+          }
+          throw new Error('Error status: ' + res.status);
+        }
         return res.json();
       })
       .then(data => {
+        setDbConnectionError(null);
         if (data && Array.isArray(data.students)) {
           setState(data);
           
@@ -83,7 +92,8 @@ export default function App() {
         }
       })
       .catch(e => {
-        console.error('Failed to load DB state, using static offline fallbacks:', e);
+        console.error('Failed to load DB state:', e);
+        setDbConnectionError(e.message);
       });
   }, []);
 
@@ -193,6 +203,10 @@ export default function App() {
 
   const handleUnifiedLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (dbConnectionError) {
+      setLoginError('Koneksi database terputus. Login dinonaktifkan sementara.');
+      return;
+    }
     if (!loginUsername.trim()) {
       setLoginError('Username wajib diisi untuk masuk!');
       return;
@@ -205,7 +219,7 @@ export default function App() {
     const usernameInput = loginUsername.trim();
     const passwordInput = loginPassword.trim();
     
-    const admins = state.adminUsers || INITIAL_ADMIN_USERS;
+    const admins = state.adminUsers;
     const adminFound = admins.find(u => u.username.toLowerCase() === usernameInput.toLowerCase() && u.password === passwordInput);
 
     if (adminFound) {
@@ -621,6 +635,15 @@ export default function App() {
             </p>
 
             <div className="w-full">
+              {dbConnectionError && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-5 p-4 bg-orange-50 border-l-4 border-orange-500 text-orange-800 text-xs font-semibold flex flex-col gap-1 shadow-sm rounded-r-xl">
+                  <div className="flex items-center gap-2">
+                    <Database className="w-4 h-4 shrink-0" />
+                    <span>Masalah Koneksi Database</span>
+                  </div>
+                  <p className="font-normal opacity-90 leading-snug">{dbConnectionError}</p>
+                </motion.div>
+              )}
               {loginError && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-5 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl flex items-start gap-2 shadow-sm">
                   <div className="w-2 h-2 rounded-full bg-rose-500 mt-1 shrink-0 animate-pulse" />
@@ -840,7 +863,7 @@ export default function App() {
 
             {currentAdmin.role === 'superadmin' && (
               <SuperAdminPanel 
-                adminUsers={state.adminUsers || INITIAL_ADMIN_USERS}
+                adminUsers={state.adminUsers}
                 students={state.students}
                 currentAdminUsername={currentAdmin.username}
                 onUpdateAdminUsers={handleUpdateAdminUsers}

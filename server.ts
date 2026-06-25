@@ -438,7 +438,6 @@ async function seedDatabaseIfEmpty() {
     isDatabaseAvailable = false;
     console.log('--- DATABASE CONNECTION TO REAL MYSQL FAILED ---');
     console.log('Reason:', err.message);
-    console.log('>>> Falling back to high-fidelity In-Memory Database for preview sandbox. <<<');
   }
 }
 
@@ -710,6 +709,24 @@ async function startServer() {
 
       res.status(500).json({ success: false, error: err.message, logs });
     }
+  });
+
+  // Database Connection Guard Middleware
+  app.use((req, res, next) => {
+    if (!req.path.startsWith('/api/')) return next();
+    
+    // Exclude paths that don't need DB
+    if (req.path.startsWith('/api/git-') || req.path === '/api/health') {
+      return next();
+    }
+    
+    if (!isDatabaseAvailable) {
+      return res.status(503).json({ 
+        error: 'Koneksi ke MySQL server bermasalah. Pastikan server database berjalan dengan baik.',
+        code: 'DB_UNAVAILABLE'
+      });
+    }
+    next();
   });
 
   // Export full MySQL-compatible SQL database dump
