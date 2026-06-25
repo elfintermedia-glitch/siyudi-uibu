@@ -303,6 +303,7 @@ export default function ProdiPanel({ state, onUpdateStudents, currentAdminUserna
                               return s;
                             });
                             onUpdateStudents(updated);
+                            logActivity?.(`${newStatus === 'Lulus' ? 'Mengesahkan kelulusan' : 'Membatalkan kelulusan'} mahasiswa: ${student.nim}`);
                           }}
                           className={`px-3 py-1.5 font-bold text-xs rounded-lg border transition-all cursor-pointer ${
                             student.statusKelulusan === 'Lulus'

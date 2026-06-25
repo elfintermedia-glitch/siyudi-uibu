@@ -182,6 +182,7 @@ export default function AdminPanel({
       }
     });
     onUpdateStudents(Array.from(existingMap.values()));
+    logActivity?.('Mengimpor data mahasiswa dari Excel');
   };
 
   // Action Handlers for Academic Admin Users Management (Restricted to 'akademik' only)
@@ -219,6 +220,7 @@ export default function AdminPanel({
       setNewAdminName('');
       setNewAdminUsername('');
       setNewAdminPassword('');
+      logActivity?.(`Menambahkan pengguna admin baru: ${username}`);
     } else {
       setAdminError('Fitur sinkronisasi admin tidak siap.');
     }
@@ -270,6 +272,7 @@ export default function AdminPanel({
       onUpdateAdminUsers(updated);
       setAdminSuccess(`Data staf "${username}" berhasil diperbarui.`);
       setEditingAdminUser(null);
+      logActivity?.(`Memperbarui pengguna admin: ${username}`);
     } else {
       setAdminError('Sinkronisasi admin error.');
     }
@@ -294,6 +297,7 @@ export default function AdminPanel({
     if (onUpdateAdminUsers) {
       onUpdateAdminUsers(updated);
       setAdminSuccess(`Akun staf "${deletingAdminUser.username}" berhasil dihapus.`);
+      logActivity?.(`Menghapus pengguna admin: ${deletingAdminUser.username}`);
     }
     setDeletingAdminUser(null);
   };
@@ -322,6 +326,7 @@ export default function AdminPanel({
       }
       onUpdateStudents([...state.students, payload]);
       setIsAddingStudent(false);
+      logActivity?.(`Menambahkan data mahasiswa baru: ${payload.nim}`);
     } else if (editingStudent) {
       if (studentForm.nik && studentForm.nik.trim() !== '' && state.students.some(s => s.nim !== editingStudent.nim && s.nik === studentForm.nik)) {
         alert(`Batal mengubah: NIK "${studentForm.nik}" sudah terpakai oleh mahasiswa lain!`);
@@ -332,6 +337,7 @@ export default function AdminPanel({
       );
       onUpdateStudents(updatedList);
       setEditingStudent(null);
+      logActivity?.(`Memperbarui data mahasiswa: ${editingStudent.nim}`);
     }
 
     setStudentForm({
@@ -356,6 +362,7 @@ export default function AdminPanel({
   const handleConfirmDeleteStudent = () => {
     if (deletingStudent) {
       onUpdateStudents(state.students.filter(s => s.nim !== deletingStudent.nim));
+      logActivity?.(`Menghapus data mahasiswa: ${deletingStudent.nim}`);
       setDeletingStudent(null);
     }
   };
@@ -367,6 +374,7 @@ export default function AdminPanel({
   const handleConfirmClearAll = () => {
     onUpdateStudents([]);
     setIsConfirmingClearAll(false);
+    logActivity?.(`Menghapus SELURUH data mahasiswa`);
   };
 
   const handleExportExcelLangkah1 = () => {
@@ -448,6 +456,7 @@ export default function AdminPanel({
       return s;
     });
     onUpdateStudents(updated);
+    logActivity?.(`${approved ? 'Mengesahkan' : 'Membatalkan pengesahan'} akademik mahasiswa: ${nim}`);
   };
 
   const handleRejectStudentAcademic = (nim: string) => {
@@ -472,6 +481,7 @@ export default function AdminPanel({
       return s;
     });
     onUpdateStudents(updated);
+    logActivity?.(`Menolak akademik mahasiswa: ${rejectingNim}`);
     setRejectingNim(null);
     setRejectionReasonInput('');
   };
@@ -494,6 +504,7 @@ export default function AdminPanel({
       return s;
     });
     onUpdateStudents(updated);
+    logActivity?.(`${status === 'disetujui' ? 'Menyetujui' : 'Menolak'} dokumen ${docType.toUpperCase()} mahasiswa: ${nim}`);
   };
 
   // 3. Document auditing inside Yudisium App
@@ -519,6 +530,7 @@ export default function AdminPanel({
       ...app,
       documents: updatedDocs
     });
+    logActivity?.(`${status === 'disetujui' ? 'Menyetujui' : 'Menolak'} dokumen ${docId} mahasiswa: ${nim}`);
   };
 
   // 4. Final approval or rejection of Yudisium / Wisuda
@@ -533,6 +545,7 @@ export default function AdminPanel({
       status: decision,
       rejectionReason: decision === 'ditolak' ? (reason.trim() ? reason : 'Beberapa berkas dokumen persyaratan Anda ditolak. Harap periksa catatan di setiap dokumen.') : undefined
     });
+    logActivity?.(`${decision === 'disetujui' ? 'Menyetujui' : 'Menolak'} pendaftaran yudisium mahasiswa: ${nim}`);
 
     if (decision === 'disetujui') {
       const studentInfo = state.students.find(s => s.nim === nim);
@@ -551,6 +564,7 @@ export default function AdminPanel({
       status: decision,
       rejectionReason: decision === 'ditolak' ? (reason || 'Berkas wisuda ditolak panitia.') : undefined
     });
+    logActivity?.(`${decision === 'disetujui' ? 'Menyetujui' : 'Menolak'} pendaftaran wisuda mahasiswa: ${nim}`);
 
     if (decision === 'disetujui') {
       const studentInfo = state.students.find(s => s.nim === nim);

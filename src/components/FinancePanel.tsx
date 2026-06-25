@@ -96,6 +96,7 @@ export default function FinancePanel({
       ...app,
       documents: updatedDocs
     });
+    logActivity?.(`${status === 'disetujui' ? 'Menyetujui' : 'Menolak'} dokumen keuangan ${docId} mahasiswa: ${nim}`);
 
     // Notify user
     const studentName = state.students.find(s => s.nim === nim)?.nama || '';
@@ -115,6 +116,7 @@ export default function FinancePanel({
       status: decision,
       rejectionReason: decision === 'ditolak' ? (reason.trim() ? reason : 'Beberapa berkas dokumen persyaratan Anda ditolak. Harap periksa catatan di setiap dokumen.') : undefined
     });
+    logActivity?.(`${decision === 'disetujui' ? 'Menyetujui' : 'Menolak'} pendaftaran yudisium mahasiswa: ${nim}`);
 
     const studentInfo = state.students.find(s => s.nim === nim);
     if (decision === 'disetujui') {
@@ -136,6 +138,7 @@ export default function FinancePanel({
       status: decision,
       rejectionReason: decision === 'ditolak' ? (reason || 'Berkas wisuda ditolak panitia.') : undefined
     });
+    logActivity?.(`${decision === 'disetujui' ? 'Menyetujui' : 'Menolak'} pendaftaran wisuda mahasiswa: ${nim}`);
 
     const studentInfo = state.students.find(s => s.nim === nim);
     if (decision === 'disetujui') {
@@ -180,6 +183,7 @@ export default function FinancePanel({
       setNewAdminName('');
       setNewAdminUsername('');
       setNewAdminPassword('');
+      logActivity?.(`Menambahkan pengguna admin baru: ${username}`);
     } else {
       setAdminError('Fitur sinkronisasi admin tidak siap.');
     }
@@ -231,6 +235,7 @@ export default function FinancePanel({
       onUpdateAdminUsers(updated);
       setAdminSuccess(`Data staf "${username}" berhasil diperbarui.`);
       setEditingAdminUser(null);
+      logActivity?.(`Memperbarui pengguna admin: ${username}`);
     } else {
       setAdminError('Sinkronisasi admin error.');
     }
@@ -255,6 +260,7 @@ export default function FinancePanel({
     if (onUpdateAdminUsers) {
       onUpdateAdminUsers(updated);
       setAdminSuccess(`Akun staf "${deletingAdminUser.username}" berhasil dihapus.`);
+      logActivity?.(`Menghapus pengguna admin: ${deletingAdminUser.username}`);
     }
     setDeletingAdminUser(null);
   };
