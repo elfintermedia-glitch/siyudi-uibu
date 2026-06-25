@@ -4,7 +4,7 @@ import * as schema from './schema.ts';
 
 export const createPool = () => {
   const host = process.env.SQL_HOST || 'localhost';
-  const isSocket = host.startsWith('/');
+  const isSocket = host && host.startsWith('/');
   
   const configToUse: mysql.PoolOptions = {
     user: process.env.SQL_USER || 'siyudi',
@@ -28,3 +28,4 @@ export const pool = createPool();
 
 export const db = drizzle(pool, { schema, mode: 'default' });
 export type AppDb = typeof db;
+

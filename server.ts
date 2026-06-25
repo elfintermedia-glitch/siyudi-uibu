@@ -349,6 +349,8 @@ async function initializeTables() {
   }
 }
 
+
+
 async function seedDatabaseIfEmpty() {
   try {
     await initializeTables();
@@ -711,34 +713,20 @@ async function startServer() {
     }
   });
 
-  // Database Connection Guard Middleware
-  app.use((req, res, next) => {
-    if (!req.path.startsWith('/api/')) return next();
-    
-    // Exclude paths that don't need DB
-    if (req.path.startsWith('/api/git-') || req.path === '/api/health') {
-      return next();
-    }
-    
-    if (!isDatabaseAvailable) {
-      return res.status(503).json({ 
-        error: 'Koneksi ke MySQL server bermasalah. Pastikan server database berjalan dengan baik.',
-        code: 'DB_UNAVAILABLE'
-      });
-    }
-    next();
-  });
+  // Database Connection Guard Middleware removed to allow memoryDb fallback
 
   // Export full MySQL-compatible SQL database dump
   app.get('/api/export-sql', async (req, res) => {
     try {
       let allStudents, allYudisiums, allWisudas, allAdmins, allLogs;
       if (isDatabaseAvailable) {
-        allStudents = await db.select().from(students);
-        allYudisiums = await db.select().from(yudisiumRegistrations);
-        allWisudas = await db.select().from(wisudaRegistrations);
-        allAdmins = await db.select().from(adminUsers);
-        allLogs = await db.select().from(adminActivityLogs);
+        [allStudents, allYudisiums, allWisudas, allAdmins, allLogs] = await Promise.all([
+          db.select().from(students),
+          db.select().from(yudisiumRegistrations),
+          db.select().from(wisudaRegistrations),
+          db.select().from(adminUsers),
+          db.select().from(adminActivityLogs)
+        ]);
       } else {
         allStudents = memoryDb.getStudents();
         allYudisiums = memoryDb.getYudisiums();
@@ -1128,11 +1116,13 @@ async function startServer() {
     try {
       let allStudents, allYudisiums, allWisudas, allAdmins, allLogs;
       if (isDatabaseAvailable) {
-        allStudents = await db.select().from(students);
-        allYudisiums = await db.select().from(yudisiumRegistrations);
-        allWisudas = await db.select().from(wisudaRegistrations);
-        allAdmins = await db.select().from(adminUsers);
-        allLogs = await db.select().from(adminActivityLogs);
+        [allStudents, allYudisiums, allWisudas, allAdmins, allLogs] = await Promise.all([
+          db.select().from(students),
+          db.select().from(yudisiumRegistrations),
+          db.select().from(wisudaRegistrations),
+          db.select().from(adminUsers),
+          db.select().from(adminActivityLogs)
+        ]);
       } else {
         allStudents = memoryDb.getStudents();
         allYudisiums = memoryDb.getYudisiums();
