@@ -47,6 +47,8 @@ export default function App() {
   });
 
   const [dbConnectionError, setDbConnectionError] = useState<string | null>(null);
+  const [isStateLoading, setIsStateLoading] = useState(true);
+
   // Load state from Cloud SQL database via backend APIs
   useEffect(() => {
     fetch('/api/state')
@@ -95,6 +97,9 @@ export default function App() {
       .catch(e => {
         console.error('Failed to load DB state:', e);
         setDbConnectionError(e.message);
+      })
+      .finally(() => {
+        setIsStateLoading(false);
       });
   }, []);
 
@@ -658,6 +663,19 @@ export default function App() {
         });
     }
   };
+
+  if (isStateLoading) {
+    return (
+      <div className="min-h-screen relative flex items-center justify-center font-sans overflow-hidden bg-gradient-to-br from-[#00C9d1] to-[#0e0082]">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#00C9d1] rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#0e0082] rounded-full mix-blend-multiply filter blur-[100px] opacity-40"></div>
+        <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center">
+          <Loader2 className="w-12 h-12 text-white animate-spin mb-4" />
+          <p className="text-white font-medium tracking-wide">Memuat Data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (activeRole === 'guest') {
     return (
