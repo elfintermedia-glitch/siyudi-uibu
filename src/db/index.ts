@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 import * as schema from './schema.ts';
 
 export const createPool = () => {
-  const host = process.env.SQL_HOST || 'localhost';
+  const host = process.env.SQL_HOST || '127.0.0.1';
   const isSocket = host && host.startsWith('/');
   
   const configToUse: mysql.PoolOptions = {
@@ -12,7 +12,11 @@ export const createPool = () => {
     database: process.env.SQL_DB_NAME || 'siyudi',
     waitForConnections: true,
     connectionLimit: 10,
+    maxIdle: 10,
+    idleTimeout: 60000,
     queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
   };
 
   if (isSocket) {
