@@ -328,6 +328,10 @@ export default function AdminPanel({
       setIsAddingStudent(false);
       logActivity?.(`Menambahkan data mahasiswa baru: ${payload.nim}`);
     } else if (editingStudent) {
+      if (studentForm.nim !== editingStudent.nim && state.students.some(s => s.nim === studentForm.nim)) {
+        alert(`Batal mengubah: Mahasiswa dengan NIM "${studentForm.nim}" sudah terdaftar di sistem!`);
+        return;
+      }
       if (studentForm.nik && studentForm.nik.trim() !== '' && state.students.some(s => s.nim !== editingStudent.nim && s.nik === studentForm.nik)) {
         alert(`Batal mengubah: NIK "${studentForm.nik}" sudah terpakai oleh mahasiswa lain!`);
         return;
@@ -2004,7 +2008,7 @@ export default function AdminPanel({
                     <input
                       id="form-nim"
                       type="text"
-                      disabled={!!editingStudent}
+                      disabled={false}
                       value={studentForm.nim}
                       onChange={(e) => setStudentForm(prev => ({ ...prev, nim: e.target.value }))}
                       className="p-2 border bg-white rounded-lg focus:outline-none focus:border-indigo-500 disabled:bg-slate-100 disabled:text-slate-400 font-mono"
